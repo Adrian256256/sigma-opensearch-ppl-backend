@@ -24,6 +24,7 @@ from sigma_backend.backends.opensearch_ppl.opensearch_ppl import OpenSearchPPLBa
 EXAMPLE_RULES_TO_TEST = [
     "powershell_suspicious.yml",
     "network_suspicious.yml",
+    "suspicious_system_user.yml",
 ]
 
 # Set to True to test ALL rules in example_rules/ directory
