@@ -114,9 +114,11 @@ source=windows | where Image like '%\\cmd.exe' and CommandLine like '%whoami%'
 
 ## Testing
 
-The project includes a comprehensive test suite. For detailed information about tests, see [tests/README.md](tests/README.md).
+The project includes both automated and manual testing capabilities.
 
 ### Automated Tests
+
+For comprehensive automated testing, see [tests/README.md](tests/README.md).
 
 ```bash
 # Run all tests
@@ -127,6 +129,18 @@ pytest tests/ -v
 
 # Run with coverage
 pytest tests/ --cov=sigma_backend --cov-report=html
+```
+
+### Manual Testing
+
+For quick testing and experimentation with example Sigma rules, see [manual_test/README.md](manual_test/README.md).
+
+```bash
+# Test example rules and see PPL output
+python manual_test/manual_test.py
+
+# Interactive testing utility
+python manual_test/interactive_test.py
 ```
 
 ## Architecture

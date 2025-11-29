@@ -62,11 +62,11 @@ def test_example_rules():
     # Test each rule
     for rule_file in rule_files:
         if not rule_file.exists():
-            print(f"\n❌ Rule file not found: {rule_file.name}")
+            print(f"\nRule file not found: {rule_file.name}")
             print("-" * 70)
             continue
         
-        print(f"\n📝 Testing: {rule_file.name}")
+        print(f"\nTesting: {rule_file.name}")
         print("-" * 70)
         
         try:
@@ -78,13 +78,13 @@ def test_example_rules():
             collection = SigmaCollection.from_yaml(yaml_content)
             ppl_query = backend.convert(collection)
             
-            print("\n✅ Generated PPL Query:")
+            print("\nGenerated PPL Query:")
             print("─" * 70)
             print(ppl_query)
             print("─" * 70)
             
         except Exception as e:
-            print(f"\n❌ Error occurred: {type(e).__name__}")
+            print(f"\nError occurred: {type(e).__name__}")
             print(f"Message: {str(e)}")
             import traceback
             traceback.print_exc()
@@ -103,12 +103,12 @@ if __name__ == "__main__":
         test_example_rules()
         
         print("=" * 70)
-        print("✅ All manual tests completed!")
+        print("All manual tests completed!")
         print("=" * 70)
         
     except Exception as e:
         print("\n" + "=" * 70)
-        print(f"❌ Error occurred: {type(e).__name__}")
+        print(f"Error occurred: {type(e).__name__}")
         print(f"Message: {str(e)}")
         print("=" * 70)
         import traceback
