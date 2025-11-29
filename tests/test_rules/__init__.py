@@ -1,0 +1,2 @@
+# Test Sigma rules directory
+

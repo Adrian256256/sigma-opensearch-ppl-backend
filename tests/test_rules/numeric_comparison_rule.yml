@@ -1,0 +1,13 @@
+title: Numeric Comparison Rule
+id: 123e4567-e89b-12d3-a456-426614174040
+status: test
+description: A rule testing numeric comparison operators
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        EventID|gt: 1000
+        ProcessId|lt: 10000
+    condition: selection
+

@@ -1,0 +1,13 @@
+title: Simple Process Creation Rule
+id: 123e4567-e89b-12d3-a456-426614174010
+status: test
+description: A simple test rule for process creation events
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        EventID: 1
+        CommandLine: test.exe
+    condition: selection
+
