@@ -30,7 +30,7 @@ sigma-opensearch-ppl-backend/
 ├── .gitignore                            # Files ignored by Git
 ├── pytest.ini                            # Pytest configuration
 ├── requirements.txt                      # Python dependencies
-└── README.md                             # This file
+└── README.md                             # Project documentation
 ```
 
 ## Installation
