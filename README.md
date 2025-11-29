@@ -1,201 +1,168 @@
 # Sigma to OpenSearch PPL Backend
 
-Backend pentru conversia regulilor Sigma în interogări PPL (Piped Processing Language) pentru OpenSearch.
+Backend for converting Sigma rules into PPL (Piped Processing Language) queries for OpenSearch.
 
-## Descriere
+## Description
 
-Acest proiect oferă un backend pentru biblioteca pySigma care convertește regulile de detecție Sigma în interogări PPL optimizate pentru OpenSearch. PPL este un limbaj de procesare a datelor care permite interogări complexe și eficiente pe datele indexate în OpenSearch.
+This project provides a backend for the pySigma library that converts Sigma detection rules into PPL queries optimized for OpenSearch. PPL is a data processing language that enables complex and efficient queries on data indexed in OpenSearch.
 
-## Structura Proiectului
+## Project Structure
 
 ```
 sigma-opensearch-ppl-backend/
-├── sigma/
+├── sigma_backend/
+│   ├── __init__.py
 │   └── backends/
+│       ├── __init__.py
 │       └── opensearch_ppl/
 │           ├── __init__.py
-│           └── opensearch_ppl.py          # Implementarea backend-ului
+│           └── opensearch_ppl.py          # Backend implementation
 ├── tests/
 │   ├── __init__.py
-│   ├── conftest.py                        # Configurație pytest și fixtures
-│   ├── test_sigma_to_ppl.py              # Teste principale pentru conversie
-│   ├── test_file_based.py                # Teste bazate pe fișiere YAML
-│   ├── test_rules/                       # Reguli Sigma de test
+│   ├── test_sigma_to_ppl.py              # Main conversion tests
+│   ├── test_rules/                       # Test Sigma rules
+│   │   ├── __init__.py
 │   │   ├── simple_rule.yml
 │   │   ├── complex_rule.yml
 │   │   ├── wildcard_rule.yml
 │   │   └── numeric_comparison_rule.yml
-│   └── README.md                         # Documentație pentru teste
-├── pytest.ini                            # Configurație pytest
-├── requirements.txt                      # Dependențe Python
-└── README.md                             # Acest fișier
+│   └── README.md                         # Test documentation
+├── .gitignore                            # Files ignored by Git
+├── pytest.ini                            # Pytest configuration
+├── requirements.txt                      # Python dependencies
+└── README.md                             # This file
 ```
 
-## Instalare
+## Installation
 
-### Dependențe
+### Dependencies
 
-Instalează dependențele necesare:
+Install required dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Dependențe principale:
-- `pysigma` - Bibliotecă pentru procesarea regulilor Sigma
-- `pytest` - Framework pentru testare
-- `pyyaml` - Parsare fișiere YAML
+Main dependencies:
+- `pysigma` - Library for processing Sigma rules
+- `pytest` - Testing framework
+- `pyyaml` - YAML file parsing
 
-## Teste
+## Tests
 
-Proiectul include o suită completă de teste pentru verificarea conversiei corecte a regulilor Sigma în interogări PPL.
+The project includes a comprehensive test suite for verifying correct conversion of Sigma rules into PPL queries.
 
-### Structura Testelor
+### Test Structure
 
-#### 1. Teste Principale (`test_sigma_to_ppl.py`)
+#### 1. Main Tests (`test_sigma_to_ppl.py`)
 
-Teste pentru conversia de bază și cazuri complexe:
+Tests for basic conversion and complex cases:
 
-- **Teste de conversie de bază:**
-  - `test_simple_rule_conversion` - Conversie reguli simple
-  - `test_complex_rule_conversion` - Conversie reguli cu multiple condiții
-  - `test_rule_with_keywords` - Conversie reguli cu keywords
-  - `test_multiple_rules_conversion` - Conversie multiple reguli simultan
+- **Basic conversion tests:**
+  - `test_simple_rule_conversion` - Simple rule conversion
+  - `test_complex_rule_conversion` - Rules with multiple conditions
+  - `test_rule_with_keywords` - Rules with keywords
+  - `test_multiple_rules_conversion` - Converting multiple rules simultaneously
 
-- **Teste pentru operatori și condiții:**
-  - `test_condition_operators` - Testare operatori logici (AND, OR)
-  - `test_wildcard_values` - Testare pattern-uri cu wildcards
-  - `test_numeric_comparisons` - Testare comparații numerice (gt, lt, etc.)
+- **Tests for operators and conditions:**
+  - `test_condition_operators` - Testing logical operators (AND, OR)
+  - `test_wildcard_values` - Testing wildcard patterns
+  - `test_numeric_comparisons` - Testing numeric comparisons (gt, lt, etc.)
 
-- **Teste de validare:**
-  - `test_ppl_query_structure` - Validare structură PPL
-  - `test_ppl_syntax_validity` - Validare sintaxă PPL
-  - `test_ppl_escaping` - Validare escaping caractere speciale
-  - `test_field_mapping` - Verificare mapare câmpuri
+- **Validation tests:**
+  - `test_ppl_query_structure` - PPL structure validation
+  - `test_ppl_syntax_validity` - PPL syntax validation
+  - `test_ppl_escaping` - Special character escaping validation
+  - `test_field_mapping` - Field mapping verification
 
-- **Teste edge cases:**
-  - `test_empty_collection` - Gestionare colecții goale
+- **Edge case tests:**
+  - `test_empty_collection` - Handling empty collections
 
-#### 2. Teste Bazate pe Fișiere (`test_file_based.py`)
+#### 2. Test Rules (`test_rules/`)
 
-Teste care încarcă reguli Sigma din fișiere YAML:
+The directory contains example Sigma rules for testing:
 
-- `test_simple_rule_file` - Test pentru `simple_rule.yml`
-- `test_complex_rule_file` - Test pentru `complex_rule.yml`
-- `test_wildcard_rule_file` - Test pentru `wildcard_rule.yml`
-- `test_numeric_comparison_rule_file` - Test pentru `numeric_comparison_rule.yml`
-- `test_all_rules_in_directory` - Test automat pentru toate regulile
+- **simple_rule.yml** - Simple rule with a single condition
+- **complex_rule.yml** - Complex rule with multiple selections and logical operators
+- **wildcard_rule.yml** - Rule testing wildcard patterns
+- **numeric_comparison_rule.yml** - Rule with numeric comparisons
 
-#### 3. Reguli de Test (`test_rules/`)
+### Running Tests
 
-Directorul conține exemple de reguli Sigma pentru testare:
-
-- **simple_rule.yml** - Regulă simplă cu o singură condiție
-- **complex_rule.yml** - Regulă complexă cu multiple selecții și operatori logici
-- **wildcard_rule.yml** - Regulă care testează pattern-uri cu wildcards
-- **numeric_comparison_rule.yml** - Regulă cu comparații numerice
-
-### Rulare Teste
-
-#### Rulare toate testele:
+#### Run all tests:
 
 ```bash
 pytest tests/
 ```
 
-#### Rulare cu output detaliat:
+#### Run with detailed output:
 
 ```bash
 pytest tests/ -v
 ```
 
-#### Rulare un test specific:
+#### Run a specific test:
 
 ```bash
 pytest tests/test_sigma_to_ppl.py::TestSigmaToPPLConversion::test_simple_rule_conversion
 ```
 
-#### Rulare teste cu coverage:
+#### Run tests with coverage:
 
 ```bash
 pytest tests/ --cov=sigma --cov-report=html
 ```
 
-### Ce Verifică Testele
+### What Tests Verify
 
-Testele verifica următoarele aspecte:
+The tests verify the following aspects:
 
-1. **Conversie corectă:** Regulile Sigma sunt convertite în interogări PPL valide
-2. **Structură PPL:** Interogările generate au structură corectă pentru OpenSearch
-3. **Sintaxă validă:** Interogările PPL au sintaxă corectă (paranteze echilibrate, etc.)
-4. **Mapare câmpuri:** Câmpurile din regulile Sigma sunt mapate corect în PPL
-5. **Operatori logici:** Operatorii AND, OR sunt convertiți corect
-6. **Wildcards:** Pattern-urile cu wildcards sunt procesate corect
-7. **Comparații numerice:** Operatorii de comparație (gt, lt, etc.) funcționează
-8. **Edge cases:** Gestionarea corectă a cazurilor limită (colecții goale, etc.)
+1. **Correct conversion:** Sigma rules are converted into valid PPL queries
+2. **PPL structure:** Generated queries have the correct structure for OpenSearch
+3. **Valid syntax:** PPL queries have correct syntax (balanced parentheses, etc.)
+4. **Field mapping:** Fields from Sigma rules are correctly mapped to PPL
+5. **Logical operators:** AND, OR operators are converted correctly
+6. **Wildcards:** Wildcard patterns are processed correctly
+7. **Numeric comparisons:** Comparison operators (gt, lt, etc.) work correctly
+8. **Edge cases:** Proper handling of edge cases (empty collections, etc.)
 
-## Utilizare
+## Usage
 
-### Exemplu de utilizare a backend-ului:
+### Backend usage example:
 
 ```python
 from sigma.collection import SigmaCollection
-from sigma.backends.opensearch_ppl.opensearch_ppl import OpenSearchPPLBackend
+from sigma_backend.backends.opensearch_ppl.opensearch_ppl import OpenSearchPPLBackend
 
-# Încarcă o regulă Sigma
+# Load a Sigma rule
 with open('rule.yml', 'r') as f:
     sigma_collection = SigmaCollection.from_yaml(f.read())
 
-# Creează backend-ul
+# Create the backend
 backend = OpenSearchPPLBackend()
 
-# Convertește în PPL
+# Convert to PPL
 ppl_query = backend.convert(sigma_collection)
 
 print(ppl_query)
 ```
 
-## Dezvoltare
+## Development
 
-### Adăugare Teste Noi
+### Adding New Tests
 
-Pentru a adăuga teste noi:
+To add new tests:
 
-1. Adaugă o regulă Sigma în `tests/test_rules/` (opțional)
-2. Creează un test nou în unul dintre fișierele de test
-3. Folosește fixture-urile din `conftest.py` pentru backend și reguli
-
-### Fixtures Disponibile
-
-- `sigma_backend` - Clasa backend-ului OpenSearchPPLBackend
-- `simple_sigma_rule` - Regulă Sigma simplă (dict)
-- `complex_sigma_rule` - Regulă Sigma complexă (dict)
-- `sigma_rule_with_keywords` - Regulă cu keywords (dict)
-- `test_rules_dir` - Path către directorul cu reguli de test
+1. Add a Sigma rule to `tests/test_rules/` (optional)
+2. Create a new test in `tests/test_sigma_to_ppl.py`
+3. Use the backend for conversion and verify the result
 
 ## Status
 
-- ✅ Structură proiect
-- ✅ Suită completă de teste
-- ✅ Reguli Sigma de exemplu
-- ✅ Configurație pytest
-- ⏳ Implementare backend (în dezvoltare)
+- ✅ Project structure
+- ✅ Complete test suite
+- ✅ Example Sigma rules
+- ✅ Pytest configuration
+- ⏳ Backend implementation (in development)
 
-## Contribuții
-
-Pentru a contribui la acest proiect:
-
-1. Fork repository-ul
-2. Creează un branch pentru feature-ul tău
-3. Adaugă teste pentru noua funcționalitate
-4. Asigură-te că toate testele trec
-5. Creează un pull request
-
-## Licență
-
-[Specifică licența aici]
-
-## Contact
-
-[Informații de contact]
 
