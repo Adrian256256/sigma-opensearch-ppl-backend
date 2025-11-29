@@ -42,11 +42,18 @@ sigma-opensearch-ppl-backend/
 │   │   ├── wildcard_rule.yml
 │   │   └── numeric_comparison_rule.yml
 │   └── README.md                         # Test documentation
+├── manual_test/
+│   ├── manual_test.py                    # Manual testing script
+│   ├── example_rules/                    # Additional example rules
+│   │   ├── powershell_suspicious.yml
+│   │   └── network_suspicious.yml
+│   └── README.md                         # Manual testing guide
 ├── .gitignore                            # Files ignored by Git
 ├── pytest.ini                            # Pytest configuration
 ├── requirements.txt                      # Python dependencies
 └── README.md                             # Project documentation
 ```
+
 
 ## Installation
 
@@ -109,7 +116,7 @@ source=windows | where Image like '%\\cmd.exe' and CommandLine like '%whoami%'
 
 The project includes a comprehensive test suite. For detailed information about tests, see [tests/README.md](tests/README.md).
 
-### Quick Test Commands
+### Automated Tests
 
 ```bash
 # Run all tests

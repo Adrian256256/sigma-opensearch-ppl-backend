@@ -1,0 +1,15 @@
+title: Suspicious PowerShell Command
+status: test
+description: Manual test for PowerShell detection
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\powershell.exe'
+        CommandLine|contains:
+            - '-EncodedCommand'
+            - '-enc'
+            - 'Invoke-Expression'
+            - 'IEX'
+    condition: selection
