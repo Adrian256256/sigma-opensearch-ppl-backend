@@ -6,6 +6,21 @@ Backend for converting Sigma rules into PPL (Piped Processing Language) queries 
 
 This project provides a backend for the pySigma library that converts Sigma detection rules into PPL queries optimized for OpenSearch. PPL is a data processing language that enables complex and efficient queries on data indexed in OpenSearch.
 
+### Key Features
+
+- **Sigma Rule Support**: Converts standard Sigma detection rules to PPL format
+- **OpenSearch Optimized**: Generates PPL queries optimized for OpenSearch performance
+- **Comprehensive Testing**: Full test suite ensuring correct conversion
+- **Extensible Architecture**: Easy to extend with new features and operators
+
+## What is Sigma?
+
+[Sigma](https://github.com/SigmaHQ/sigma) is a generic and open signature format for SIEM systems. It allows security professionals to write detection rules once and convert them to various SIEM query languages.
+
+## What is PPL?
+
+Piped Processing Language (PPL) is OpenSearch's query language that uses a pipe syntax to chain commands for data processing and analysis. It provides a more intuitive way to query and manipulate data compared to traditional query DSL.
+
 ## Project Structure
 
 ```
@@ -48,87 +63,9 @@ Main dependencies:
 - `pytest` - Testing framework
 - `pyyaml` - YAML file parsing
 
-## Tests
-
-The project includes a comprehensive test suite for verifying correct conversion of Sigma rules into PPL queries.
-
-### Test Structure
-
-#### 1. Main Tests (`test_sigma_to_ppl.py`)
-
-Tests for basic conversion and complex cases:
-
-- **Basic conversion tests:**
-  - `test_simple_rule_conversion` - Simple rule conversion
-  - `test_complex_rule_conversion` - Rules with multiple conditions
-  - `test_rule_with_keywords` - Rules with keywords
-  - `test_multiple_rules_conversion` - Converting multiple rules simultaneously
-
-- **Tests for operators and conditions:**
-  - `test_condition_operators` - Testing logical operators (AND, OR)
-  - `test_wildcard_values` - Testing wildcard patterns
-  - `test_numeric_comparisons` - Testing numeric comparisons (gt, lt, etc.)
-
-- **Validation tests:**
-  - `test_ppl_query_structure` - PPL structure validation
-  - `test_ppl_syntax_validity` - PPL syntax validation
-  - `test_ppl_escaping` - Special character escaping validation
-  - `test_field_mapping` - Field mapping verification
-
-- **Edge case tests:**
-  - `test_empty_collection` - Handling empty collections
-
-#### 2. Test Rules (`test_rules/`)
-
-The directory contains example Sigma rules for testing:
-
-- **simple_rule.yml** - Simple rule with a single condition
-- **complex_rule.yml** - Complex rule with multiple selections and logical operators
-- **wildcard_rule.yml** - Rule testing wildcard patterns
-- **numeric_comparison_rule.yml** - Rule with numeric comparisons
-
-### Running Tests
-
-#### Run all tests:
-
-```bash
-pytest tests/
-```
-
-#### Run with detailed output:
-
-```bash
-pytest tests/ -v
-```
-
-#### Run a specific test:
-
-```bash
-pytest tests/test_sigma_to_ppl.py::TestSigmaToPPLConversion::test_simple_rule_conversion
-```
-
-#### Run tests with coverage:
-
-```bash
-pytest tests/ --cov=sigma --cov-report=html
-```
-
-### What Tests Verify
-
-The tests verify the following aspects:
-
-1. **Correct conversion:** Sigma rules are converted into valid PPL queries
-2. **PPL structure:** Generated queries have the correct structure for OpenSearch
-3. **Valid syntax:** PPL queries have correct syntax (balanced parentheses, etc.)
-4. **Field mapping:** Fields from Sigma rules are correctly mapped to PPL
-5. **Logical operators:** AND, OR operators are converted correctly
-6. **Wildcards:** Wildcard patterns are processed correctly
-7. **Numeric comparisons:** Comparison operators (gt, lt, etc.) work correctly
-8. **Edge cases:** Proper handling of edge cases (empty collections, etc.)
-
 ## Usage
 
-### Backend usage example:
+### Basic Example
 
 ```python
 from sigma.collection import SigmaCollection
@@ -147,22 +84,100 @@ ppl_query = backend.convert(sigma_collection)
 print(ppl_query)
 ```
 
+### Example Sigma Rule
+
+```yaml
+title: Suspicious Process Execution
+status: experimental
+description: Detects suspicious process execution
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\cmd.exe'
+        CommandLine|contains: 'whoami'
+    condition: selection
+```
+
+This will be converted to a PPL query like:
+```
+source=windows | where Image like '%\\cmd.exe' and CommandLine like '%whoami%'
+```
+
+## Testing
+
+The project includes a comprehensive test suite. For detailed information about tests, see [tests/README.md](tests/README.md).
+
+### Quick Test Commands
+
+```bash
+# Run all tests
+pytest tests/
+
+# Run with verbose output
+pytest tests/ -v
+
+# Run with coverage
+pytest tests/ --cov=sigma_backend --cov-report=html
+```
+
+## Architecture
+
+### Backend Components
+
+- **OpenSearchPPLBackend**: Main backend class that handles conversion
+- **Rule Converter**: Converts individual Sigma rules to PPL
+- **Field Mapper**: Maps Sigma field names to OpenSearch fields
+- **Operator Handler**: Converts Sigma operators to PPL syntax
+
+### Conversion Flow
+
+```
+Sigma Rule (YAML) → SigmaCollection → OpenSearchPPLBackend → PPL Query (String)
+```
+
 ## Development
 
-### Adding New Tests
-
-To add new tests:
-
-1. Add a Sigma rule to `tests/test_rules/` (optional)
-2. Create a new test in `tests/test_sigma_to_ppl.py`
-3. Use the backend for conversion and verify the result
-
-## Status
+### Project Status
 
 - ✅ Project structure
 - ✅ Complete test suite
 - ✅ Example Sigma rules
 - ✅ Pytest configuration
 - ⏳ Backend implementation (in development)
+
+### Contributing
+
+To contribute to this project:
+
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Ensure all tests pass
+5. Submit a pull request
+
+### Adding New Features
+
+When adding new features:
+
+1. Write tests first (TDD approach recommended)
+2. Implement the feature in `sigma_backend/backends/opensearch_ppl/opensearch_ppl.py`
+3. Update documentation
+4. Ensure all existing tests still pass
+
+## Resources
+
+- [Sigma Specification](https://github.com/SigmaHQ/sigma-specification)
+- [OpenSearch PPL Documentation](https://opensearch.org/docs/latest/search-plugins/sql/ppl/index/)
+- [pySigma Documentation](https://github.com/SigmaHQ/pySigma)
+
+## License
+
+[Add license information here]
+
+## Contact
+
+[Add contact information here]
 
 
