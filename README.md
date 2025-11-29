@@ -31,7 +31,7 @@ sigma-opensearch-ppl-backend/
 │       ├── __init__.py
 │       └── opensearch_ppl/
 │           ├── __init__.py
-│           └── opensearch_ppl.py          # Backend implementation
+│           └── opensearch_ppl.py         # Backend implementation
 ├── tests/
 │   ├── __init__.py
 │   ├── test_sigma_to_ppl.py              # Main conversion tests
@@ -126,9 +126,6 @@ pytest tests/
 
 # Run with verbose output
 pytest tests/ -v
-
-# Run with coverage
-pytest tests/ --cov=sigma_backend --cov-report=html
 ```
 
 ### Manual Testing
@@ -138,9 +135,6 @@ For quick testing and experimentation with example Sigma rules, see [manual_test
 ```bash
 # Test example rules and see PPL output
 python manual_test/manual_test.py
-
-# Interactive testing utility
-python manual_test/interactive_test.py
 ```
 
 ## Architecture
