@@ -79,7 +79,7 @@ backend = OpenSearchPPLBackend()
 ppl_query = backend.convert(sigma_collection)
 
 print(ppl_query)
-# Output: ['source = windows-process_creation-* | where EventID=1 AND Image like "*\\\\powershell.exe"']
+# Output: ['source = windows-process_creation-* | where EventID=1 AND LIKE(Image, "%\\\\powershell.exe")']
 ```
 
 ### Example Sigma Rule
@@ -102,7 +102,7 @@ detection:
 
 This will be converted to:
 ```
-source = windows-process_creation-* | where Image like "*\powershell.exe" AND (CommandLine like "*-EncodedCommand*" OR CommandLine like "*Invoke-Expression*")
+source = windows-process_creation-* | where LIKE(Image, "%\powershell.exe") AND (LIKE(CommandLine, "%-EncodedCommand%") OR LIKE(CommandLine, "%Invoke-Expression%"))
 ```
 
 ## Testing
