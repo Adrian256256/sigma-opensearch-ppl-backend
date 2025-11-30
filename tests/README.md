@@ -27,26 +27,81 @@ tests/
 
 ## Test Categories
 
-### 1. Basic Conversion Tests (`test_sigma_to_ppl.py`)
+### 1. Supported Features Tests (`TestSigmaToPPLConversion`) ✅
 
-These tests verify the fundamental conversion functionality:
+These tests verify the fundamental conversion functionality that **works correctly**:
 
 #### Simple Rule Conversion
 - **`test_simple_rule_conversion`**: Converts a basic Sigma rule with a single condition
 - **`test_complex_rule_conversion`**: Converts rules with multiple conditions and selections
-- **`test_rule_with_keywords`**: Converts rules that use Sigma keywords
 - **`test_multiple_rules_conversion`**: Processes multiple rules in a single collection
 
 #### Operator and Condition Tests
 - **`test_condition_operators`**: Verifies logical operators (AND, OR, NOT)
-- **`test_wildcard_values`**: Tests wildcard pattern handling (* and ?)
-- **`test_numeric_comparisons`**: Tests numeric comparison operators (gt, lt, gte, lte)
+- **`test_wildcard_rule_conversion`**: Tests wildcard pattern handling (* and ?)
+- **`test_numeric_comparison_rule_conversion`**: Tests numeric comparison operators (gt, lt, gte, lte)
 
 #### Validation Tests
 - **`test_ppl_query_structure`**: Validates the overall structure of generated PPL queries
-- **`test_ppl_syntax_validity`**: Ensures generated queries have valid PPL syntax
-- **`test_ppl_escaping`**: Verifies proper escaping of special characters
 - **`test_field_mapping`**: Checks correct mapping of Sigma fields to PPL fields
+- **`test_empty_collection`**: Handles empty Sigma collections gracefully
+- **`test_all_rules_in_directory`**: Tests all YAML files in test_rules/
+
+### 2. PPL Query Validation Tests (`TestPPLQueryValidation`) ✅
+
+- **`test_ppl_syntax_validity`**: Ensures generated queries have valid PPL syntax (balanced parentheses, etc.)
+- **`test_ppl_escaping`**: Verifies proper escaping of special characters
+
+### 3. **NEW:** Unsupported Features Tests (`TestUnsupportedFeatures`) ❌
+
+These tests document **known limitations** of the backend. They are marked with `@pytest.mark.xfail` to indicate expected failures.
+
+#### ❌ Features NOT Supported (XFAIL)
+
+1. **`test_aggregation_count`** - Aggregation with count() operations
+   - Cannot generate `stats count()` commands
+   - Threshold detection not available
+
+2. **`test_aggregation_group_by`** - Aggregation with GROUP BY
+   - Group by operations not implemented
+   - Cannot generate `stats ... by field` commands
+
+3. **`test_correlation_rule`** - Correlation between multiple events
+   - Event correlation not supported
+   - Temporal ordering (`followed by`) not available
+
+4. **`test_timeframe_filtering`** - Time-based filtering
+   - Timeframe constraints not converted
+   - `@timestamp` filtering not generated
+
+5. **`test_field_transformation`** - Field transformations with eval
+   - Cannot generate `eval` commands
+   - base64, urldecode modifiers may not work
+
+6. **`test_near_proximity_search`** - Proximity/NEAR modifier
+   - Near modifier not implemented
+   - Proximity patterns not generated
+
+7. **`test_field_alias_lookup`** - External lookups and aliases
+   - External lookups not supported
+   - CSV/database enrichment not available
+
+#### ⚠️  Features with Partial Support (XPASS)
+
+8. **`test_complex_negation`** - Complex NOT conditions
+   - Simple NOT works fine
+   - Complex multi-value NOT **surprisingly works** (XPASS)
+   - May need more testing for edge cases
+
+9. **`test_regex_modifier`** - Regular expression modifiers
+   - Basic regex **appears to work** (XPASS)
+   - Complex patterns may have issues
+   - Needs more comprehensive testing
+
+10. **`test_cidr_notation`** - CIDR notation for IP ranges
+    - Test **passes unexpectedly** (XPASS)
+    - May not generate correct CIDR logic
+    - Needs investigation
 
 #### Edge Case Tests
 - **`test_empty_collection`**: Handles empty Sigma rule collections gracefully
