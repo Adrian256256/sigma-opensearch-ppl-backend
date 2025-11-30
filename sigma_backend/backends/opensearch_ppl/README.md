@@ -5,20 +5,25 @@ This backend converts Sigma detection rules into PPL (Piped Processing Language)
 ## Table of Contents
 
 - [Sigma Rule Data Structure](#sigma-rule-data-structure)
+  - [Main Structure](#main-structure)
+  - [Key Concepts](#key-concepts)
 - [Sigma YAML Syntax](#sigma-yaml-syntax)
+  - [Dash (-) Logic: AND vs OR](#dash---logic-and-vs-or)
 - [PPL Commands Used in Conversion](#ppl-commands-used-in-conversion)
-  - [1. `source` - Data Source Specification](#1-source---data-source-specification)
-  - [2. `where` - Event Filtering](#2-where---event-filtering)
-  - [3. `fields` - Field Selection](#3-fields---field-selection)
-  - [4. `stats` - Aggregations and Statistics](#4-stats---aggregations-and-statistics)
-  - [5. `eval` - Creating New Fields](#5-eval---creating-new-fields)
-  - [6. `dedup` - Removing Duplicates](#6-dedup---removing-duplicates)
-  - [7. `sort` - Sorting Results](#7-sort---sorting-results)
-  - [8. `head` / `tail` - Limiting Results](#8-head--tail---limiting-results)
-  - [9. Pattern Matching with `like` and `match`](#9-pattern-matching-with-like-and-match)
-  - [10. String Functions](#10-string-functions)
+  - [Core Commands](#core-commands)
+  - [Pattern Matching](#pattern-matching)
+  - [String Functions](#string-functions)
+  - [Additional Commands](#additional-commands)
 - [Structure of Generated PPL Query](#structure-of-generated-ppl-query)
 - [Sigma → PPL Mapping](#sigma---ppl-mapping)
+- [Implementation Architecture](#implementation-architecture)
+  - [Backend Implementations](#backend-implementations)
+    - [1. `opensearch_ppl.py` - Manual/Legacy Backend](#1-opensearch_pplpy---manuallegacy-backend)
+    - [2. `opensearch_ppl_textquery.py` - Production Backend ✅](#2-opensearch_ppl_textquerypy---production-backend-)
+  - [Core Components](#core-components)
+    - [Configuration via Class Variables](#configuration-via-class-variables)
+    - [Key Methods](#key-methods)
+  - [Conversion Flow](#conversion-flow)
 - [References](#references)
 
 ---
@@ -124,449 +129,70 @@ selection_special:
 
 ## PPL Commands Used in Conversion
 
-### 1. `source` - Data Source Specification
+This backend uses the following PPL commands to convert Sigma rules into queries:
 
-The `source` command is used to specify the index or data source from which events will be extracted.
+### Core Commands
 
-**Syntax:**
+**1. `source` - Index Specification**
 ```ppl
 source = index_pattern
 ```
+Maps Sigma `logsource` to OpenSearch indices using pattern: `{product}-{category}-{service}-*`
 
-**Usage in Sigma conversion:**
-- Mapped from the `logsource` field of the Sigma rule
-- May include the product, category, and service specified in the Sigma rule
+Example: `source = windows-process_creation-*`
 
-**Example:**
-
-*Sigma Rule:*
-```yaml
-title: Windows Process Creation
-logsource:
-  category: process_creation
-  product: windows
-detection:
-  selection:
-    EventID: 1
-  condition: selection
-```
-
-*PPL Query:*
-```ppl
-source = windows-process_creation-*
-```
-
-**Logsource Mapping Strategy:**
-- Uses original Sigma category/service names for consistency
-- Index pattern: `{product}-{category}-{service}-*`
-- All components are optional and concatenated with dashes
-
-**More examples:**
-```ppl
-source = windows-*                        # product only
-source = windows-process_creation-*       # product + category
-source = windows-sysmon-*                 # product + service
-source = windows-process_creation-sysmon-*  # product + category + service
-source = firewall-*                       # category only
-```
-
-### 2. `where` - Event Filtering
-
-The `where` command is essential for applying detection conditions from Sigma rules.
-
-**Syntax:**
+**2. `where` - Filtering**
 ```ppl
 source = index | where condition
 ```
+Converts Sigma detection conditions. Supports: `=`, `!=`, `>`, `<`, `>=`, `<=`, `AND`, `OR`, `NOT`, `like`
 
-**Supported operators:**
-- **Equality:** `field = value`
-- **Inequality:** `field != value`
-- **Numeric comparisons:** `field > value`, `field >= value`, `field < value`, `field <= value`
-- **Logical operators:** `AND`, `OR`, `NOT`
-- **Pattern matching:** `like` for wildcards
+Example: `source = windows-* | where EventID = 1 AND CommandLine like "%whoami%"`
 
-**Usage in Sigma conversion:**
-- Converts Sigma `selection` into `where` conditions
-- Supports multiple conditions with logical operators
-
-**Example:**
-
-*Sigma Rule:*
-```yaml
-title: Suspicious Process Execution
-logsource:
-  category: process_creation
-  product: windows
-detection:
-  selection:
-    EventID: 1
-    Image|endswith: '\cmd.exe'
-    CommandLine|contains: 'whoami'
-  condition: selection
-```
-
-*PPL Query:*
+**3. `fields` - Field Selection**
 ```ppl
-source = windows-* | where EventID = 1 AND Image like "%\\cmd.exe" AND CommandLine like "%whoami%"
+source = index | where condition | fields field1, field2
 ```
+Returns only specified fields from Sigma rule.
 
-**More examples:**
-```ppl
-source = windows-* | where EventID = 1
-source = windows-* | where EventID = 1 AND CommandLine like "%test.exe%"
-source = windows-* | where (field1 = value1 OR field2 = value2) AND field3 != value3
-```
+Example: `source = windows-* | where EventID = 1 | fields EventID, CommandLine, User`
 
-### 3. `fields` - Field Selection
-
-The `fields` command allows specific selection of fields to be returned in results.
-
-**Syntax:**
-```ppl
-source = index | where condition | fields field1, field2, field3
-```
-
-**Usage in Sigma conversion:**
-- Can be used to return only relevant fields mentioned in the rule
-- Optimizes performance by limiting returned data
-
-**Example:**
-
-*Sigma Rule:*
-```yaml
-title: Process Creation Monitoring
-logsource:
-  category: process_creation
-  product: windows
-detection:
-  selection:
-    EventID: 1
-  condition: selection
-fields:
-  - EventID
-  - CommandLine
-  - User
-  - ProcessName
-```
-
-*PPL Query:*
-```ppl
-source = windows-* | where EventID = 1 | fields EventID, CommandLine, User, ProcessName
-```
-
-**More examples:**
-```ppl
-source = windows-* | where EventID = 1 | fields EventID, CommandLine, User, ProcessName
-source = firewall-* | where action = "block" | fields timestamp, src_ip, dst_ip, port
-```
-
-### 4. `stats` - Aggregations and Statistics
-
-The `stats` command is used for data aggregation and calculating statistics.
-
-**Syntax:**
+**4. `stats` - Aggregations**
 ```ppl
 source = index | where condition | stats count() by field
 ```
+Functions: `count()`, `sum()`, `avg()`, `min()`, `max()`, `distinct_count()`
 
-**Aggregation functions:**
-- `count()` - counts events
-- `sum(field)` - sum of values
-- `avg(field)` - average of values
-- `min(field)` - minimum value
-- `max(field)` - maximum value
-- `distinct_count(field)` - counts unique values
+Example: `source = windows-* | where EventID = 4625 | stats count() by SourceIP`
 
-**Usage in Sigma conversion:**
-- Used for rules requiring aggregations (e.g., count, threshold)
-- Supports grouping with `by`
+### Pattern Matching
 
-**Example:**
+**`like` operator:**
+- `%` = wildcard (multiple characters)
+- `_` = single character
 
-*Sigma Rule:*
-```yaml
-title: Multiple Failed Login Attempts
-logsource:
-  product: windows
-  service: security
-detection:
-  selection:
-    EventID: 4625  # Failed logon
-  condition: selection | count(SourceIP) by SourceIP > 5
-timeframe: 10m
-```
+Example: `where CommandLine like "%powershell%"`
 
-*PPL Query:*
+**`match()` function for regex:**
 ```ppl
-source = windows-security-* | where EventID = 4625 | stats count() by SourceIP | where count() > 5
-```
-
-**More examples:**
-```ppl
-source = windows-* | where EventID = 4625 | stats count() by SourceIP
-source = windows-* | where ProcessName = "cmd.exe" | stats count() by User
-source = network-* | where action = "blocked" | stats distinct_count(dst_ip) by src_ip
-```
-
-### 5. `eval` - Creating New Fields
-
-The `eval` command allows creating new fields or modifying existing ones.
-
-**Syntax:**
-```ppl
-source = index | eval new_field = expression
-```
-
-**Usage in Sigma conversion:**
-- Field transformations
-- Data normalization
-
-**Example:**
-
-*Sigma Rule:*
-```yaml
-title: Case Insensitive Command Detection
-logsource:
-  category: process_creation
-  product: windows
-detection:
-  selection:
-    EventID: 1
-    CommandLine|contains: 'powershell'  # Case insensitive
-  condition: selection
-```
-
-*PPL Query:*
-```ppl
-source = windows-* | where EventID = 1 | eval CommandLine_lower = lower(CommandLine) | where CommandLine_lower like "%powershell%"
-```
-
-**More examples:**
-```ppl
-source = windows-* | eval CommandLine_lower = lower(CommandLine)
-source = windows-* | eval is_suspicious = if(EventID = 4625, 1, 0)
-source = web-logs-* | eval full_url = concat(protocol, "://", domain, path)
-```
-
-### 6. `dedup` - Removing Duplicates
-
-The `dedup` command removes duplicate records based on specific fields.
-
-**Syntax:**
-```ppl
-source = index | where condition | dedup field1, field2
-```
-
-**Usage in Sigma conversion:**
-- Reducing noise in detections
-- Eliminating duplicate events
-
-**Example:**
-
-*Sigma Rule:*
-```yaml
-title: Unique Suspicious Process Executions
-logsource:
-  category: process_creation
-  product: windows
-detection:
-  selection:
-    EventID: 1
-    Image|endswith: '\powershell.exe'
-  condition: selection
-  # Only alert once per unique process instance
-```
-
-*PPL Query:*
-```ppl
-source = windows-* | where EventID = 1 AND Image like "%\\powershell.exe" | dedup ProcessGuid
-```
-
-**More examples:**
-```ppl
-source = windows-* | where EventID = 1 | dedup ProcessGuid
-source = network-* | where suspicious = true | dedup src_ip, dst_ip
-source = web-logs-* | where status = 404 | dedup client_ip, url
-```
-
-### 7. `sort` - Sorting Results
-
-The `sort` command orders results by one or more fields.
-
-**Syntax:**
-```ppl
-source = index | where condition | sort field [asc|desc]
-```
-
-**Usage in Sigma conversion:**
-- Ordering results by timestamp
-- Prioritizing alerts
-
-**Example:**
-
-*Sigma Rule:*
-```yaml
-title: Recent Failed Login Attempts
-logsource:
-  product: windows
-  service: security
-detection:
-  selection:
-    EventID: 4625
-  condition: selection
-  # Show most recent attempts first
-```
-
-*PPL Query:*
-```ppl
-source = windows-security-* | where EventID = 4625 | sort @timestamp desc
-```
-
-**More examples:**
-```ppl
-source = windows-* | where EventID = 4625 | sort @timestamp desc
-source = web-logs-* | where status >= 400 | sort response_time desc
-source = firewall-* | where action = "block" | sort timestamp asc
-```
-
-### 8. `head` / `tail` - Limiting Results
-
-The `head` and `tail` commands limit the number of returned results.
-
-**Syntax:**
-```ppl
-source = index | where condition | head n
-source = index | where condition | tail n
-```
-
-**Usage in Sigma conversion:**
-- Limiting results for testing
-- Returning the first/last N events
-
-**Example:**
-
-*Sigma Rule:*
-```yaml
-title: Sample Process Creation Events
-logsource:
-  category: process_creation
-  product: windows
-detection:
-  selection:
-    EventID: 1
-  condition: selection
-  # Limit to first 100 results for testing
-```
-
-*PPL Query:*
-```ppl
-source = windows-* | where EventID = 1 | head 100
-```
-
-**More examples:**
-```ppl
-source = windows-* | where EventID = 1 | head 100
-source = web-logs-* | where status = 500 | tail 50
-source = firewall-* | where action = "alert" | sort @timestamp desc | head 20
-```
-
-### 9. Pattern Matching with `like` and `match`
-
-PPL supports pattern matching for text fields.
-
-**Syntax:**
-```ppl
-where field like "pattern%"
 where match(field, 'regex_pattern')
 ```
 
-**Wildcards in `like`:**
-- `%` - any sequence of characters
-- `_` - single character
+### String Functions
 
-**Usage in Sigma conversion:**
-- Converting Sigma wildcards (`*`, `?`)
-- Matching complex patterns
-
-**Example:**
-
-*Sigma Rule:*
-```yaml
-title: PowerShell Execution with Encoded Command
-logsource:
-  category: process_creation
-  product: windows
-detection:
-  selection:
-    EventID: 1
-    Image|endswith: '\powershell.exe'
-    CommandLine|contains|all:
-      - '-enc'
-      - 'JAB'
-  condition: selection
-```
-
-*PPL Query:*
-```ppl
-source = windows-* | where EventID = 1 AND Image like "%\\powershell.exe" AND CommandLine like "%-enc%" AND CommandLine like "%JAB%"
-```
-
-**More examples:**
-```ppl
-source = windows-* | where CommandLine like "%powershell%"          # Contains 'powershell'
-source = windows-* | where FileName like "%.exe"                    # Ends with .exe
-source = windows-* | where ProcessName like "cmd___.exe"            # cmd + exactly 3 chars + .exe
-source = web-logs-* | where url like "/admin/%"                     # Starts with /admin/
-source = windows-* | where match(CommandLine, '.*-enc(oded)?.*')    # Regex matching
-```
-
-### 10. String Functions
-
-PPL offers various functions for string manipulation.
-
-**Available functions:**
-- `lower(field)` - convert to lowercase
-- `upper(field)` - convert to uppercase
+- `lower(field)`, `upper(field)` - case conversion
 - `substring(field, start, length)` - extract substring
-- `concat(field1, field2)` - concatenate strings
+- `concat(field1, field2)` - concatenate
 - `trim(field)` - remove whitespace
 
-**Usage in Sigma conversion:**
-- Normalizing data for case-insensitive comparisons
-- Extracting substrings for analysis
+Example: `where lower(CommandLine) like "%powershell%"`
 
-**Example:**
+### Additional Commands
 
-*Sigma Rule:*
-```yaml
-title: Suspicious Script Execution (Case Insensitive)
-logsource:
-  category: process_creation
-  product: windows
-detection:
-  selection:
-    EventID: 1
-    CommandLine|contains:  # Case insensitive by default in Sigma
-      - 'POWERSHELL'
-      - 'powershell'
-      - 'PowerShell'
-  condition: selection
-```
-
-*PPL Query:*
-```ppl
-source = windows-* | where EventID = 1 AND lower(CommandLine) like "%powershell%"
-```
-
-**More examples:**
-```ppl
-source = windows-* | where lower(CommandLine) like "%powershell%"
-source = web-logs-* | where upper(method) = "POST"
-source = windows-* | eval process_name = substring(Image, 0, 50)
-source = logs-* | eval full_message = concat(user, ": ", message)
-source = windows-* | where trim(CommandLine) like "powershell%"
-```
+- `eval` - create/transform fields
+- `dedup` - remove duplicates
+- `sort` - order results
+- `head`/`tail` - limit results
 
 ## Structure of Generated PPL Query
 
@@ -594,6 +220,89 @@ source = <index_pattern>
 | `condition: not a` | `where NOT a` | Logical negation |
 | Wildcard `*` | `%` in `like` | Any sequence |
 | Wildcard `?` | `_` in `like` | Single character |
+
+---
+
+## Implementation Architecture
+
+### Backend Implementations
+
+**Two implementations available:**
+
+#### 1. `opensearch_ppl.py` - Manual/Legacy Backend
+- **Status:** Placeholder (educational purpose)
+- Detailed documentation and method templates
+- Returns `"where true"` - not functional
+
+#### 2. `opensearch_ppl_textquery.py` - Production Backend ✅
+- **Status:** Fully functional, production-ready
+- Uses pySigma's `TextQueryBackend` infrastructure
+- Configuration-driven via class variables
+- Automatic handling: operators, quoting, wildcards, comparisons
+
+### Core Components
+
+#### Configuration via Class Variables
+
+```python
+class OpenSearchPPLBackend(TextQueryBackend):
+    # Operators
+    or_token = "OR"
+    and_token = "AND"
+    not_token = "NOT"
+    
+    # String matching templates
+    contains_expression = '{field} like "*{value}*"'
+    startswith_expression = '{field} like "{value}*"'
+    endswith_expression = '{field} like "*{value}"'
+    
+    # Comparison operators
+    compare_operators = {
+        CompareOperators.LT: "<",
+        CompareOperators.GT: ">",
+        # ...
+    }
+```
+
+#### Key Methods
+
+**`finish_query()`** - Assembles final PPL query:
+```python
+def finish_query(self, rule, query, state):
+    index = self._get_index_pattern(rule)  # Get index from logsource
+    return f"source = {index} | where {query}"
+```
+
+**`_get_index_pattern()`** - Maps logsource to index:
+```python
+def _get_index_pattern(self, rule):
+    # Extract: product, category, service
+    # Build: "product-category-service-*"
+    # Example: "windows-process_creation-*"
+```
+
+### Conversion Flow
+
+```
+Sigma YAML → SigmaCollection → TextQueryBackend Processing → finish_query() → PPL Query
+```
+
+**Example:**
+```yaml
+# Input
+detection:
+  selection:
+    EventID: 1
+    Image|endswith: '\powershell.exe'
+  condition: selection
+```
+↓
+```
+# Output
+['source = windows-process_creation-* | where EventID=1 AND Image like "*\\powershell.exe"']
+```
+
+---
 
 ## References
 
