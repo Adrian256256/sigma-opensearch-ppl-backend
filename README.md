@@ -8,10 +8,10 @@ This project provides a backend for the pySigma library that converts Sigma dete
 
 ### Key Features
 
-- **Sigma Rule Support**: Converts standard Sigma detection rules to PPL format
+- **Full Sigma Support**: Converts standard Sigma detection rules with all modifiers
 - **OpenSearch Optimized**: Generates PPL queries optimized for OpenSearch performance
 - **Comprehensive Testing**: Full test suite ensuring correct conversion
-- **Extensible Architecture**: Easy to extend with new features and operators
+- **Extensible Architecture**: Easy to extend with custom index mappings and output formats
 
 ## What is Sigma?
 
@@ -31,7 +31,9 @@ sigma-opensearch-ppl-backend/
 │       ├── __init__.py
 │       └── opensearch_ppl/
 │           ├── __init__.py
-│           └── opensearch_ppl.py         # Backend implementation
+│           ├── opensearch_ppl.py              # Legacy manual implementation
+│           ├── opensearch_ppl_textquery.py    # Main TextQueryBackend implementation
+│           └── README.md                      # Backend documentation
 ├── tests/
 │   ├── __init__.py
 │   ├── test_sigma_to_ppl.py              # Main conversion tests
@@ -43,11 +45,13 @@ sigma-opensearch-ppl-backend/
 │   │   └── numeric_comparison_rule.yml
 │   └── README.md                         # Test documentation
 ├── manual_test/
-│   ├── manual_test.py                    # Manual testing script
+│   ├── test_simple_backend.py            # Simple backend test script
+│   ├── test_textquery_backend.py         # TextQueryBackend test script
 │   ├── example_rules/                    # Additional example rules
 │   │   ├── powershell_suspicious.yml
-│   │   └── network_suspicious.yml
-│   └── README.md                         # Manual testing guide
+│   │   ├── network_suspicious.yml
+│   │   └── suspicious_system_user.yml
+│   └── README.md                         # Manual testing documentation
 ├── .gitignore                            # Files ignored by Git
 ├── pytest.ini                            # Pytest configuration
 ├── requirements.txt                      # Python dependencies
@@ -72,11 +76,11 @@ Main dependencies:
 
 ## Usage
 
-### Basic Example
+### Quick Start
 
 ```python
 from sigma.collection import SigmaCollection
-from sigma_backend.backends.opensearch_ppl.opensearch_ppl import OpenSearchPPLBackend
+from sigma_backend.backends.opensearch_ppl.opensearch_ppl_textquery import OpenSearchPPLBackend
 
 # Load a Sigma rule
 with open('rule.yml', 'r') as f:
@@ -89,32 +93,41 @@ backend = OpenSearchPPLBackend()
 ppl_query = backend.convert(sigma_collection)
 
 print(ppl_query)
+# Output: ['source = windows-process_creation-* | where EventID=1 AND Image like "*\\\\powershell.exe"']
 ```
 
 ### Example Sigma Rule
 
 ```yaml
-title: Suspicious Process Execution
-status: experimental
-description: Detects suspicious process execution
+title: Suspicious PowerShell Command
+status: test
+description: Detects suspicious PowerShell execution
 logsource:
-    category: process_creation
     product: windows
+    category: process_creation
 detection:
     selection:
-        Image|endswith: '\cmd.exe'
-        CommandLine|contains: 'whoami'
+        Image|endswith: '\powershell.exe'
+        CommandLine|contains:
+            - '-EncodedCommand'
+            - 'Invoke-Expression'
     condition: selection
 ```
 
-This will be converted to a PPL query like:
+This will be converted to:
 ```
-source=windows | where Image like '%\\cmd.exe' and CommandLine like '%whoami%'
+source = windows-process_creation-* | where Image like "*\powershell.exe" AND (CommandLine like "*-EncodedCommand*" OR CommandLine like "*Invoke-Expression*")
 ```
 
 ## Testing
 
-The project includes both automated and manual testing capabilities.
+### Quick Test
+
+Run the test script to see the backend in action:
+
+```bash
+python manual_test/test_textquery_backend.py
+```
 
 ### Automated Tests
 
@@ -133,8 +146,11 @@ pytest tests/ -v
 For quick testing and experimentation with example Sigma rules, see [manual_test/README.md](manual_test/README.md).
 
 ```bash
-# Test example rules and see PPL output
-python manual_test/manual_test.py
+# Test example rules with simple backend
+python manual_test/test_simple_backend.py
+
+# Test example rules with TextQuery backend
+python manual_test/test_textquery_backend.py
 ```
 
 ## Architecture

@@ -1,6 +1,7 @@
 """
 Tests for converting Sigma rules to OpenSearch PPL queries.
 All tests use YAML rule files from the test_rules directory.
+Uses the TextQueryBackend implementation (opensearch_ppl_textquery.py).
 """
 import pytest
 from pathlib import Path
@@ -10,9 +11,27 @@ from sigma.exceptions import SigmaError
 
 @pytest.fixture
 def sigma_backend():
-    """Fixture to import and return the OpenSearch PPL backend."""
-    from sigma_backend.backends.opensearch_ppl.opensearch_ppl import OpenSearchPPLBackend
+    """Fixture to import and return the OpenSearch PPL backend (TextQuery implementation)."""
+    from sigma_backend.backends.opensearch_ppl.opensearch_ppl_textquery import OpenSearchPPLBackend
+    # from sigma_backend.backends.opensearch_ppl.opensearch_ppl import OpenSearchPPLBackend
     return OpenSearchPPLBackend
+
+
+def get_query_from_result(ppl_query):
+    """
+    Helper function to extract query string from backend result.
+    TextQueryBackend returns a list of queries, so we extract the first one.
+    
+    Args:
+        ppl_query: Result from backend.convert() - can be list or string
+        
+    Returns:
+        str: The PPL query string
+    """
+    if isinstance(ppl_query, list):
+        assert len(ppl_query) > 0, "Backend returned empty list"
+        return ppl_query[0]
+    return ppl_query
 
 
 class TestSigmaToPPLConversion:
@@ -63,11 +82,16 @@ class TestSigmaToPPLConversion:
         assert ppl_query is not None
         assert len(ppl_query) > 0
         
-        # Verify it's a string (PPL query)
-        assert isinstance(ppl_query, str)
+        # TextQueryBackend returns a list of queries
+        assert isinstance(ppl_query, list)
+        assert len(ppl_query) > 0
+        
+        # Get first query for testing
+        query = ppl_query[0]
+        assert isinstance(query, str)
         
         # Basic PPL structure checks
-        query_lower = ppl_query.lower()
+        query_lower = query.lower()
         assert "source" in query_lower or "index" in query_lower
         
         # Verify that the query contains the fields from the rule
@@ -75,7 +99,7 @@ class TestSigmaToPPLConversion:
         assert "commandline" in query_lower or "command_line" in query_lower
         
         # Verify that the query contains the values from the rule
-        assert "1" in ppl_query  # EventID: 1
+        assert "1" in query  # EventID: 1
         assert "test.exe" in query_lower  # CommandLine: test.exe
         
         # Verify PPL structure
@@ -116,9 +140,12 @@ class TestSigmaToPPLConversion:
             sigma_collection = SigmaCollection.from_yaml(f.read())
         
         backend = sigma_backend()
-        ppl_query = backend.convert(sigma_collection)
+        ppl_query_result = backend.convert(sigma_collection)
         
-        assert ppl_query is not None
+        assert ppl_query_result is not None
+        
+        # Extract query from list result
+        ppl_query = get_query_from_result(ppl_query_result)
         assert isinstance(ppl_query, str)
         assert len(ppl_query) > 0
         
@@ -173,9 +200,12 @@ class TestSigmaToPPLConversion:
             sigma_collection = SigmaCollection.from_yaml(f.read())
         
         backend = sigma_backend()
-        ppl_query = backend.convert(sigma_collection)
+        ppl_query_result = backend.convert(sigma_collection)
         
-        assert ppl_query is not None
+        assert ppl_query_result is not None
+        
+        # Extract query from list result
+        ppl_query = get_query_from_result(ppl_query_result)
         assert isinstance(ppl_query, str)
         assert len(ppl_query) > 0
         
@@ -224,9 +254,12 @@ class TestSigmaToPPLConversion:
             sigma_collection = SigmaCollection.from_yaml(f.read())
         
         backend = sigma_backend()
-        ppl_query = backend.convert(sigma_collection)
+        ppl_query_result = backend.convert(sigma_collection)
         
-        assert ppl_query is not None
+        assert ppl_query_result is not None
+        
+        # Extract query from list result
+        ppl_query = get_query_from_result(ppl_query_result)
         assert isinstance(ppl_query, str)
         assert len(ppl_query) > 0
         
@@ -283,9 +316,12 @@ class TestSigmaToPPLConversion:
         sigma_collection = SigmaCollection.from_yaml(combined_yaml)
         
         backend = sigma_backend()
-        ppl_query = backend.convert(sigma_collection)
+        ppl_query_result = backend.convert(sigma_collection)
         
-        assert ppl_query is not None
+        assert ppl_query_result is not None
+        
+        # Extract query from list result
+        ppl_query = get_query_from_result(ppl_query_result)
         assert isinstance(ppl_query, str)
         assert len(ppl_query) > 0
 
@@ -343,7 +379,10 @@ class TestSigmaToPPLConversion:
             sigma_collection = SigmaCollection.from_yaml(f.read())
         
         backend = sigma_backend()
-        ppl_query = backend.convert(sigma_collection)
+        ppl_query_result = backend.convert(sigma_collection)
+        
+        # Extract query from list result
+        ppl_query = get_query_from_result(ppl_query_result)
         
         # PPL queries should contain field references
         assert isinstance(ppl_query, str)
@@ -390,7 +429,10 @@ class TestSigmaToPPLConversion:
             sigma_collection = SigmaCollection.from_yaml(f.read())
         
         backend = sigma_backend()
-        ppl_query = backend.convert(sigma_collection)
+        ppl_query_result = backend.convert(sigma_collection)
+        
+        # Extract query from list result
+        ppl_query = get_query_from_result(ppl_query_result)
         
         # The query should reference the fields from the rule
         query_lower = ppl_query.lower()
@@ -445,9 +487,12 @@ detection:
         sigma_collection = SigmaCollection.from_yaml(or_rule_yaml)
         
         backend = sigma_backend()
-        ppl_query = backend.convert(sigma_collection)
+        ppl_query_result = backend.convert(sigma_collection)
         
-        assert ppl_query is not None
+        assert ppl_query_result is not None
+        
+        # Extract query from list result
+        ppl_query = get_query_from_result(ppl_query_result)
         assert isinstance(ppl_query, str)
         assert len(ppl_query) > 0
         
@@ -484,9 +529,12 @@ detection:
             try:
                 with open(rule_file, 'r') as f:
                     sigma_collection = SigmaCollection.from_yaml(f.read())
-                ppl_query = backend.convert(sigma_collection)
+                ppl_query_result = backend.convert(sigma_collection)
                 
-                assert ppl_query is not None, f"Failed to convert {rule_file.name}"
+                assert ppl_query_result is not None, f"Failed to convert {rule_file.name}"
+                
+                # Extract query from list result
+                ppl_query = get_query_from_result(ppl_query_result)
                 assert isinstance(ppl_query, str), f"Invalid output type for {rule_file.name}"
                 assert len(ppl_query) > 0, f"Empty output for {rule_file.name}"
             except Exception as e:
@@ -532,7 +580,10 @@ class TestPPLQueryValidation:
             sigma_collection = SigmaCollection.from_yaml(f.read())
         
         backend = sigma_backend()
-        ppl_query = backend.convert(sigma_collection)
+        ppl_query_result = backend.convert(sigma_collection)
+        
+        # Extract query from list result
+        ppl_query = get_query_from_result(ppl_query_result)
         
         # Basic syntax checks
         assert isinstance(ppl_query, str)
@@ -580,9 +631,12 @@ detection:
         sigma_collection = SigmaCollection.from_yaml(special_char_rule_yaml)
         
         backend = sigma_backend()
-        ppl_query = backend.convert(sigma_collection)
+        ppl_query_result = backend.convert(sigma_collection)
         
-        assert ppl_query is not None
+        assert ppl_query_result is not None
+        
+        # Extract query from list result
+        ppl_query = get_query_from_result(ppl_query_result)
         assert isinstance(ppl_query, str)
         assert len(ppl_query) > 0
         

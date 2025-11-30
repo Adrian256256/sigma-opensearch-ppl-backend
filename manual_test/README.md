@@ -12,32 +12,52 @@ Manual testing allows you to:
 
 ## Quick Start
 
-Run the main testing script:
+### Testing the Simple Backend (Manual Implementation)
+
+Run the simple backend testing script:
 
 ```bash
-python manual_test/manual_test.py
+python manual_test/test_simple_backend.py
+```
+
+### Testing the TextQuery Backend (pySigma Infrastructure)
+
+Run the TextQuery backend testing script:
+
+```bash
+python manual_test/test_textquery_backend.py
 ```
 
 Or with your virtual environment:
 
 ```bash
-.venv/bin/python manual_test/manual_test.py
+.venv/bin/python manual_test/test_simple_backend.py
+.venv/bin/python manual_test/test_textquery_backend.py
 ```
 
 ## Directory Structure
 
 ```
 manual_test/
-├── manual_test.py                    # Main testing script
+├── test_simple_backend.py            # Testing script for simple/manual backend
+├── test_textquery_backend.py         # Testing script for TextQuery backend
 ├── example_rules/                    # Example Sigma rules
 └── README.md                         # This file
 ```
 
-## Main Testing Script (`manual_test.py`)
+## Testing Scripts
+
+### `test_simple_backend.py` - Simple Backend
+
+Tests the manual implementation (`opensearch_ppl.py`).
+
+### `test_textquery_backend.py` - TextQuery Backend
+
+Tests the pySigma TextQueryBackend implementation (`opensearch_ppl_textquery.py`).
 
 ### Configuration
 
-At the top of `manual_test.py`, you'll find configuration variables:
+At the top of both testing scripts, you'll find configuration variables:
 
 ```python
 # List of rule files to test
@@ -73,7 +93,9 @@ EXAMPLE_RULES_TO_TEST = [
 Then run:
 
 ```bash
-.venv/bin/python manual_test/manual_test.py
+.venv/bin/python manual_test/test_simple_backend.py
+# or
+.venv/bin/python manual_test/test_textquery_backend.py
 ```
 
 ### Testing All Rules
@@ -110,7 +132,7 @@ detection:
     condition: selection
 ```
 
-3. **Add it to the test list** in `manual_test.py`:
+3. **Add it to the test list** in the testing script (`test_simple_backend.py` or `test_textquery_backend.py`):
 
 ```python
 EXAMPLE_RULES_TO_TEST = [
@@ -123,7 +145,9 @@ EXAMPLE_RULES_TO_TEST = [
 4. **Run the tests**:
 
 ```bash
-.venv/bin/python manual_test/manual_test.py
+.venv/bin/python manual_test/test_simple_backend.py
+# or
+.venv/bin/python manual_test/test_textquery_backend.py
 ```
 
 ## See Also
