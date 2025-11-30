@@ -145,9 +145,9 @@ Example: `source = windows-process_creation-*`
 ```ppl
 source = index | where condition
 ```
-Converts Sigma detection conditions. Supports: `=`, `!=`, `>`, `<`, `>=`, `<=`, `AND`, `OR`, `NOT`, `like`
+Converts Sigma detection conditions. Supports: `=`, `!=`, `>`, `<`, `>=`, `<=`, `AND`, `OR`, `NOT`, `LIKE()`, `IN()`
 
-Example: `source = windows-* | where EventID = 1 AND CommandLine like "%whoami%"`
+Example: `source = windows-* | where EventID = 1 AND LIKE(CommandLine, "%whoami%")`
 
 **3. `fields` - Field Selection**
 ```ppl
@@ -167,16 +167,42 @@ Example: `source = windows-* | where EventID = 4625 | stats count() by SourceIP`
 
 ### Pattern Matching
 
-**`like` operator:**
-- `%` = wildcard (multiple characters)
-- `_` = single character
+**`LIKE()` function - Pattern Matching:**
 
-Example: `where CommandLine like "%powershell%"`
+The `LIKE()` function in OpenSearch PPL is used for pattern matching with wildcards:
 
-**`match()` function for regex:**
+Syntax: `LIKE(field, "pattern")`
+
+Wildcards:
+- `%` = matches zero or more characters (equivalent to `*` in Sigma)
+- `_` = matches exactly one character (equivalent to `?` in Sigma)
+
+Examples:
+```ppl
+# Contains match
+where LIKE(CommandLine, "%powershell%")
+
+# Starts with
+where LIKE(Image, "C:\\Windows\\%")
+
+# Ends with
+where LIKE(Image, "%\\powershell.exe")
+
+# Single character wildcard
+where LIKE(state, "M_")
+
+# Multiple conditions
+where LIKE(User, "%AUTHORI%") OR LIKE(User, "%AUTORI%")
+```
+
+**Important:** `LIKE()` is a **function**, not an infix operator. The syntax `field like "pattern"` is **not valid** in OpenSearch PPL.
+
+**`match()` function - Regular Expressions:**
 ```ppl
 where match(field, 'regex_pattern')
 ```
+
+Example: `where match(CommandLine, '.*powershell.*-enc.*')`
 
 ### String Functions
 
@@ -212,14 +238,15 @@ source = <index_pattern>
 | `logsource.product` | `source = <index>` | Mapping to OpenSearch indices |
 | `detection.selection` | `where condition` | Filtering conditions |
 | `fieldname: value` | `field = value` | Exact equality |
-| `fieldname\|contains: value` | `field like "%value%"` | Substring matching |
-| `fieldname\|startswith: value` | `field like "value%"` | Prefix matching |
-| `fieldname\|endswith: value` | `field like "%value"` | Suffix matching |
+| `fieldname\|contains: value` | `LIKE(field, "%value%")` | Substring matching with LIKE function |
+| `fieldname\|startswith: value` | `LIKE(field, "value%")` | Prefix matching with LIKE function |
+| `fieldname\|endswith: value` | `LIKE(field, "%value")` | Suffix matching with LIKE function |
 | `condition: a and b` | `where a AND b` | Logical conjunction |
 | `condition: a or b` | `where a OR b` | Logical disjunction |
 | `condition: not a` | `where NOT a` | Logical negation |
-| Wildcard `*` | `%` in `like` | Any sequence |
-| Wildcard `?` | `_` in `like` | Single character |
+| Wildcard `*` in Sigma | `%` in PPL LIKE | Any sequence of characters |
+| Wildcard `?` in Sigma | `_` in PPL LIKE | Single character |
+| `fieldname\|re: regex` | `match(field, 'regex')` | Regular expression matching |
 
 ---
 
@@ -251,16 +278,25 @@ class OpenSearchPPLBackend(TextQueryBackend):
     and_token = "AND"
     not_token = "NOT"
     
-    # String matching templates
-    contains_expression = '{field} like "*{value}*"'
-    startswith_expression = '{field} like "{value}*"'
-    endswith_expression = '{field} like "*{value}"'
+    # Wildcards (PPL uses % and _ instead of * and ?)
+    wildcard_multi = "%"    # Multi-character wildcard
+    wildcard_single = "_"   # Single-character wildcard
+    
+    # String matching templates using LIKE() function
+    contains_expression = 'LIKE({field}, "%{value}%")'
+    startswith_expression = 'LIKE({field}, "{value}%")'
+    endswith_expression = 'LIKE({field}, "%{value}")'
+    wildcard_match_expression = 'LIKE({field}, "{value}")'
+    
+    # Regular expression matching
+    re_expression = "match({field}, '{regex}')"
     
     # Comparison operators
     compare_operators = {
         CompareOperators.LT: "<",
         CompareOperators.GT: ">",
-        # ...
+        CompareOperators.LTE: "<=",
+        CompareOperators.GTE: ">=",
     }
 ```
 
@@ -299,13 +335,23 @@ detection:
 ↓
 ```
 # Output
-['source = windows-process_creation-* | where EventID=1 AND Image like "*\\powershell.exe"']
+['source = windows-process_creation-* | where EventID=1 AND LIKE(Image, "%\\powershell.exe")']
 ```
 
 ---
 
 ## References
 
-- [OpenSearch PPL Documentation](https://opensearch.org/docs/latest/search-plugins/sql/ppl/index/)
-- [Sigma Rules Specification](https://github.com/SigmaHQ/sigma-specification/blob/main/specification/sigma-rules-specification.md)
-- [Sigma Project](https://github.com/SigmaHQ/sigma)
+### OpenSearch PPL Documentation
+- **Main PPL Page**: [OpenSearch PPL Documentation](https://opensearch.org/docs/latest/search-plugins/sql/ppl/index/)
+- **PPL Commands**: [OpenSearch PPL Commands & Functions](https://opensearch.org/docs/latest/search-plugins/sql/ppl/functions/)
+- **PPL Syntax**: [OpenSearch PPL Syntax](https://opensearch.org/docs/latest/search-plugins/sql/ppl/syntax/)
+- **GitHub Documentation**: [OpenSearch SQL/PPL GitHub Docs](https://github.com/opensearch-project/sql/tree/main/docs/user/ppl)
+
+### Sigma Documentation
+- **Sigma Rules Specification**: [Sigma Rules Specification](https://github.com/SigmaHQ/sigma-specification/blob/main/specification/sigma-rules-specification.md)
+- **Sigma Project**: [Sigma HQ on GitHub](https://github.com/SigmaHQ/sigma)
+- **pySigma**: [pySigma Library](https://github.com/SigmaHQ/pySigma)
+
+### Interactive Testing
+- **Query Workbench**: [OpenSearch Playground](https://playground.opensearch.org/app/opensearch-query-workbench) - Test PPL queries interactively
