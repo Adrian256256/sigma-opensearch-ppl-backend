@@ -134,12 +134,3 @@ python manual_test/test_textquery_backend.py
 Sigma Rule (YAML) → SigmaCollection → OpenSearchPPLBackend → PPL Query (String)
 ```
 
-## Development
-
-### Project Status
-
-- ✅ Project structure
-- ✅ Complete test suite
-- ✅ Example Sigma rules
-- ✅ Pytest configuration
-- ⏳ Backend implementation (in development)
