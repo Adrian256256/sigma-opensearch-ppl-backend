@@ -19,7 +19,7 @@ This backend converts Sigma detection rules into PPL (Piped Processing Language)
 - [Implementation Architecture](#implementation-architecture)
   - [Backend Implementations](#backend-implementations)
     - [1. `opensearch_ppl.py` - Manual/Legacy Backend](#1-opensearch_pplpy---manuallegacy-backend)
-    - [2. `opensearch_ppl_textquery.py` - Production Backend ✅](#2-opensearch_ppl_textquerypy---production-backend-)
+    - [2. `opensearch_ppl_textquery.py` - Production Backend](#2-opensearch_ppl_textquerypy---production-backend-)
   - [Core Components](#core-components)
     - [Configuration via Class Variables](#configuration-via-class-variables)
     - [Key Methods](#key-methods)
@@ -261,7 +261,7 @@ source = <index_pattern>
 - Detailed documentation and method templates
 - Returns `"where true"` - not functional
 
-#### 2. `opensearch_ppl_textquery.py` - Production Backend ✅
+#### 2. `opensearch_ppl_textquery.py` - Production Backend
 - **Status:** Fully functional, production-ready
 - Uses pySigma's `TextQueryBackend` infrastructure
 - Configuration-driven via class variables
