@@ -48,20 +48,20 @@ class OpenSearchPPLBackend(TextQueryBackend):
     field_quote_pattern_negation: ClassVar[bool] = True  # Quote if pattern does NOT match
     
     # String quoting and escaping
-    str_quote: ClassVar[str] = '"'
+    str_quote: ClassVar[str] = ''  # No automatic quoting - we handle it in templates
     escape_char: ClassVar[str] = '\\'
-    wildcard_multi: ClassVar[str] = "*"
-    wildcard_single: ClassVar[str] = "?"
+    wildcard_multi: ClassVar[str] = "%"  # PPL uses % for multi-character wildcard
+    wildcard_single: ClassVar[str] = "_"  # PPL uses _ for single-character wildcard
     add_escaped: ClassVar[str] = "\\"
     filter_chars: ClassVar[str] = ""
     
-    # String matching operators with PPL's like operator
-    # PPL uses: field like "pattern" for wildcards
+    # String matching operators with PPL's LIKE() function
+    # PPL uses: LIKE(field, "pattern") with % for wildcards
     # PPL uses: field = "exact" for exact match
-    startswith_expression: ClassVar[str] = '{field} like "{value}*"'
-    endswith_expression: ClassVar[str] = '{field} like "*{value}"'
-    contains_expression: ClassVar[str] = '{field} like "*{value}*"'
-    wildcard_match_expression: ClassVar[str] = '{field} like "{value}"'
+    startswith_expression: ClassVar[str] = 'LIKE({field}, "{value}%")'
+    endswith_expression: ClassVar[str] = 'LIKE({field}, "%{value}")'
+    contains_expression: ClassVar[str] = 'LIKE({field}, "%{value}%")'
+    wildcard_match_expression: ClassVar[str] = 'LIKE({field}, "{value}")'
     
     # Regular expressions in PPL
     # PPL supports: field match 'regex' or match(field, 'regex')

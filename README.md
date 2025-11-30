@@ -34,26 +34,12 @@ sigma-opensearch-ppl-backend/
 │           ├── opensearch_ppl.py              # Legacy manual implementation
 │           ├── opensearch_ppl_textquery.py    # Main TextQueryBackend implementation
 │           └── README.md                      # Backend documentation
-├── tests/
-│   ├── __init__.py
-│   ├── test_sigma_to_ppl.py              # Main conversion tests
-│   ├── test_rules/                       # Test Sigma rules
-│   │   ├── __init__.py
-│   │   ├── simple_rule.yml
-│   │   ├── complex_rule.yml
-│   │   ├── wildcard_rule.yml
-│   │   └── numeric_comparison_rule.yml
-│   └── README.md                         # Test documentation
 ├── manual_test/
 │   ├── test_simple_backend.py            # Simple backend test script
 │   ├── test_textquery_backend.py         # TextQueryBackend test script
 │   ├── example_rules/                    # Additional example rules
-│   │   ├── powershell_suspicious.yml
-│   │   ├── network_suspicious.yml
-│   │   └── suspicious_system_user.yml
 │   └── README.md                         # Manual testing documentation
 ├── .gitignore                            # Files ignored by Git
-├── pytest.ini                            # Pytest configuration
 ├── requirements.txt                      # Python dependencies
 └── README.md                             # Project documentation
 ```
@@ -120,26 +106,6 @@ source = windows-process_creation-* | where Image like "*\powershell.exe" AND (C
 ```
 
 ## Testing
-
-### Quick Test
-
-Run the test script to see the backend in action:
-
-```bash
-python manual_test/test_textquery_backend.py
-```
-
-### Automated Tests
-
-For comprehensive automated testing, see [tests/README.md](tests/README.md).
-
-```bash
-# Run all tests
-pytest tests/
-
-# Run with verbose output
-pytest tests/ -v
-```
 
 ### Manual Testing
 

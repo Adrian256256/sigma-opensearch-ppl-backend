@@ -1,0 +1,12 @@
+title: Privilege Escalation After Logon
+id: 12345678-1234-1234-1234-123456789abe
+status: test
+logsource:
+    product: windows
+    service: security
+detection:
+    selection1:
+        EventID: 4624
+    selection2:
+        EventID: 4672
+    condition: selection1 followed by selection2

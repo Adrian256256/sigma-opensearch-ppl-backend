@@ -1,0 +1,10 @@
+title: Special Characters Test
+id: 123e4567-e89b-12d3-a456-426614174400
+status: test
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine: "test (value) [test]"
+    condition: selection
