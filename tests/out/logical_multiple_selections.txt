@@ -1,1 +1,1 @@
-source = windows-process_creation-* | where (LIKE(Image, "%\\net.exe") OR LIKE(Image, "%\\net1.exe")) AND (LIKE(CommandLine, "%user%") OR LIKE(CommandLine, "%group%") OR LIKE(CommandLine, "%localgroup%")) AND NOT LIKE(ParentImage, "%\\services.exe")
+source=windows-process_creation-* | where (LIKE(Image, "%\\net.exe") OR LIKE(Image, %"\\net1.exe")) AND (LIKE(CommandLine, %"user"%) OR LIKE(CommandLine, %"group"%) OR LIKE(CommandLine, %"localgroup"%)) AND NOT LIKE(ParentImage, %"\\services.exe")

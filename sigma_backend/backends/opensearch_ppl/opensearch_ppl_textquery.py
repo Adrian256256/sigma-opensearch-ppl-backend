@@ -47,8 +47,8 @@ class OpenSearchPPLBackend(TextQueryBackend):
     field_quote_pattern: ClassVar[Pattern] = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
     field_quote_pattern_negation: ClassVar[bool] = True  # Quote if pattern does NOT match
     
-    # String quoting and escaping
-    str_quote: ClassVar[str] = ''  # No automatic quoting - we handle it in templates
+    # String quoting and escaping  
+    str_quote: ClassVar[str] = '"'  # Double quotes for string values
     escape_char: ClassVar[str] = '\\'
     wildcard_multi: ClassVar[str] = "%"  # PPL uses % for multi-character wildcard
     wildcard_single: ClassVar[str] = "_"  # PPL uses _ for single-character wildcard
@@ -56,12 +56,13 @@ class OpenSearchPPLBackend(TextQueryBackend):
     filter_chars: ClassVar[str] = ""
     
     # String matching operators with PPL's LIKE() function
-    # PPL uses: LIKE(field, "pattern") with % for wildcards
+    # PPL uses: LIKE(field, "pattern") with % for wildcards  
     # PPL uses: field = "exact" for exact match
-    startswith_expression: ClassVar[str] = 'LIKE({field}, "{value}%")'
-    endswith_expression: ClassVar[str] = 'LIKE({field}, "%{value}")'
-    contains_expression: ClassVar[str] = 'LIKE({field}, "%{value}%")'
-    wildcard_match_expression: ClassVar[str] = 'LIKE({field}, "{value}")'
+    # Template values will be auto-quoted by str_quote
+    startswith_expression: ClassVar[str] = 'LIKE({field}, {value}%)'
+    endswith_expression: ClassVar[str] = 'LIKE({field}, %{value})'
+    contains_expression: ClassVar[str] = 'LIKE({field}, %{value}%)'
+    wildcard_match_expression: ClassVar[str] = 'LIKE({field}, {value})'
     
     # Regular expressions in PPL
     # PPL supports: field match 'regex' or match(field, 'regex')
@@ -211,7 +212,14 @@ class OpenSearchPPLBackend(TextQueryBackend):
         # Handle deferred expressions (if any)
         query = super().finish_query(rule, query, state)
         
+        # Fix LIKE expressions: move wildcards inside quotes
+        # Convert %"value"% to "%value%", "value"% to "value%", %"value" to "%value"
+        import re
+        query = re.sub(r'%"([^"]*)"%', r'"%\1%"', query)  # %"value"% -> "%value%"
+        query = re.sub(r'%"([^"]*)"', r'"%\1"', query)    # %"value" -> "%value"
+        query = re.sub(r'"([^"]*)"%', r'"\1%"', query)    # "value"% -> "value%"
+        
         # Build complete PPL query with source command
-        ppl_query = f"source = {index_pattern} | where {query}"
+        ppl_query = f"source={index_pattern} | where {query}"
         
         return ppl_query

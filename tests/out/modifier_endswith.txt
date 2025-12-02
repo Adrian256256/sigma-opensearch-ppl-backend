@@ -1,1 +1,1 @@
-source = windows-process_creation-* | where LIKE(Image, "%.exe") OR LIKE(Image, "%.bat") OR LIKE(Image, "%.ps1")
+source=windows-process_creation-* | where LIKE(Image, "%.exe") OR LIKE(Image, %".bat") OR LIKE(Image, %".ps1")

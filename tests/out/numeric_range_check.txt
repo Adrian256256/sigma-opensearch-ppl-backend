@@ -1,1 +1,1 @@
-source = windows-network_connection-* | where EventID = 3 AND DestinationPort>=8000 AND DestinationPort<=9000
+source=windows-network_connection-* | where EventID=3 AND DestinationPort>=8000 AND DestinationPort<=9000

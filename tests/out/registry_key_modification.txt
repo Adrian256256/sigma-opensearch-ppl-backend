@@ -1,1 +1,1 @@
-source = windows-registry_event-* | where EventID = 13 AND (LIKE(TargetObject, "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run%") OR LIKE(TargetObject, "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run%"))
+source=windows-registry_event-* | where EventID=13 AND (LIKE(TargetObject, "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run%") OR LIKE(TargetObject, "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run%"))

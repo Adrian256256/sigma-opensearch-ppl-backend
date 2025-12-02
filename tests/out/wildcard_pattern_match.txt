@@ -1,1 +1,1 @@
-source = windows-process_creation-* | where LIKE(CommandLine, "%malware%") OR LIKE(CommandLine, "%backdoor%") OR LIKE(CommandLine, "%cmd_.exe%")
+source=windows-process_creation-* | where LIKE(CommandLine, "%malware%") OR LIKE(CommandLine, "%backdoor%") OR LIKE(CommandLine, "%cmd_.exe%")

@@ -1,1 +1,1 @@
-source = windows-process_creation-* | where EventID = 1 AND LIKE(CommandLine, "%powershell%") AND NOT LIKE(User, "%SYSTEM%")
+source=windows-process_creation-* | where EventID=1 AND LIKE(CommandLine, "%powershell%") AND NOT LIKE(User, "%SYSTEM%")

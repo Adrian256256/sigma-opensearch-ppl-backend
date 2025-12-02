@@ -1,1 +1,1 @@
-source = windows-network_connection-* | where EventID = 3 AND DestinationPort>=4444 AND Initiated = true
+source=windows-network_connection-* | where EventID=3 AND DestinationPort>=4444 AND Initiated="true"

@@ -1,1 +1,1 @@
-source = windows-process_creation-* | where LIKE(Image, "%\\PsExec.exe") AND LIKE(CommandLine, "%\\\\%") AND NOT LIKE(User, "%SYSTEM%")
+source=windows-process_creation-* | where LIKE(Image, "%\\PsExec.exe") AND LIKE(CommandLine, %"\\\\"%) AND NOT LIKE(User, %"SYSTEM%")
