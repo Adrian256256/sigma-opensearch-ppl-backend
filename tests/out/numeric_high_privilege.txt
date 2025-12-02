@@ -1,0 +1,1 @@
+source = windows-process_creation-* | where IntegrityLevel = System AND ProcessId>0

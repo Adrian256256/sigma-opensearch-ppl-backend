@@ -1,0 +1,1 @@
+source = windows-file_event-* | where EventID = 11 AND (LIKE(TargetFilename, "C:\\Windows\\System32\\%") OR LIKE(TargetFilename, "C:\\Windows\\SysWOW64\\%"))

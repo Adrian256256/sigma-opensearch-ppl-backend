@@ -1,0 +1,1 @@
+source = windows-file_event-* | where LIKE(TargetFilename, "%\\Users\\Public\\%") OR LIKE(TargetFilename, "%\\AppData\\Roaming\\%") OR LIKE(TargetFilename, "%\\ProgramData\\%")

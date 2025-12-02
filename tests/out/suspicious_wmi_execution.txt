@@ -1,0 +1,1 @@
+source = windows-process_creation-* | where LIKE(ParentImage, "%\\wmiprvse.exe") AND (LIKE(Image, "%\\powershell.exe") OR LIKE(Image, "%\\cmd.exe") OR LIKE(Image, "%\\wscript.exe") OR LIKE(Image, "%\\cscript.exe"))

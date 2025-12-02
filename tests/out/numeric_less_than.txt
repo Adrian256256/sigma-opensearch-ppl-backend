@@ -1,0 +1,1 @@
+source = windows-network_connection-* | where EventID = 3 AND DestinationPort<1024
