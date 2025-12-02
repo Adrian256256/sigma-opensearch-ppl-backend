@@ -1,1 +1,1 @@
-source=windows-process_creation-* | where LIKE(Image, "%\\sc.exe") AND LIKE(CommandLine, %"binpath%")
+source=windows-process_creation-* | where LIKE(Image, "%\\sc.exe") AND LIKE(CommandLine, "%binpath%")

@@ -1,1 +1,1 @@
-source=windows-process_creation-* | where LIKE(CommandLine, "%sekurlsa%") OR LIKE(CommandLine, "%logonpasswords%") OR LIKE(CommandLine, "%lsadump%") OR LIKE(Image, %"\\mimikatz.exe") AND OriginalFileName="mimikatz.exe"
+source=windows-process_creation-* | where LIKE(CommandLine, "%sekurlsa%") OR LIKE(CommandLine, "%logonpasswords%") OR LIKE(CommandLine, "%lsadump%") OR LIKE(Image, "%\\mimikatz.exe") AND OriginalFileName="mimikatz.exe"

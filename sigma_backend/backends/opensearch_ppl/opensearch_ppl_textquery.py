@@ -64,6 +64,10 @@ class OpenSearchPPLBackend(TextQueryBackend):
     contains_expression: ClassVar[str] = 'LIKE({field}, %{value}%)'
     wildcard_match_expression: ClassVar[str] = 'LIKE({field}, {value})'
     
+    # CIDR notation support
+    # PPL supports: cidrmatch(field, "cidr")
+    cidr_expression: ClassVar[str] = 'cidrmatch({field}, "{value}")'
+    
     # Regular expressions in PPL
     # PPL supports: field match 'regex' or match(field, 'regex')
     re_expression: ClassVar[str] = "match({field}, '{regex}')"
@@ -83,8 +87,8 @@ class OpenSearchPPLBackend(TextQueryBackend):
     field_exists_expression: ClassVar[str] = "isnotnull({field})"
     field_not_exists_expression: ClassVar[str] = "isnull({field})"
     
-    # Null value handling
-    field_null_expression: ClassVar[str] = "{field} is null"
+    # Null value handling - in PPL use isnull() function
+    field_null_expression: ClassVar[str] = "isnull({field})"
     
     # List expressions (IN operator)
     convert_or_as_in: ClassVar[bool] = True
@@ -213,11 +217,18 @@ class OpenSearchPPLBackend(TextQueryBackend):
         query = super().finish_query(rule, query, state)
         
         # Fix LIKE expressions: move wildcards inside quotes
-        # Convert %"value"% to "%value%", "value"% to "value%", %"value" to "%value"
+        # Handle all patterns in one comprehensive replacement
         import re
-        query = re.sub(r'%"([^"]*)"%', r'"%\1%"', query)  # %"value"% -> "%value%"
-        query = re.sub(r'%"([^"]*)"', r'"%\1"', query)    # %"value" -> "%value"
-        query = re.sub(r'"([^"]*)"%', r'"\1%"', query)    # "value"% -> "value%"
+        
+        # Pattern: optional % before quote, content, optional % after quote
+        # Replace with: quote, optional %, content, optional %, quote
+        def fix_wildcards(match):
+            leading = match.group(1) or ''  # % before "
+            content = match.group(2)         # content between quotes
+            trailing = match.group(3) or ''  # % after "
+            return f'"{leading}{content}{trailing}"'
+        
+        query = re.sub(r'(%?)"([^"]*)\"(%?)', fix_wildcards, query)
         
         # Build complete PPL query with source command
         ppl_query = f"source={index_pattern} | where {query}"

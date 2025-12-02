@@ -1,1 +1,1 @@
-source=windows-process_creation-* | where (LIKE(Image, "%\\powershell.exe") OR LIKE(Image, %"\\cmd.exe")) AND (LIKE(CommandLine, %"-enc"%) OR LIKE(CommandLine, %"bypass"%)) AND NOT LIKE(User, %"\\Administrator")
+source=windows-process_creation-* | where (LIKE(Image, "%\\powershell.exe") OR LIKE(Image, "%\\cmd.exe")) AND (LIKE(CommandLine, "%-enc%") OR LIKE(CommandLine, "%bypass%")) AND NOT LIKE(User, "%\\Administrator")
