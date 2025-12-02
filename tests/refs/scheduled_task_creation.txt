@@ -1,0 +1,1 @@
+source=windows-process_creation-* | where LIKE(Image, "%\\schtasks.exe") AND LIKE(CommandLine, "%/create%") AND LIKE(CommandLine, "%/tn%")

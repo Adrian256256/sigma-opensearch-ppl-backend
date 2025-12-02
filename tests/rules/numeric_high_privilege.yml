@@ -1,0 +1,12 @@
+title: High Privilege Level Detection
+id: 00000004-0004-0004-0004-000000000004
+status: test
+description: Tests detection of processes with high integrity level
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        IntegrityLevel: 'System'
+        ProcessId|gt: 0
+    condition: selection

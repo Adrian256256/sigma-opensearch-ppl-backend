@@ -1,0 +1,13 @@
+title: Numeric Range Check
+id: 00000004-0003-0003-0003-000000000003
+status: test
+description: Tests numeric range with gte and lte
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        EventID: 3
+        DestinationPort|gte: 8000
+        DestinationPort|lte: 9000
+    condition: selection

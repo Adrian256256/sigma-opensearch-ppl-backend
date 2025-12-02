@@ -1,0 +1,16 @@
+title: Suspicious Service Installation
+id: 00000006-0007-0007-0007-000000000007
+status: test
+description: Detects installation of suspicious Windows services
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\sc.exe'
+        CommandLine|contains:
+            - 'create'
+            - 'config'
+        CommandLine|contains:
+            - 'binpath'
+    condition: selection

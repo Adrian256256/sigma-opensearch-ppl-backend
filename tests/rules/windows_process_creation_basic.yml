@@ -1,0 +1,12 @@
+title: Windows Process Creation - Basic
+id: 00000001-0001-0001-0001-000000000001
+status: test
+description: Basic process creation detection testing exact match
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        EventID: 1
+        Image: 'C:\Windows\System32\calc.exe'
+    condition: selection

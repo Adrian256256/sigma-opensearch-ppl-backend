@@ -1,0 +1,1 @@
+source=linux-process_creation-* | where (LIKE(Image, "%/bash") OR LIKE(Image, "%/sh")) AND (LIKE(CommandLine, "%wget%") OR LIKE(CommandLine, "%curl%") OR LIKE(CommandLine, "%chmod +x%"))

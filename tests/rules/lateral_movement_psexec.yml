@@ -1,0 +1,14 @@
+title: Lateral Movement via PsExec
+id: 00000006-0004-0004-0004-000000000004
+status: test
+description: Detects lateral movement using PsExec tool
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\PsExec.exe'
+        CommandLine|contains: '\\\'
+    filter:
+        User|contains: 'SYSTEM'
+    condition: selection and not filter

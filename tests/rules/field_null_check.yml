@@ -1,0 +1,12 @@
+title: Field Existence Check
+id: 00000005-0003-0003-0003-000000000003
+status: test
+description: Tests checking if a field exists
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        EventID: 1
+        CommandLine: null
+    condition: selection

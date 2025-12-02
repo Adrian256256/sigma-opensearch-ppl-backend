@@ -1,0 +1,17 @@
+title: Mimikatz Execution Detection
+id: 00000006-0003-0003-0003-000000000003
+status: test
+description: Detects potential Mimikatz execution through various indicators
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_cli:
+        CommandLine|contains:
+            - 'sekurlsa'
+            - 'logonpasswords'
+            - 'lsadump'
+    selection_image:
+        Image|endswith: '\mimikatz.exe'
+        OriginalFileName: 'mimikatz.exe'
+    condition: selection_cli or selection_image

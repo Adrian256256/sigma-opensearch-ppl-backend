@@ -1,0 +1,16 @@
+title: Suspicious WMI Execution
+id: 00000006-0005-0005-0005-000000000005
+status: test
+description: Detects suspicious WMI process executions
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\wmiprvse.exe'
+        Image|endswith:
+            - '\powershell.exe'
+            - '\cmd.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+    condition: selection

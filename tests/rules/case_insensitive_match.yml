@@ -1,0 +1,14 @@
+title: Case Insensitive Match
+id: 00000002-0005-0005-0005-000000000005
+status: test
+description: Tests case insensitive matching (default in Sigma)
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains:
+            - 'WHOAMI'
+            - 'netstat'
+            - 'IpConfig'
+    condition: selection

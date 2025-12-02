@@ -1,0 +1,1 @@
+source=windows-process_creation-* | where LIKE(CommandLine, "%WHOAMI%") OR LIKE(CommandLine, "%netstat%") OR LIKE(CommandLine, "%IpConfig%")

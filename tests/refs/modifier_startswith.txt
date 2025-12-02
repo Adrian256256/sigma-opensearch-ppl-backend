@@ -1,0 +1,1 @@
+source=windows-file_event-* | where LIKE(TargetFilename, "C:\\Temp\\%")

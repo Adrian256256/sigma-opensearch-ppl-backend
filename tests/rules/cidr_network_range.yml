@@ -1,0 +1,12 @@
+title: CIDR Network Range
+id: 00000005-0002-0002-0002-000000000002
+status: test
+description: Tests CIDR notation for IP address ranges
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        EventID: 3
+        DestinationIp|cidr: '192.168.1.0/24'
+    condition: selection

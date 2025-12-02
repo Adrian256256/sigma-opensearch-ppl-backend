@@ -1,0 +1,15 @@
+title: Suspicious DNS Query
+id: 00000006-0008-0008-0008-000000000008
+status: test
+description: Detects DNS queries to suspicious domains
+logsource:
+    category: dns_query
+    product: windows
+detection:
+    selection:
+        QueryName|endswith:
+            - '.tk'
+            - '.ml'
+            - '.ga'
+            - '.gq'
+    condition: selection

@@ -1,0 +1,16 @@
+title: Suspicious Network Connection
+id: 00000001-0003-0003-0003-000000000003
+status: test
+description: Detects suspicious outbound network connections
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        EventID: 3
+        DestinationPort:
+            - 4444
+            - 5555
+            - 8080
+        Initiated: 'true'
+    condition: selection

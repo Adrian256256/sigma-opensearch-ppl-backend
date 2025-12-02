@@ -1,0 +1,14 @@
+title: Sensitive File Creation
+id: 00000001-0004-0004-0004-000000000004
+status: test
+description: Detects creation of files in sensitive directories
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        EventID: 11
+        TargetFilename|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+    condition: selection

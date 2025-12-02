@@ -1,0 +1,20 @@
+title: Multiple Selections Combined
+id: 00000003-0005-0005-0005-000000000005
+status: test
+description: Tests combination of multiple named selections
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_suspicious_process:
+        Image|endswith:
+            - '\net.exe'
+            - '\net1.exe'
+    selection_suspicious_args:
+        CommandLine|contains:
+            - 'user'
+            - 'group'
+            - 'localgroup'
+    filter_legitimate:
+        ParentImage|endswith: '\services.exe'
+    condition: (selection_suspicious_process and selection_suspicious_args) and not filter_legitimate

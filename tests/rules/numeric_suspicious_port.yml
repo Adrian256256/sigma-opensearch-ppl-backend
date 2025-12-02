@@ -1,0 +1,13 @@
+title: Suspicious Port Range
+id: 00000004-0005-0005-0005-000000000005
+status: test
+description: Tests detection of connections to suspicious port ranges
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        EventID: 3
+        DestinationPort|gte: 4444
+        Initiated: 'true'
+    condition: selection

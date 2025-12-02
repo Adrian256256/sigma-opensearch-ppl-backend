@@ -1,0 +1,14 @@
+title: EndsWith Modifier Test
+id: 00000002-0003-0003-0003-000000000003
+status: test
+description: Tests endswith modifier for file extension matching
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '.exe'
+            - '.bat'
+            - '.ps1'
+    condition: selection

@@ -1,0 +1,17 @@
+title: Suspicious Bash Commands
+id: 00000001-0005-0005-0005-000000000005
+status: test
+description: Detects suspicious bash command patterns on Linux
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection:
+        Image|endswith:
+            - '/bash'
+            - '/sh'
+        CommandLine|contains:
+            - 'wget'
+            - 'curl'
+            - 'chmod +x'
+    condition: selection

@@ -1,0 +1,1 @@
+source=windows-process_creation-* | where LIKE(Image, "%\\powershell.exe") AND (LIKE(CommandLine, "%-EncodedCommand%") OR LIKE(CommandLine, "%-enc%") OR LIKE(CommandLine, "%-NoProfile%"))

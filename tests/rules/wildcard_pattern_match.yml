@@ -1,0 +1,14 @@
+title: Wildcard Pattern Match
+id: 00000002-0001-0001-0001-000000000001
+status: test
+description: Tests wildcard pattern matching with * and ?
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains:
+            - '*malware*'
+            - '*backdoor*'
+            - 'cmd?.exe'
+    condition: selection

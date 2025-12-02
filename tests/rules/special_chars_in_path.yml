@@ -1,0 +1,14 @@
+title: Special Characters in Path
+id: 00000005-0005-0005-0005-000000000005
+status: test
+description: Tests handling of special characters in file paths
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|contains:
+            - '\Users\Public\'
+            - '\AppData\Roaming\'
+            - '\ProgramData\'
+    condition: selection

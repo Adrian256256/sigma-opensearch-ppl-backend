@@ -1,0 +1,12 @@
+title: Numeric Comparison Less Than
+id: 00000004-0002-0002-0002-000000000002
+status: test
+description: Tests numeric less than comparison
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        EventID: 3
+        DestinationPort|lt: 1024
+    condition: selection

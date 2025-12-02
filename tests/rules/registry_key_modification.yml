@@ -1,0 +1,14 @@
+title: Registry Key Modification
+id: 00000005-0006-0006-0006-000000000006
+status: test
+description: Tests detection of suspicious registry modifications
+logsource:
+    category: registry_event
+    product: windows
+detection:
+    selection:
+        EventID: 13
+        TargetObject|startswith:
+            - 'HKLM\Software\Microsoft\Windows\CurrentVersion\Run'
+            - 'HKCU\Software\Microsoft\Windows\CurrentVersion\Run'
+    condition: selection

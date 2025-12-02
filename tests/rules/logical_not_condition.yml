@@ -1,0 +1,14 @@
+title: NOT Condition Test
+id: 00000003-0003-0003-0003-000000000003
+status: test
+description: Tests NOT logic for filtering out legitimate processes
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        EventID: 1
+        CommandLine|contains: 'powershell'
+    filter:
+        User|contains: 'SYSTEM'
+    condition: selection and not filter

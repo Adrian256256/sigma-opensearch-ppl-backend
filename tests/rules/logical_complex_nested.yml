@@ -1,0 +1,19 @@
+title: Complex Nested Condition
+id: 00000003-0004-0004-0004-000000000004
+status: test
+description: Tests complex nested AND/OR/NOT conditions
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_image:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\cmd.exe'
+    selection_cmdline:
+        CommandLine|contains:
+            - '-enc'
+            - 'bypass'
+    filter_user:
+        User|endswith: '\Administrator'
+    condition: (selection_image and selection_cmdline) and not filter_user

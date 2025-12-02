@@ -1,0 +1,12 @@
+title: Numeric Comparison Greater Than
+id: 00000004-0001-0001-0001-000000000001
+status: test
+description: Tests numeric greater than comparison
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        EventID: 1
+        ProcessId|gt: 1000
+    condition: selection

@@ -1,0 +1,1 @@
+source=windows-authentication-* | where EventID=4625 AND Status="Failed" | stats count() by SourceIP | where count()>5

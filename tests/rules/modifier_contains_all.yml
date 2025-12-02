@@ -1,0 +1,14 @@
+title: Contains All Modifier Test
+id: 00000002-0004-0004-0004-000000000004
+status: test
+description: Tests contains|all modifier requiring all values to match
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains|all:
+            - 'powershell'
+            - '-enc'
+            - 'bypass'
+    condition: selection

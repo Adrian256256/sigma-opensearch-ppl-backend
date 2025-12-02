@@ -1,0 +1,12 @@
+title: Multiple Failed Login Attempts
+id: 00000006-0001-0001-0001-000000000001
+status: test
+description: Detects multiple failed login attempts from same source
+logsource:
+    category: authentication
+    product: windows
+detection:
+    selection:
+        EventID: 4625
+        Status: 'Failed'
+    condition: selection | count(EventID) by SourceIP > 5

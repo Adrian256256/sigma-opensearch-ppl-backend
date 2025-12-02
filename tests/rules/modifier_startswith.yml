@@ -1,0 +1,11 @@
+title: StartsWith Modifier Test
+id: 00000002-0002-0002-0002-000000000002
+status: test
+description: Tests startswith modifier for path matching
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|startswith: 'C:\Temp\'
+    condition: selection

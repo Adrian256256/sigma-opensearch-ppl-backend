@@ -1,0 +1,15 @@
+title: OR Condition Test
+id: 00000003-0002-0002-0002-000000000002
+status: test
+description: Tests OR logic between multiple selections
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_cmd:
+        Image|endswith: '\cmd.exe'
+    selection_powershell:
+        Image|endswith: '\powershell.exe'
+    selection_wscript:
+        Image|endswith: '\wscript.exe'
+    condition: selection_cmd or selection_powershell or selection_wscript
