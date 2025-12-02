@@ -104,29 +104,6 @@ for part in sigma_string.plain:
 
 ---
 
-## Sigma YAML Syntax
-
-### Dash (-) Logic: AND vs OR
-
-| Syntax | Logic | Example |
-|--------|-------|---------|
-| **No dash** | **AND** between fields | All conditions must match |
-| **Dash (-)** | **OR** between items | At least one condition matches |
-
-**Example:**
-```yaml
-selection:
-    IntegrityLevel: System        # No dash
-    User|contains: AUTHORI
-
-selection_special:
-    - Image|endswith: calc.exe    # Dash = OR
-    - CommandLine|contains: -NoP
-```
-→ `(IntegrityLevel = System AND User contains AUTHORI) AND ((Image endswith calc.exe) OR (CommandLine contains -NoP))`
-
----
-
 ## PPL Commands Used in Conversion
 
 This backend uses the following PPL commands to convert Sigma rules into queries:
