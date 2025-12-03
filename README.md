@@ -34,11 +34,21 @@ sigma-opensearch-ppl-backend/
 │           ├── opensearch_ppl.py              # Legacy manual implementation
 │           ├── opensearch_ppl_textquery.py    # Main TextQueryBackend implementation
 │           └── README.md                      # Backend documentation
+├── ecs_mapping/
+│   ├── __init__.py
+│   ├── yaml_loader.py                    # YAML pipeline loader
+│   ├── ecs_mapping.yml                   # ECS field mappings (YAML)
+│   └── README.md                         # ECS mapping documentation
 ├── manual_test/
 │   ├── test_simple_backend.py            # Simple backend test script
 │   ├── test_textquery_backend.py         # TextQueryBackend test script
+│   ├── test_ecs_pipeline.py              # ECS pipeline test script
 │   ├── example_rules/                    # Additional example rules
 │   └── README.md                         # Manual testing documentation
+├── tests/
+│   ├── test_checker.py                   # Automated test checker
+│   ├── rules/                            # Test Sigma rules
+│   └── refs/                             # Expected PPL outputs
 ├── .gitignore                            # Files ignored by Git
 ├── requirements.txt                      # Python dependencies
 └── README.md                             # Project documentation
@@ -105,6 +115,36 @@ This will be converted to:
 source = windows-process_creation-* | where LIKE(Image, "%\powershell.exe") AND (LIKE(CommandLine, "%-EncodedCommand%") OR LIKE(CommandLine, "%Invoke-Expression%"))
 ```
 
+## ECS Field Mapping
+
+This backend supports **Elastic Common Schema (ECS)** field mapping through a YAML-based processing pipeline. This ensures compatibility with OpenSearch indices that follow the ECS schema.
+
+### Quick Example
+
+```python
+from sigma.collection import SigmaCollection
+from sigma_backend.backends.opensearch_ppl.opensearch_ppl_textquery import OpenSearchPPLBackend
+from ecs_mapping import load_ecs_pipeline_from_yaml
+
+# Load ECS pipeline from YAML
+ecs_pipeline = load_ecs_pipeline_from_yaml()
+
+# Initialize backend with ECS pipeline
+backend = OpenSearchPPLBackend(processing_pipeline=ecs_pipeline)
+
+# Convert Sigma rule - field names will be automatically mapped to ECS
+collection = SigmaCollection.from_yaml(sigma_rule)
+ppl_query = backend.convert(collection)
+```
+
+**Field Mapping Example:**
+- `CommandLine` → `process.command_line`
+- `ProcessName` → `process.name`
+- `User` → `user.name`
+- `DestinationIp` → `destination.ip`
+
+📖 **For detailed ECS mapping documentation, see [ecs_mapping/README.md](ecs_mapping/README.md)**
+
 ## Testing
 
 ### Manual Testing
@@ -117,20 +157,14 @@ python manual_test/test_simple_backend.py
 
 # Test example rules with TextQuery backend
 python manual_test/test_textquery_backend.py
+
+# Test ECS field mapping pipeline
+python manual_test/test_ecs_pipeline.py
 ```
-
-## Architecture
-
-### Backend Components
-
-- **OpenSearchPPLBackend**: Main backend class that handles conversion
-- **Rule Converter**: Converts individual Sigma rules to PPL
-- **Field Mapper**: Maps Sigma field names to OpenSearch fields
-- **Operator Handler**: Converts Sigma operators to PPL syntax
 
 ### Conversion Flow
 
 ```
-Sigma Rule (YAML) → SigmaCollection → OpenSearchPPLBackend → PPL Query (String)
+Sigma Rule (YAML) → SigmaCollection → [ECS Pipeline] → OpenSearchPPLBackend → PPL Query (String)
 ```
 

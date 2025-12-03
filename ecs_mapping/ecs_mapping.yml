@@ -1,0 +1,198 @@
+name: ECS Field Mapping for OpenSearch PPL
+priority: 10
+transformations:
+  # =========================================================================
+  # PROCESS FIELDS - Process execution and creation events
+  # =========================================================================
+  - id: process_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Process creation
+      CommandLine: process.command_line
+      ParentCommandLine: process.parent.command_line
+      ProcessCommandLine: process.command_line
+      
+      # Process identity
+      Image: process.executable
+      ProcessName: process.name
+      OriginalFileName: process.pe.original_file_name
+      ParentImage: process.parent.executable
+      ParentProcessName: process.parent.name
+      
+      # Process metadata
+      ProcessId: process.pid
+      ParentProcessId: process.parent.pid
+      ProcessGuid: process.entity_id
+      ParentProcessGuid: process.parent.entity_id
+      
+      # Process details
+      Company: process.pe.company
+      Product: process.pe.product
+      Description: process.pe.description
+      FileVersion: process.pe.file_version
+      Imphash: process.pe.imphash
+      md5: process.hash.md5
+      sha1: process.hash.sha1
+      sha256: process.hash.sha256
+      
+      # Process working directory
+      CurrentDirectory: process.working_directory
+      WorkingDirectory: process.working_directory
+  
+  # =========================================================================
+  # USER AND AUTHENTICATION FIELDS
+  # =========================================================================
+  - id: user_field_mapping
+    type: field_name_mapping
+    mapping:
+      User: user.name
+      UserName: user.name
+      TargetUserName: user.target.name
+      SubjectUserName: user.name
+      AccountName: user.name
+      
+      LogonType: event.action
+      LogonId: user.id
+      TargetLogonId: user.target.id
+      
+      # User domain
+      SubjectDomainName: user.domain
+      TargetDomainName: user.target.domain
+      UserDomain: user.domain
+      
+      # User IDs
+      SubjectUserSid: user.id
+      TargetUserSid: user.target.id
+  
+  # =========================================================================
+  # NETWORK FIELDS - Network connections and communication
+  # =========================================================================
+  - id: network_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Source network
+      SourceIp: source.ip
+      src_ip: source.ip
+      SourcePort: source.port
+      src_port: source.port
+      SourceHostname: source.domain
+      
+      # Destination network
+      DestinationIp: destination.ip
+      dst_ip: destination.ip
+      DestinationPort: destination.port
+      dst_port: destination.port
+      DestinationHostname: destination.domain
+      DestinationIsIpv6: destination.ip
+      
+      # Network protocol
+      Protocol: network.protocol
+      NetworkProtocol: network.protocol
+      
+      # DNS
+      QueryName: dns.question.name
+      query: dns.question.name
+      QueryType: dns.question.type
+      QueryResults: dns.answers.data
+      answer: dns.answers.data
+      
+      # HTTP
+      cs-method: http.request.method
+      c-uri: url.path
+      cs-uri-query: url.query
+      cs-user-agent: user_agent.original
+      sc-status: http.response.status_code
+  
+  # =========================================================================
+  # FILE FIELDS - File operations and attributes
+  # =========================================================================
+  - id: file_field_mapping
+    type: field_name_mapping
+    mapping:
+      FileName: file.name
+      TargetFilename: file.path
+      TargetFileName: file.path
+      FilePath: file.path
+      FullPath: file.path
+      
+      # File hashes
+      Hashes: file.hash.sha256
+      Hash: file.hash.sha256
+      MD5: file.hash.md5
+      SHA1: file.hash.sha1
+      SHA256: file.hash.sha256
+      
+      # File metadata
+      FileSize: file.size
+      FileExtension: file.extension
+      FileAttributes: file.attributes
+      CreationUtcTime: file.created
+  
+  # =========================================================================
+  # REGISTRY FIELDS - Windows Registry operations
+  # =========================================================================
+  - id: registry_field_mapping
+    type: field_name_mapping
+    mapping:
+      TargetObject: registry.path
+      RegistryKey: registry.key
+      RegistryValueName: registry.value
+      RegistryValueData: registry.data.strings
+      Details: registry.data.strings
+  
+  # =========================================================================
+  # HOST AND SYSTEM FIELDS
+  # =========================================================================
+  - id: host_field_mapping
+    type: field_name_mapping
+    mapping:
+      ComputerName: host.name
+      Computer: host.name
+      Hostname: host.name
+      Workstation: host.name
+      WorkstationName: host.name
+      
+      IpAddress: host.ip
+      HostIp: host.ip
+  
+  # =========================================================================
+  # EVENT FIELDS - General event metadata
+  # =========================================================================
+  - id: event_field_mapping
+    type: field_name_mapping
+    mapping:
+      EventID: event.code
+      EventId: event.code
+      event_id: event.code
+      
+      Channel: winlog.channel
+      Provider_Name: winlog.provider_name
+      EventType: event.type
+      Level: log.level
+      
+      # Sysmon specific
+      RuleName: rule.name
+      UtcTime: "@timestamp"
+  
+  # =========================================================================
+  # SERVICE FIELDS - Windows Services
+  # =========================================================================
+  - id: service_field_mapping
+    type: field_name_mapping
+    mapping:
+      ServiceName: service.name
+      ServiceFileName: service.executable
+      ImagePath: service.executable
+      ServiceType: service.type
+  
+  # =========================================================================
+  # WMI FIELDS - Windows Management Instrumentation
+  # =========================================================================
+  - id: wmi_field_mapping
+    type: field_name_mapping
+    mapping:
+      Operation: event.action
+      EventNamespace: winlog.event_data.EventNamespace
+      Query: winlog.event_data.Query
+      Consumer: winlog.event_data.Consumer
+      Filter: winlog.event_data.Filter
