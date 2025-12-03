@@ -134,3 +134,7 @@ dmypy.json
 manual_test/output/
 manual_test/*.log
 manual_test/*.txt
+
+# Test output files
+tests/out/
+tests/out/*

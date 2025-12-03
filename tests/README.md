@@ -59,6 +59,11 @@ Each rule file in `rules/` has a corresponding PPL query in `refs/` with the sam
 
 ## PPL Syntax Notes
 
+### OpenSearch PPL Official Documentation
+- **[PPL Syntax](https://opensearch.org/docs/latest/search-plugins/sql/ppl/syntax/)**
+- **[PPL Commands & Functions](https://opensearch.org/docs/latest/search-plugins/sql/ppl/functions/)**
+- **[PPL Functions (GitHub)](https://github.com/opensearch-project/sql/tree/main/docs/user/ppl/functions)** - Detailed function documentation
+
 ### Key OpenSearch PPL Patterns Used
 
 - **Source**: `source=<product>-<category>-*`
