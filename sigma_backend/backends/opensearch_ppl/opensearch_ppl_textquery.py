@@ -233,4 +233,78 @@ class OpenSearchPPLBackend(TextQueryBackend):
         # Build complete PPL query with source command
         ppl_query = f"source={index_pattern} | where {query}"
         
+        # Check for custom aggregation metadata
+        ppl_query = self._add_aggregation(rule, ppl_query)
+        
+        return ppl_query
+    
+    def _add_aggregation(self, rule: SigmaRule, ppl_query: str) -> str:
+        """
+        Add aggregation commands to PPL query based on custom rule metadata.
+        
+        Supports custom.aggregation metadata with types:
+        - count: Counts events grouped by fields
+        - rare: Finds least common values
+        
+        Args:
+            rule: Sigma rule with potential custom.aggregation metadata
+            ppl_query: Base PPL query
+            
+        Returns:
+            PPL query with aggregation commands appended
+        """
+        # Check if rule has custom aggregation metadata
+        # pySigma stores custom fields in custom_attributes
+        if not hasattr(rule, 'custom_attributes') or not rule.custom_attributes:
+            return ppl_query
+        
+        # Get the 'custom' section from custom_attributes
+        custom = rule.custom_attributes.get('custom')
+        if not custom:
+            return ppl_query
+        
+        aggregation = custom.get('aggregation')
+        if not aggregation:
+            return ppl_query
+        
+        agg_type = aggregation.get('type', 'count')
+        
+        if agg_type == 'count':
+            # stats count() by field | where count() > threshold
+            group_by = aggregation.get('by', '')
+            condition = aggregation.get('condition', '')
+            
+            if group_by:
+                ppl_query = f"{ppl_query} | stats count() by {group_by}"
+            else:
+                ppl_query = f"{ppl_query} | stats count()"
+            
+            if condition:
+                ppl_query = f"{ppl_query} | where count(){condition}"
+        
+        elif agg_type == 'rare':
+            # rare field by grouping
+            field = aggregation.get('field', '')
+            group_by = aggregation.get('by', '')
+            
+            if field and group_by:
+                ppl_query = f"{ppl_query} | rare {field} by {group_by}"
+            elif field:
+                ppl_query = f"{ppl_query} | rare {field}"
+        
+        elif agg_type == 'top':
+            # top N field by grouping
+            field = aggregation.get('field', '')
+            group_by = aggregation.get('by', '')
+            limit = aggregation.get('limit', '')
+            
+            if limit and field and group_by:
+                ppl_query = f"{ppl_query} | top {limit} {field} by {group_by}"
+            elif limit and field:
+                ppl_query = f"{ppl_query} | top {limit} {field}"
+            elif field and group_by:
+                ppl_query = f"{ppl_query} | top {field} by {group_by}"
+            elif field:
+                ppl_query = f"{ppl_query} | top {field}"
+        
         return ppl_query

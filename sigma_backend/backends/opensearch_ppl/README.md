@@ -317,6 +317,125 @@ detection:
 
 ---
 
+## Aggregations Support
+
+This backend supports aggregations through custom metadata in Sigma rules, enabling PPL queries with `stats`, `rare`, and `top` commands.
+
+### Custom Aggregation Metadata
+
+Add aggregation metadata to your Sigma rules using the `custom` field:
+
+```yaml
+title: Rule with Aggregation
+detection:
+    selection:
+        EventID: 4625
+    condition: selection
+fields:
+    - SourceIP
+custom:
+    aggregation:
+        type: count          # count, rare, or top
+        by: SourceIP        # group-by field
+        condition: ">5"     # threshold (for count only)
+        field: Image        # field to aggregate (for rare/top)
+        limit: 10           # limit results (for top only)
+```
+
+### Supported Aggregation Types
+### PPL Aggregation Commands
+
+The backend maps aggregation metadata to these PPL commands:
+
+| Metadata Type | PPL Command | Syntax Example |
+|--------------|-------------|----------------|
+| `count` | `stats` | `stats count() by field` |
+| `rare` | `rare` | `rare field by grouping` |
+| `top` | `top` | `top N field by grouping` |
+
+- **PPL Stats Command**: [OpenSearch Stats Documentation](https://opensearch.org/docs/latest/search-plugins/sql/ppl/functions/#stats)
+- **PPL Rare Command**: [OpenSearch Rare Documentation](https://opensearch.org/docs/latest/search-plugins/sql/ppl/functions/#rare)
+- **PPL Top Command**: [OpenSearch Top Documentation](https://opensearch.org/docs/latest/search-plugins/sql/ppl/functions/#top-command)
+- **Aggregation Functions**: [OpenSearch Aggregation Functions](https://opensearch.org/docs/latest/search-plugins/sql/functions/#aggregate)
+
+#### 1. Count Aggregation
+
+Counts events grouped by fields and filters by threshold.
+
+**Example Rule:**
+```yaml
+title: Multiple Failed Login Attempts
+detection:
+    selection:
+        EventID: 4625
+        Status: 'Failed'
+    condition: selection
+fields:
+    - SourceIP
+custom:
+    aggregation:
+        type: count
+        by: SourceIP
+        condition: ">5"
+```
+
+**Generated PPL:**
+```ppl
+source=windows-authentication-* | where EventID=4625 AND Status="Failed" | stats count() by SourceIP | where count()>5
+```
+
+#### 2. Rare Aggregation
+
+Finds the least common values, useful for detecting anomalies.
+
+**Example Rule:**
+```yaml
+title: Rare Process Execution
+detection:
+    selection:
+        EventID: 1
+    condition: selection
+fields:
+    - Image
+    - Computer
+custom:
+    aggregation:
+        type: rare
+        field: Image
+        by: Computer
+```
+
+**Generated PPL:**
+```ppl
+source=windows-process_creation-* | where EventID=1 | rare Image by Computer
+```
+
+#### 3. Top Aggregation
+
+Finds the most common values.
+
+**Example Rule:**
+```yaml
+title: Top Accessed Files
+detection:
+    selection:
+        EventID: 11
+    condition: selection
+custom:
+    aggregation:
+        type: top
+        field: TargetFilename
+        by: User
+        limit: 10
+```
+
+**Generated PPL:**
+```ppl
+source=windows-file_event-* | where EventID=11 | top 10 TargetFilename by User
+```
+
+---
+
 ## References
 
 ### OpenSearch PPL Documentation

@@ -8,4 +8,13 @@ logsource:
 detection:
     selection:
         EventID: 1
-    condition: selection | rare Image by Computer
+    condition: selection
+# Custom aggregation metadata for PPL backend
+fields:
+    - Image
+    - Computer
+custom:
+    aggregation:
+        type: rare
+        field: Image
+        by: Computer

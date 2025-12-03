@@ -9,4 +9,12 @@ detection:
     selection:
         EventID: 4625
         Status: 'Failed'
-    condition: selection | count(EventID) by SourceIP > 5
+    condition: selection
+# Custom aggregation metadata for PPL backend
+fields:
+    - SourceIP
+custom:
+    aggregation:
+        type: count
+        by: SourceIP
+        condition: ">5"
