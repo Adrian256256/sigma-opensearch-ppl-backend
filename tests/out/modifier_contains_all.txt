@@ -1,1 +1,0 @@
-source=windows-process_creation-* | where LIKE(CommandLine, "%powershell%") AND LIKE(CommandLine, "%-enc%") AND LIKE(CommandLine, "%bypass%")
