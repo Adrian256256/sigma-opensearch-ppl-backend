@@ -1,0 +1,24 @@
+title: Reconnaissance Commands Within Short Time
+id: 0e95725d-7320-415d-80f7-004da920fc13
+description: Multiple reconnaissance commands invoked in arbitrary order within 5 minutes on a system by the same user
+status: test
+author: Sigma Correlation Test
+date: 2025-12-03
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains:
+            - 'whoami'
+            - 'net user'
+            - 'ipconfig'
+            - 'systeminfo'
+    condition: selection
+# Correlation metadata for temporal
+correlation:
+    type: temporal
+    group-by:
+        - ComputerName
+        - User
+    timespan: 5m

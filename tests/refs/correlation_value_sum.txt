@@ -1,0 +1,1 @@
+source=firewall-network-traffic-* | where action="allowed" AND direction="outbound" | stats sum(bytes_sent) by SourceIP, User | where sum(bytes_sent)>1000000

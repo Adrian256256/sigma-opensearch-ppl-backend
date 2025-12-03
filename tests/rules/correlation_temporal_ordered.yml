@@ -1,0 +1,26 @@
+title: Failed Logins Followed by Successful Login
+id: 0e95725d-7320-415d-80f7-004da920fc14
+description: Multiple failed logins by a single user followed by a successful login - indicates brute force attack
+status: test
+author: Sigma Correlation Test
+date: 2025-12-03
+logsource:
+    product: windows
+    service: security
+detection:
+    selection_failed:
+        EventID:
+            - 4625
+            - 529
+        Status: 'Failed'
+    selection_success:
+        EventID:
+            - 4624
+            - 528
+    condition: selection_failed or selection_success
+# Correlation metadata for temporal_ordered
+correlation:
+    type: temporal_ordered
+    group-by:
+        - User
+    timespan: 1h
