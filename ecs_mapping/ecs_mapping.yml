@@ -2,197 +2,940 @@ name: ECS Field Mapping for OpenSearch PPL
 priority: 10
 transformations:
   # =========================================================================
+  # BASE FIELDS - Fields at the root of events
+  # https://www.elastic.co/docs/reference/ecs/ecs-base
+  # =========================================================================
+  - id: base_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Timestamp
+      UtcTime: "@timestamp"
+      TimeCreated: "@timestamp"
+      Timestamp: "@timestamp"
+      
+      # Message and labels
+      Message: message
+      Tags: tags
+      
+  # =========================================================================
   # PROCESS FIELDS - Process execution and creation events
+  # https://www.elastic.co/docs/reference/ecs/ecs-process
   # =========================================================================
   - id: process_field_mapping
     type: field_name_mapping
     mapping:
-      # Process creation
+      # Process command line
       CommandLine: process.command_line
       ParentCommandLine: process.parent.command_line
       ProcessCommandLine: process.command_line
       
-      # Process identity
+      # Process executable and name
       Image: process.executable
       ProcessName: process.name
-      OriginalFileName: process.pe.original_file_name
       ParentImage: process.parent.executable
       ParentProcessName: process.parent.name
       
-      # Process metadata
+      # Process ID and GUID
       ProcessId: process.pid
       ParentProcessId: process.parent.pid
       ProcessGuid: process.entity_id
       ParentProcessGuid: process.parent.entity_id
       
-      # Process details
+      # Process working directory
+      CurrentDirectory: process.working_directory
+      WorkingDirectory: process.working_directory
+      
+      # Process title
+      Title: process.title
+      
+      # Process user context
+      IntegrityLevel: process.user.name
+      User: process.user.name
+      LogonId: process.user.id
+      LogonGuid: winlog.event_data.LogonGuid
+      TerminalSessionId: winlog.event_data.TerminalSessionId
+      
+      # Parent process user
+      ParentUser: process.parent.user.name
+      
+  # =========================================================================
+  # PROCESS PE FIELDS - Windows Portable Executable metadata
+  # https://www.elastic.co/docs/reference/ecs/ecs-pe
+  # =========================================================================
+  - id: process_pe_field_mapping
+    type: field_name_mapping
+    mapping:
+      # PE file metadata
+      OriginalFileName: process.pe.original_file_name
       Company: process.pe.company
       Product: process.pe.product
       Description: process.pe.description
       FileVersion: process.pe.file_version
       Imphash: process.pe.imphash
-      md5: process.hash.md5
-      sha1: process.hash.sha1
-      sha256: process.hash.sha256
       
-      # Process working directory
-      CurrentDirectory: process.working_directory
-      WorkingDirectory: process.working_directory
+  # =========================================================================
+  # PROCESS HASH FIELDS - Process file hashes
+  # https://www.elastic.co/docs/reference/ecs/ecs-hash
+  # =========================================================================
+  - id: process_hash_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Individual hash types
+      md5: process.hash.md5
+      MD5: process.hash.md5
+      sha1: process.hash.sha1
+      SHA1: process.hash.sha1
+      sha256: process.hash.sha256
+      SHA256: process.hash.sha256
+      IMPHASH: process.hash.imphash
+      
+      # Combined hashes field (contains multiple hash types)
+      Hashes: related.hash
   
   # =========================================================================
-  # USER AND AUTHENTICATION FIELDS
+  # USER FIELDS - User information relevant to the event
+  # https://www.elastic.co/docs/reference/ecs/ecs-user
   # =========================================================================
   - id: user_field_mapping
     type: field_name_mapping
     mapping:
+      # User name (subject user - the user performing the action)
       User: user.name
       UserName: user.name
-      TargetUserName: user.target.name
       SubjectUserName: user.name
       AccountName: user.name
       
-      LogonType: event.action
-      LogonId: user.id
-      TargetLogonId: user.target.id
+      # Target user (the user being acted upon)
+      TargetUserName: user.target.name
       
-      # User domain
+      # User domain (subject)
       SubjectDomainName: user.domain
-      TargetDomainName: user.target.domain
       UserDomain: user.domain
+      Domain: user.domain
       
-      # User IDs
+      # Target user domain
+      TargetDomainName: user.target.domain
+      
+      # User ID/SID (subject)
       SubjectUserSid: user.id
+      UserSid: user.id
+      
+      # Target user ID/SID
       TargetUserSid: user.target.id
-  
+      
+      # Logon ID (stored in winlog for Windows-specific context)
+      SubjectLogonId: winlog.event_data.SubjectLogonId
+      TargetLogonId: winlog.event_data.TargetLogonId
+      LogonId: winlog.event_data.LogonId
+      
   # =========================================================================
-  # NETWORK FIELDS - Network connections and communication
+  # GROUP FIELDS - Group information
+  # https://www.elastic.co/docs/reference/ecs/ecs-group
+  # =========================================================================
+  - id: group_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Group name
+      GroupName: group.name
+      TargetGroupName: group.name
+      
+      # Group ID/SID
+      GroupSid: group.id
+      TargetGroupSid: group.id
+      
+  # =========================================================================
+  # SOURCE FIELDS - Source side of network connection
+  # https://www.elastic.co/docs/reference/ecs/ecs-source
+  # =========================================================================
+  - id: source_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Source IP address
+      SourceIp: source.ip
+      src_ip: source.ip
+      SourceAddress: source.ip
+      c-ip: source.ip
+      
+      # Source port
+      SourcePort: source.port
+      src_port: source.port
+      
+      # Source hostname/domain
+      SourceHostname: source.domain
+      SourceHost: source.domain
+      
+  # =========================================================================
+  # DESTINATION FIELDS - Destination side of network connection
+  # https://www.elastic.co/docs/reference/ecs/ecs-destination
+  # =========================================================================
+  - id: destination_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Destination IP address
+      DestinationIp: destination.ip
+      dst_ip: destination.ip
+      DestinationAddress: destination.ip
+      DestinationIsIpv6: destination.ip
+      s-ip: destination.ip
+      
+      # Destination port
+      DestinationPort: destination.port
+      dst_port: destination.port
+      s-port: destination.port
+      
+      # Destination hostname/domain
+      DestinationHostname: destination.domain
+      DestinationHost: destination.domain
+      
+  # =========================================================================
+  # NETWORK FIELDS - Network communication details
+  # https://www.elastic.co/docs/reference/ecs/ecs-network
   # =========================================================================
   - id: network_field_mapping
     type: field_name_mapping
     mapping:
-      # Source network
-      SourceIp: source.ip
-      src_ip: source.ip
-      SourcePort: source.port
-      src_port: source.port
-      SourceHostname: source.domain
-      
-      # Destination network
-      DestinationIp: destination.ip
-      dst_ip: destination.ip
-      DestinationPort: destination.port
-      dst_port: destination.port
-      DestinationHostname: destination.domain
-      DestinationIsIpv6: destination.ip
-      
       # Network protocol
       Protocol: network.protocol
       NetworkProtocol: network.protocol
+      proto: network.protocol
       
-      # DNS
+      # Transport protocol
+      Transport: network.transport
+      
+      # Network direction
+      Direction: network.direction
+      Initiated: network.direction
+      
+      # Network application
+      Application: network.application
+      
+  # =========================================================================
+  # DNS FIELDS - DNS queries and answers
+  # https://www.elastic.co/docs/reference/ecs/ecs-dns
+  # =========================================================================
+  - id: dns_field_mapping
+    type: field_name_mapping
+    mapping:
+      # DNS question
       QueryName: dns.question.name
       query: dns.question.name
+      question.name: dns.question.name
+      
+      # DNS question type
       QueryType: dns.question.type
+      question.type: dns.question.type
+      
+      # DNS answer
       QueryResults: dns.answers.data
       answer: dns.answers.data
       
-      # HTTP
+      # DNS response code
+      QueryStatus: dns.response_code
+      
+  # =========================================================================
+  # HTTP FIELDS - HTTP request and response details
+  # https://www.elastic.co/docs/reference/ecs/ecs-http
+  # =========================================================================
+  - id: http_field_mapping
+    type: field_name_mapping
+    mapping:
+      # HTTP request method
       cs-method: http.request.method
-      c-uri: url.path
-      cs-uri-query: url.query
-      cs-user-agent: user_agent.original
+      RequestMethod: http.request.method
+      Method: http.request.method
+      
+      # HTTP request body
+      cs-bytes: http.request.bytes
+      RequestBytes: http.request.bytes
+      
+      # HTTP response status
       sc-status: http.response.status_code
-  
+      ResponseStatus: http.response.status_code
+      StatusCode: http.response.status_code
+      
+      # HTTP response body
+      sc-bytes: http.response.bytes
+      ResponseBytes: http.response.bytes
+      
+  # =========================================================================
+  # URL FIELDS - URL components
+  # https://www.elastic.co/docs/reference/ecs/ecs-url
+  # =========================================================================
+  - id: url_field_mapping
+    type: field_name_mapping
+    mapping:
+      # URL path
+      c-uri: url.path
+      cs-uri-stem: url.path
+      RequestUri: url.path
+      
+      # URL query string
+      cs-uri-query: url.query
+      QueryString: url.query
+      
+      # Full URL
+      URL: url.full
+      Url: url.full
+      
+      # URL domain
+      cs-host: url.domain
+      Host: url.domain
+      
+  # =========================================================================
+  # USER AGENT FIELDS - Browser user agent information
+  # https://www.elastic.co/docs/reference/ecs/ecs-user_agent
+  # =========================================================================
+  - id: user_agent_field_mapping
+    type: field_name_mapping
+    mapping:
+      # User agent string
+      cs-user-agent: user_agent.original
+      UserAgent: user_agent.original
+      
   # =========================================================================
   # FILE FIELDS - File operations and attributes
+  # https://www.elastic.co/docs/reference/ecs/ecs-file
   # =========================================================================
   - id: file_field_mapping
     type: field_name_mapping
     mapping:
+      # File name
       FileName: file.name
+      
+      # File path (full path including name)
       TargetFilename: file.path
       TargetFileName: file.path
       FilePath: file.path
       FullPath: file.path
       
-      # File hashes
-      Hashes: file.hash.sha256
+      # File directory
+      Directory: file.directory
+      
+      # File extension
+      FileExtension: file.extension
+      Extension: file.extension
+      
+      # File size
+      FileSize: file.size
+      Size: file.size
+      
+      # File attributes
+      FileAttributes: file.attributes
+      Attributes: file.attributes
+      
+      # File creation time
+      CreationUtcTime: file.created
+      CreationTime: file.created
+      
+      # File modification time
+      ModificationTime: file.mtime
+      PreviousCreationUtcTime: file.mtime
+      
+      # File access time
+      AccessTime: file.accessed
+      
+      # File owner
+      Owner: file.owner
+      
+      # File group
+      Group: file.group
+      
+  # =========================================================================
+  # FILE HASH FIELDS - File hashes
+  # https://www.elastic.co/docs/reference/ecs/ecs-hash
+  # =========================================================================
+  - id: file_hash_field_mapping
+    type: field_name_mapping
+    mapping:
+      # File hash (generic)
       Hash: file.hash.sha256
+      
+      # File hash MD5
       MD5: file.hash.md5
+      
+      # File hash SHA1
       SHA1: file.hash.sha1
+      
+      # File hash SHA256
       SHA256: file.hash.sha256
       
-      # File metadata
-      FileSize: file.size
-      FileExtension: file.extension
-      FileAttributes: file.attributes
-      CreationUtcTime: file.created
-  
   # =========================================================================
   # REGISTRY FIELDS - Windows Registry operations
+  # https://www.elastic.co/docs/reference/ecs/ecs-registry
   # =========================================================================
   - id: registry_field_mapping
     type: field_name_mapping
     mapping:
+      # Registry path (full path including hive, key, and value)
       TargetObject: registry.path
+      
+      # Registry key (without hive)
       RegistryKey: registry.key
+      
+      # Registry value name
       RegistryValueName: registry.value
+      ValueName: registry.value
+      
+      # Registry value data
       RegistryValueData: registry.data.strings
       Details: registry.data.strings
-  
+      
+      # Registry hive
+      Hive: registry.hive
+      
+      # Registry data type
+      ValueType: registry.data.type
+      
+      # Registry event type (Sysmon)
+      EventType: registry.action
+      
   # =========================================================================
-  # HOST AND SYSTEM FIELDS
+  # HOST FIELDS - Host/computer information
+  # https://www.elastic.co/docs/reference/ecs/ecs-host
   # =========================================================================
   - id: host_field_mapping
     type: field_name_mapping
     mapping:
+      # Host name
       ComputerName: host.name
       Computer: host.name
       Hostname: host.name
       Workstation: host.name
       WorkstationName: host.name
+      SourceWorkstation: host.name
       
+      # Host IP address
       IpAddress: host.ip
       HostIp: host.ip
-  
+      
+      # Host domain
+      HostDomain: host.domain
+      
+      # Host OS
+      OperatingSystem: host.os.name
+      OSVersion: host.os.version
+      
   # =========================================================================
-  # EVENT FIELDS - General event metadata
+  # EVENT FIELDS - Event categorization and metadata
+  # https://www.elastic.co/docs/reference/ecs/ecs-event
   # =========================================================================
   - id: event_field_mapping
     type: field_name_mapping
     mapping:
+      # Event ID/Code
       EventID: event.code
       EventId: event.code
       event_id: event.code
       
-      Channel: winlog.channel
-      Provider_Name: winlog.provider_name
+      # Event type
       EventType: event.type
+      Type: event.type
+      
+      # Event action
+      Action: event.action
+      
+      # Event outcome
+      Outcome: event.outcome
+      
+      # Event category
+      Category: event.category
+      
+      # Event severity
+      Severity: event.severity
+      
+  # =========================================================================
+  # LOG FIELDS - Log-specific information
+  # https://www.elastic.co/docs/reference/ecs/ecs-log
+  # =========================================================================
+  - id: log_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Log level
       Level: log.level
       
-      # Sysmon specific
-      RuleName: rule.name
-      UtcTime: "@timestamp"
-  
+      # Log logger name
+      Logger: log.logger
+      
   # =========================================================================
-  # SERVICE FIELDS - Windows Services
+  # WINLOG FIELDS - Windows-specific logging fields
+  # Windows Event Log specific fields (not part of standard ECS)
+  # =========================================================================
+  - id: winlog_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Windows Event Log channel
+      Channel: winlog.channel
+      
+      # Provider name
+      Provider_Name: winlog.provider_name
+      ProviderName: winlog.provider_name
+      
+      # Provider GUID
+      ProviderGuid: winlog.provider_guid
+      
+      # Task
+      Task: winlog.task
+      
+      # Opcode
+      Opcode: winlog.opcode
+      
+      # Keywords
+      Keywords: winlog.keywords
+      
+      # Record ID
+      RecordId: winlog.record_id
+      RecordNumber: winlog.record_id
+      
+      # Computer name (in Windows context)
+      SystemComputerName: winlog.computer_name
+      
+      # Logon type (Windows-specific)
+      LogonType: winlog.event_data.LogonType
+      
+      # Authentication package
+      AuthenticationPackageName: winlog.event_data.AuthenticationPackageName
+      
+      # Process name (in Windows event data)
+      ProcessName: winlog.event_data.ProcessName
+      
+      # New process name (for process creation)
+      NewProcessName: winlog.event_data.NewProcessName
+      
+  # =========================================================================
+  # SERVICE FIELDS - Service information
+  # https://www.elastic.co/docs/reference/ecs/ecs-service
   # =========================================================================
   - id: service_field_mapping
     type: field_name_mapping
     mapping:
+      # Service name
       ServiceName: service.name
+      
+      # Service executable
       ServiceFileName: service.executable
       ImagePath: service.executable
+      
+      # Service type
       ServiceType: service.type
-  
+      
+      # Service state
+      State: service.state
+      
+  # =========================================================================
+  # RULE FIELDS - Detection rule information
+  # https://www.elastic.co/docs/reference/ecs/ecs-rule
+  # =========================================================================
+  - id: rule_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Rule name (Sysmon)
+      RuleName: rule.name
+      
+      # Rule ID
+      RuleId: rule.id
+      
+      # Rule description
+      RuleDescription: rule.description
+      
+  # =========================================================================
+  # DLL FIELDS - Dynamic Link Library information
+  # https://www.elastic.co/docs/reference/ecs/ecs-dll
+  # =========================================================================
+  - id: dll_field_mapping
+    type: field_name_mapping
+    mapping:
+      # DLL path
+      ImageLoaded: dll.path
+      
+      # DLL name
+      LoadedImage: dll.name
+      
+      # DLL hash
+      ImageLoadedHash: dll.hash.sha256
+      
+  # =========================================================================
+  # RELATED FIELDS - Fields for pivoting and correlation
+  # https://www.elastic.co/docs/reference/ecs/ecs-related
+  # =========================================================================
+  - id: related_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Related IP addresses (array)
+      RelatedIPs: related.ip
+      
+      # Related users (array)
+      RelatedUsers: related.user
+      
+      # Related hosts (array)
+      RelatedHosts: related.hosts
+      
+  # =========================================================================
+  # THREAT FIELDS - Threat intelligence information
+  # https://www.elastic.co/docs/reference/ecs/ecs-threat
+  # =========================================================================
+  - id: threat_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Threat technique (MITRE ATT&CK)
+      Technique: threat.technique.name
+      TechniqueId: threat.technique.id
+      
+      # Threat tactic
+      Tactic: threat.tactic.name
+      TacticId: threat.tactic.id
+      
   # =========================================================================
   # WMI FIELDS - Windows Management Instrumentation
+  # Windows-specific WMI event data
   # =========================================================================
   - id: wmi_field_mapping
     type: field_name_mapping
     mapping:
-      Operation: event.action
+      # WMI operation
+      Operation: winlog.event_data.Operation
+      
+      # WMI namespace
       EventNamespace: winlog.event_data.EventNamespace
+      Namespace: winlog.event_data.Namespace
+      
+      # WMI query
       Query: winlog.event_data.Query
+      
+      # WMI consumer
       Consumer: winlog.event_data.Consumer
+      
+      # WMI filter
       Filter: winlog.event_data.Filter
+      
+      # WMI destination
+      Destination: winlog.event_data.Destination
+      
+      # WMI type
+      Type: winlog.event_data.Type
+      
+  # =========================================================================
+  # IMAGE LOAD FIELDS - DLL/Image loading events (Sysmon EID 7)
+  # https://www.elastic.co/docs/reference/ecs/ecs-file
+  # =========================================================================
+  - id: image_load_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Loaded image path
+      ImageLoaded: file.path
+      
+      # Image signature status
+      Signed: file.code_signature.signed
+      Signature: file.code_signature.subject_name
+      SignatureStatus: file.code_signature.status
+      
+  # =========================================================================
+  # DRIVER LOAD FIELDS - Driver loading events (Sysmon EID 6)
+  # =========================================================================
+  - id: driver_load_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Driver image path
+      ImageLoaded: driver.name
+      
+      # Driver signature
+      Signed: file.code_signature.signed
+      Signature: file.code_signature.subject_name
+      SignatureStatus: file.code_signature.status
+      
+  # =========================================================================
+  # CREATE REMOTE THREAD FIELDS - Remote thread creation (Sysmon EID 8)
+  # =========================================================================
+  - id: create_remote_thread_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Source process (creating the thread)
+      SourceImage: process.executable
+      SourceProcessId: process.pid
+      SourceProcessGuid: process.entity_id
+      
+      # Target process (receiving the thread)
+      TargetImage: process.target.executable
+      TargetProcessId: process.target.pid
+      TargetProcessGuid: process.target.entity_id
+      
+      # Thread details
+      StartAddress: winlog.event_data.StartAddress
+      StartFunction: winlog.event_data.StartFunction
+      StartModule: winlog.event_data.StartModule
+      
+  # =========================================================================
+  # RAW ACCESS READ FIELDS - Raw disk access (Sysmon EID 9)
+  # =========================================================================
+  - id: raw_access_read_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Device being accessed
+      Device: file.device
+      
+  # =========================================================================
+  # PROCESS ACCESS FIELDS - Process memory access (Sysmon EID 10)
+  # =========================================================================
+  - id: process_access_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Source process (accessing memory)
+      SourceImage: process.executable
+      SourceProcessId: process.pid
+      SourceProcessGuid: process.entity_id
+      
+      # Target process (being accessed)
+      TargetImage: process.target.executable
+      TargetProcessId: process.target.pid
+      TargetProcessGuid: process.target.entity_id
+      
+      # Access details
+      GrantedAccess: winlog.event_data.GrantedAccess
+      CallTrace: winlog.event_data.CallTrace
+      
+  # =========================================================================
+  # PIPE FIELDS - Named pipe events (Sysmon EID 17, 18)
+  # =========================================================================
+  - id: pipe_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Pipe name
+      PipeName: file.name
+      
+  # =========================================================================
+  # CLIPBOARD FIELDS - Clipboard capture (Sysmon EID 24)
+  # =========================================================================
+  - id: clipboard_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Client information
+      ClientInfo: winlog.event_data.ClientInfo
+      
+  # =========================================================================
+  # PROCESS TAMPERING FIELDS - Process tampering (Sysmon EID 25)
+  # =========================================================================
+  - id: process_tampering_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Tampering type
+      Type: event.action
+      
+  # =========================================================================
+  # FILE DELETE FIELDS - File deletion events (Sysmon EID 23, 26)
+  # =========================================================================
+  - id: file_delete_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Deleted file details
+      TargetFilename: file.path
+      IsExecutable: file.pe.original_file_name
+      Archived: winlog.event_data.Archived
+      
+  # =========================================================================
+  # POWERSHELL FIELDS - PowerShell script logging (EID 4103, 4104, etc.)
+  # https://www.elastic.co/docs/reference/ecs/ecs-powershell
+  # =========================================================================
+  - id: powershell_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Script block text
+      ScriptBlockText: powershell.file.script_block_text
+      
+      # Script block ID
+      ScriptBlockId: powershell.file.script_block_id
+      
+      # Script path
+      Path: file.path
+      ScriptName: file.name
+      
+      # Host application
+      HostApplication: process.command_line
+      
+      # Engine version
+      EngineVersion: powershell.engine.version
+      
+      # Command details
+      CommandInvocation: powershell.command.invocation_details
+      CommandName: powershell.command.name
+      CommandType: powershell.command.type
+      CommandPath: powershell.command.path
+      
+  # =========================================================================
+  # TASK SCHEDULER FIELDS - Windows Task Scheduler events
+  # =========================================================================
+  - id: task_scheduler_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Task name
+      TaskName: winlog.event_data.TaskName
+      
+      # Task content (XML)
+      TaskContent: winlog.event_data.TaskContent
+      TaskContentNew: winlog.event_data.TaskContentNew
+      
+      # User context
+      UserContext: user.name
+      
+      # Action details
+      ActionName: winlog.event_data.ActionName
+      
+  # =========================================================================
+  # AUTHENTICATION FIELDS - Windows authentication events (EID 4624, 4625, etc.)
+  # =========================================================================
+  - id: authentication_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Logon/authentication details
+      LogonType: winlog.event_data.LogonType
+      AuthenticationPackageName: winlog.event_data.AuthenticationPackageName
+      LmPackageName: winlog.event_data.LmPackageName
+      KeyLength: winlog.event_data.KeyLength
+      
+      # Source network information
+      IpAddress: source.ip
+      IpPort: source.port
+      WorkstationName: source.domain
+      
+      # Logon process details
+      LogonProcessName: winlog.event_data.LogonProcessName
+      
+      # Status codes
+      Status: event.outcome
+      SubStatus: winlog.event_data.SubStatus
+      
+      # Failure information
+      FailureReason: event.reason
+      
+  # =========================================================================
+  # CERTIFICATE FIELDS - Certificate and code signing information
+  # =========================================================================
+  - id: certificate_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Certificate subject
+      Subject: file.code_signature.subject_name
+      
+      # Certificate issuer
+      Issuer: file.code_signature.issuer
+      
+      # Certificate serial number
+      SerialNumber: file.x509.serial_number
+      
+      # Certificate thumbprint
+      Thumbprint: file.hash.sha1
+      
+  # =========================================================================
+  # ACCOUNT MANAGEMENT FIELDS - User/group account changes
+  # =========================================================================
+  - id: account_management_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Account changes
+      SamAccountName: user.target.name
+      DisplayName: user.target.full_name
+      
+      # Privilege/group changes
+      PrivilegeList: winlog.event_data.PrivilegeList
+      MemberName: user.name
+      MemberSid: user.id
+      
+  # =========================================================================
+  # SYSMON EXTENDED FIELDS - Additional Sysmon-specific fields
+  # =========================================================================
+  - id: sysmon_extended_field_mapping
+    type: field_name_mapping
+    mapping:
+      # File stream hash (Sysmon EID 15)
+      Contents: file.hash.sha256
+      Hash: file.hash.sha256
+      
+      # DNS query (Sysmon EID 22)
+      QueryName: dns.question.name
+      QueryStatus: dns.response_code
+      QueryResults: dns.answers.data
+      
+      # Sysmon configuration
+      Configuration: winlog.event_data.Configuration
+      ConfigurationFileHash: winlog.event_data.ConfigurationFileHash
+      
+  # =========================================================================
+  # FIREWALL FIELDS - Network firewall events
+  # =========================================================================
+  - id: firewall_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Firewall rule
+      RuleName: rule.name
+      RuleId: rule.id
+      
+      # Action taken
+      Action: event.action
+      
+      # Direction
+      Direction: network.direction
+      
+  # =========================================================================
+  # PROXY FIELDS - Web proxy logs (W3C format)
+  # =========================================================================
+  - id: proxy_field_mapping
+    type: field_name_mapping
+    mapping:
+      # URI components
+      c-uri: url.full
+      c-uri-extension: file.extension
+      c-uri-query: url.query
+      c-uri-stem: url.path
+      
+      # User agent
+      c-useragent: user_agent.original
+      
+      # Cookies
+      cs-cookie: http.request.cookies
+      
+      # Referrer
+      cs-referrer: http.request.referrer
+      r-dns: url.domain
+      
+  # =========================================================================
+  # WEBSERVER FIELDS - Web server access logs
+  # =========================================================================
+  - id: webserver_field_mapping
+    type: field_name_mapping
+    mapping:
+      # Client IP
+      c-ip: source.ip
+      
+      # Server IP
+      s-ip: destination.ip
+      
+      # Server name/site
+      s-sitename: service.name
+      s-computername: host.name
+      
+      # Timing
+      time-taken: event.duration
+      
+      # Username
+      cs-username: user.name
+      
+  # =========================================================================
+  # CLOUD FIELDS - Cloud provider events (AWS, Azure, GCP, etc.)
+  # =========================================================================
+  - id: cloud_field_mapping
+    type: field_name_mapping
+    mapping:
+      # AWS CloudTrail
+      eventName: event.action
+      eventSource: event.provider
+      eventType: event.type
+      awsRegion: cloud.region
+      userIdentity.userName: user.name
+      sourceIPAddress: source.ip
+      
+      # Azure
+      operationName: event.action
+      resourceId: cloud.instance.id
+      location: cloud.region
+      
+      # GCP
+      protoPayload.methodName: event.action
+      resource.type: cloud.service.name
