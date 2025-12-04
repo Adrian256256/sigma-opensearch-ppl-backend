@@ -12,15 +12,7 @@ Manual testing allows you to:
 
 ## Quick Start
 
-### Testing the Simple Backend (Manual Implementation)
-
-Run the simple backend testing script:
-
-```bash
-python manual_test/test_simple_backend.py
-```
-
-### Testing the TextQuery Backend (pySigma Infrastructure)
+### Testing the TextQuery Backend
 
 Run the TextQuery backend testing script:
 
@@ -31,33 +23,46 @@ python manual_test/test_textquery_backend.py
 Or with your virtual environment:
 
 ```bash
-.venv/bin/python manual_test/test_simple_backend.py
 .venv/bin/python manual_test/test_textquery_backend.py
+```
+
+### Testing with ECS Field Mapping
+
+Run the ECS pipeline testing script:
+
+```bash
+python manual_test/test_ecs_pipeline.py
+```
+
+Or with your virtual environment:
+
+```bash
+.venv/bin/python manual_test/test_ecs_pipeline.py
 ```
 
 ## Directory Structure
 
 ```
 manual_test/
-├── test_simple_backend.py            # Testing script for simple/manual backend
 ├── test_textquery_backend.py         # Testing script for TextQuery backend
+├── test_ecs_pipeline.py              # Testing script for ECS field mapping
 ├── example_rules/                    # Example Sigma rules
 └── README.md                         # This file
 ```
 
 ## Testing Scripts
 
-### `test_simple_backend.py` - Simple Backend
-
-Tests the manual implementation (`opensearch_ppl.py`).
-
 ### `test_textquery_backend.py` - TextQuery Backend
 
 Tests the pySigma TextQueryBackend implementation (`opensearch_ppl_textquery.py`).
 
+### `test_ecs_pipeline.py` - ECS Field Mapping
+
+Tests the backend with ECS (Elastic Common Schema) field mapping pipeline enabled.
+
 ### Configuration
 
-At the top of both testing scripts, you'll find configuration variables:
+At the top of the testing script, you'll find configuration variables:
 
 ```python
 # List of rule files to test
@@ -93,8 +98,6 @@ EXAMPLE_RULES_TO_TEST = [
 Then run:
 
 ```bash
-.venv/bin/python manual_test/test_simple_backend.py
-# or
 .venv/bin/python manual_test/test_textquery_backend.py
 ```
 
@@ -132,7 +135,7 @@ detection:
     condition: selection
 ```
 
-3. **Add it to the test list** in the testing script (`test_simple_backend.py` or `test_textquery_backend.py`):
+3. **Add it to the test list** in the testing script:
 
 ```python
 EXAMPLE_RULES_TO_TEST = [
@@ -145,8 +148,6 @@ EXAMPLE_RULES_TO_TEST = [
 4. **Run the tests**:
 
 ```bash
-.venv/bin/python manual_test/test_simple_backend.py
-# or
 .venv/bin/python manual_test/test_textquery_backend.py
 ```
 

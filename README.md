@@ -31,7 +31,6 @@ sigma-opensearch-ppl-backend/
 │       ├── __init__.py
 │       └── opensearch_ppl/
 │           ├── __init__.py
-│           ├── opensearch_ppl.py              # Legacy manual implementation
 │           ├── opensearch_ppl_textquery.py    # Main TextQueryBackend implementation
 │           └── README.md                      # Backend documentation
 ├── ecs_mapping/
@@ -40,7 +39,6 @@ sigma-opensearch-ppl-backend/
 │   ├── ecs_mapping.yml                   # ECS field mappings (YAML)
 │   └── README.md                         # ECS mapping documentation
 ├── manual_test/
-│   ├── test_simple_backend.py            # Simple backend test script
 │   ├── test_textquery_backend.py         # TextQueryBackend test script
 │   ├── test_ecs_pipeline.py              # ECS pipeline test script
 │   ├── example_rules/                    # Additional example rules
@@ -152,9 +150,6 @@ ppl_query = backend.convert(collection)
 For quick testing and experimentation with example Sigma rules, see [manual_test/README.md](manual_test/README.md).
 
 ```bash
-# Test example rules with simple backend
-python manual_test/test_simple_backend.py
-
 # Test example rules with TextQuery backend
 python manual_test/test_textquery_backend.py
 
