@@ -18,6 +18,8 @@ detection:
 # Correlation metadata for temporal
 correlation:
     type: temporal
+    rules:
+        - 0e95725d-7320-415d-80f7-004da920fc13
     group-by:
         - ComputerName
         - User

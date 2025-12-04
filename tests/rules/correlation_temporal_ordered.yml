@@ -21,6 +21,8 @@ detection:
 # Correlation metadata for temporal_ordered
 correlation:
     type: temporal_ordered
+    rules:
+        - 0e95725d-7320-415d-80f7-004da920fc14
     group-by:
         - User
     timespan: 1h

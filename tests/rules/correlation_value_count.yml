@@ -17,6 +17,8 @@ detection:
 # Correlation metadata for value_count
 correlation:
     type: value_count
+    rules:
+        - 0e95725d-7320-415d-80f7-004da920fc12
     group-by:
         - ComputerName
         - WorkstationName

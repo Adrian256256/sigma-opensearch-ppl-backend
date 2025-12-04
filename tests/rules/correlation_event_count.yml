@@ -17,6 +17,8 @@ detection:
 # Correlation metadata for event_count
 correlation:
     type: event_count
+    rules:
+        - 0e95725d-7320-415d-80f7-004da920fc11
     group-by:
         - ComputerName
     timespan: 1h
