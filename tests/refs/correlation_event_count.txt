@@ -1,1 +1,1 @@
-source=windows-security-* | where (EventID=4625 OR EventID=529) AND Status="Failed" | stats count() by ComputerName | where count()>=100
+source=windows-security-* | where (EventID=4625 OR EventID=529) AND Status="Failed" | stats count() as event_count by ComputerName | where event_count>=100

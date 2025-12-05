@@ -1,1 +1,1 @@
-source=windows-security-* | where ((EventID=4625 OR EventID=529) AND Status="Failed") OR (EventID=4624 OR EventID=528)
+source=windows-security-* | where ((EventID=4625 OR EventID=529) AND Status="Failed") OR (EventID=4624 OR EventID=528) | stats count() as event_count by User | where event_count>=2
