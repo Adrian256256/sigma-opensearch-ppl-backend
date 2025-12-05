@@ -2,9 +2,7 @@
 
 ## Known Issues
 
-### Contains Modifier with List Values
-
-**Known parsing behavior:** 
+### TODO: The character `-` is not taken into consideration and it should be
 
 **Example:**
 ```yaml
@@ -16,7 +14,7 @@ CommandLine|contains:
 
 The backend should process the complete YAML list items (" - 'sekurlsa' ") and not just the string values ("sekurlsa").
 
-> ** DISCLAIMER:** Correlation tests are currently not functional. The backend does not yet have an implementation for correlation rules. I am not sure that correlation rules and reference files of theese rules (`correlation_*.txt`, `correlation_*.yml`) are correct. TODO
+> ** DISCLAIMER:** TODO: Correlation tests are currently not functional. The backend does not yet have an implementation for correlation rules. I am not sure that correlation rules and reference files of theese rules (`correlation_*.txt`, `correlation_*.yml`) are correct.
 
 This directory contains Sigma rules and their expected OpenSearch PPL translations for testing the backend converter.
 
