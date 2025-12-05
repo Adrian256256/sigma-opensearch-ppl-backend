@@ -14,7 +14,7 @@ CommandLine|contains:
     - 'lsadump'
 ```
 
-The backend is aware that it should process the complete YAML list items (`- 'sekurlsa'`) and not just the string values (`%sekurlsa`).
+The backend should process the complete YAML list items (" - 'sekurlsa' ") and not just the string values ("sekurlsa").
 
 > ** DISCLAIMER:** Correlation tests are currently not functional. The backend does not yet have an implementation for correlation rules. I am not sure that correlation rules and reference files of theese rules (`correlation_*.txt`, `correlation_*.yml`) are correct. TODO
 
