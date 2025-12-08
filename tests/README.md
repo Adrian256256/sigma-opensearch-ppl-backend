@@ -2,18 +2,6 @@
 
 ## Known Issues
 
-### TODO: The character `-` is not taken into consideration and it should be
-
-**Example:**
-```yaml
-CommandLine|contains:
-    - 'sekurlsa'
-    - 'logonpasswords'
-    - 'lsadump'
-```
-
-The backend should process the complete YAML list items (" - 'sekurlsa' ") and not just the string values ("sekurlsa").
-
 > ** DISCLAIMER:** TODO: Correlation tests are currently not functional. The backend does not yet have an implementation for correlation rules. I am not sure that correlation rules and reference files of theese rules (`correlation_*.txt`, `correlation_*.yml`) are correct.
 
 This directory contains Sigma rules and their expected OpenSearch PPL translations for testing the backend converter.
@@ -40,6 +28,24 @@ Each rule file in `rules/` has a corresponding PPL query in `refs/` with the sam
 - **`modifier_endswith.yml`** - EndsWith modifier → `LIKE(field, "%value")`
 - **`modifier_contains_all.yml`** - Contains|all modifier requiring all values match
 - **`case_insensitive_match.yml`** - Case insensitive matching (default behavior)
+
+### String Modifiers
+- **`modifier_cased.yml`** - Case-sensitive matching → `LIKE(field, "%value%", true)`
+- **`modifier_base64.yml`** - Base64 encoding for values
+- **`modifier_base64offset.yml`** - Base64 encoding with 3 offset variations
+- **`modifier_wide_base64offset.yml`** - UTF-16LE encoding + base64offset (wide modifier)
+- **`modifier_windash.yml`** - Windows dash variations (`-`, `/`, `–`, `—`, `―`)
+
+### Field Operations
+- **`modifier_exists_true.yml`** - Field existence check → `isnotnull(field)`
+- **`modifier_exists_false.yml`** - Field non-existence check → `isnull(field)`
+- **`modifier_fieldref.yml`** - Field-to-field comparison → `field1=field2`
+
+### Numeric Modifiers
+- **`modifier_gt.yml`** - Greater than → `field>value`
+- **`modifier_gte.yml`** - Greater than or equal → `field>=value`
+- **`modifier_lt.yml`** - Less than → `field<value`
+- **`modifier_lte.yml`** - Less than or equal → `field<=value`
 
 ### Logical Operators
 - **`logical_and_condition.yml`** - AND logic between multiple conditions
@@ -101,3 +107,68 @@ Each rule file in `rules/` has a corresponding PPL query in `refs/` with the sam
 - Sigma `startswith:` → PPL `LIKE(field, "value%")`
 - Sigma `endswith:` → PPL `LIKE(field, "%value")`
 - Backslashes in strings must be escaped: `\\`
+
+## Sigma Modifiers Support
+
+### Supported Modifiers (15/17 from SigmaHQ documentation)
+
+All modifiers implemented and tested:
+
+| Modifier | Description | PPL Output Example |
+|----------|-------------|-------------------|
+| `contains` | Contains pattern | `LIKE(field, "%value%")` |
+| `startswith` | Starts with pattern | `LIKE(field, "value%")` |
+| `endswith` | Ends with pattern | `LIKE(field, "%value")` |
+| `all` | All values must match (AND) | `field1=val1 AND field1=val2` |
+| `base64` | Base64 encode value | `LIKE(field, "%base64value%")` |
+| `base64offset` | Base64 with 3 offsets | `LIKE(field, "%off0%") OR LIKE(field, "%off1%") OR ...` |
+| `cased` | Case-sensitive match | `LIKE(field, "%value%", true)` |
+| `cidr` | CIDR network matching | `cidrmatch(field, "192.168.0.0/24")` |
+| `exists` | Field existence check | `isnotnull(field)` or `isnull(field)` |
+| `fieldref` | Field-to-field comparison | `field1=field2` |
+| `gt` / `gte` | Greater than (or equal) | `field>10` or `field>=10` |
+| `lt` / `lte` | Less than (or equal) | `field<100` or `field<=100` |
+| `re` | Regular expression | `match(field, 'regex')` |
+| `wide` | UTF-16LE encoding | Combined with base64offset |
+| `windash` | Windows dash variations | `LIKE(field, "%-param%") OR LIKE(field, "%/param%") ...` |
+
+### Unsupported Modifiers
+
+**Not supported by pySigma (base library):**
+- `utf16` - Not implemented in pySigma
+- `utf16le` - Not implemented in pySigma
+- `utf16be` - Not implemented in pySigma
+
+## Running Tests
+
+```bash
+# Run all tests
+python tests/test_checker.py
+
+# Run specific test
+python tests/test_checker.py -t test_name
+
+# Run with verbose output
+python tests/test_checker.py -v
+
+# Show all results (including passed)
+python tests/test_checker.py --show-all
+```
+
+## References
+
+### Sigma Documentation
+- **[Sigma Modifiers](https://sigmahq.io/docs/basics/modifiers.html)** - Official modifier documentation
+- **[Sigma Rules Repository](https://github.com/SigmaHQ/sigma)** - Community Sigma rules
+- **[pySigma Documentation](https://sigmahq-pysigma.readthedocs.io/)** - Python library documentation
+
+### OpenSearch PPL Documentation
+- **[PPL Syntax](https://opensearch.org/docs/latest/search-plugins/sql/ppl/syntax/)** - Official syntax guide
+- **[PPL Commands](https://opensearch.org/docs/latest/search-plugins/sql/ppl/commands/)** - Available commands
+- **[PPL Functions](https://opensearch.org/docs/latest/search-plugins/sql/ppl/functions/)** - Built-in functions
+
+### Backend Development
+- **[pySigma Backend Development](https://sigmahq-pysigma.readthedocs.io/en/latest/Backends.html)** - Guide for creating backends
+- **[TextQueryBackend Source](https://github.com/SigmaHQ/pySigma/blob/main/sigma/conversion/base.py)** - Base class source code
+- **[Example Backends](https://github.com/SigmaHQ/pySigma/tree/main/sigma/backends)** - Reference implementations
+

@@ -1,0 +1,11 @@
+title: Greater Than or Equal Modifier Test
+id: 00000006-0005-0005-0005-000000000002
+status: test
+description: Tests gte modifier for greater than or equal comparison
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ProcessId|gte: 1000
+    condition: selection

@@ -1,0 +1,11 @@
+title: UTF16LE Base64 Offset Modifier Test
+id: 00000006-0006-0006-0006-000000000002
+status: test
+description: Tests utf16le|base64offset modifier chain for UTF-16LE encoded commands
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|utf16le|base64offset|contains: 'powershell'
+    condition: selection

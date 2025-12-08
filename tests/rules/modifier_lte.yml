@@ -1,0 +1,11 @@
+title: Less Than or Equal Modifier Test
+id: 00000006-0005-0005-0005-000000000004
+status: test
+description: Tests lte modifier for less than or equal comparison
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ProcessId|lte: 5000
+    condition: selection

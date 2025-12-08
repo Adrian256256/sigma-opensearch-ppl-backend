@@ -4,27 +4,21 @@ This backend converts Sigma detection rules into PPL (Piped Processing Language)
 
 ## Table of Contents
 
-- [Sigma Rule Data Structure](#sigma-rule-data-structure)
-  - [Main Structure](#main-structure)
-  - [Key Concepts](#key-concepts)
-- [Sigma YAML Syntax](#sigma-yaml-syntax)
-  - [Dash (-) Logic: AND vs OR](#dash---logic-and-vs-or)
-- [PPL Commands Used in Conversion](#ppl-commands-used-in-conversion)
-  - [Core Commands](#core-commands)
-  - [Pattern Matching](#pattern-matching)
-  - [String Functions](#string-functions)
-  - [Additional Commands](#additional-commands)
-- [Structure of Generated PPL Query](#structure-of-generated-ppl-query)
-- [Sigma → PPL Mapping](#sigma---ppl-mapping)
-- [Implementation Architecture](#implementation-architecture)
-  - [Backend Implementations](#backend-implementations)
-    - [1. `opensearch_ppl.py` - Manual/Legacy Backend](#1-opensearch_pplpy---manuallegacy-backend)
-    - [2. `opensearch_ppl_textquery.py` - Production Backend](#2-opensearch_ppl_textquerypy---production-backend-)
-  - [Core Components](#core-components)
-    - [Configuration via Class Variables](#configuration-via-class-variables)
-    - [Key Methods](#key-methods)
-  - [Conversion Flow](#conversion-flow)
-- [References](#references)
+1. [Sigma Rule Data Structure](#sigma-rule-data-structure)
+   - [Main Structure](#main-structure)
+   - [Key Concepts](#key-concepts)
+2. [PPL Commands Used in Conversion](#ppl-commands-used-in-conversion)
+   - [Core Commands](#core-commands)
+   - [Pattern Matching](#pattern-matching)
+   - [String Functions](#string-functions)
+   - [Additional Commands](#additional-commands)
+3. [Structure of Generated PPL Query](#structure-of-generated-ppl-query)
+4. [Sigma → PPL Mapping](#sigma-to-ppl-mapping)
+5. [Implementation Architecture](#implementation-architecture)
+   - [Backend Implementations](#backend-implementations)
+   - [Core Components](#core-components)
+   - [Conversion Flow](#conversion-flow)
+6. [References](#references)
 
 ---
 
@@ -208,7 +202,7 @@ source = <index_pattern>
 | [additional_commands]
 ```
 
-## Sigma → PPL Mapping
+## Sigma to PPL Mapping
 
 | Sigma Concept | PPL Equivalent | Notes |
 |---------------|----------------|-------|
@@ -231,18 +225,62 @@ source = <index_pattern>
 
 ### Backend Implementations
 
-**Two implementations available:**
+This project implements a Sigma to OpenSearch PPL converter using the **TextQueryBackend** approach from the pySigma framework.
 
-#### 1. `opensearch_ppl.py` - Manual/Legacy Backend
-- **Status:** Placeholder (educational purpose)
-- Detailed documentation and method templates
-- Returns `"where true"` - not functional
+#### OpenSearchPPLBackend (TextQueryBackend)
 
-#### 2. `opensearch_ppl_textquery.py` - Production Backend
-- **Status:** Fully functional, production-ready
-- Uses pySigma's `TextQueryBackend` infrastructure
-- Configuration-driven via class variables
-- Automatic handling: operators, quoting, wildcards, comparisons
+**File**: `opensearch_ppl_textquery.py`
+
+The `OpenSearchPPLBackend` class extends `TextQueryBackend` from pySigma, providing a clean and maintainable implementation that leverages pySigma's built-in conversion infrastructure.
+
+**Key characteristics:**
+
+1. **Configuration-based approach**: Most conversion behavior is defined through class variables rather than complex method overrides
+2. **Minimal code**: Requires only ~250 lines of code by utilizing pySigma's existing logic
+3. **Standard patterns**: Follows pySigma best practices for backend development
+
+**Main components:**
+
+- **Class variables for operators and tokens**:
+  - `or_token`, `and_token`, `not_token` - Boolean operators
+  - `wildcard_multi`, `wildcard_single` - Wildcard characters (`%` and `_`)
+  - String matching expressions using `LIKE()` function
+  
+- **Key methods**:
+  - `__init__()` - Initializes the backend with optional processing pipeline
+  - `finalize_query_default()` - Assembles the final PPL query with `source` and `where` clauses
+  - `_get_index_pattern()` - Maps Sigma logsource to OpenSearch index patterns
+  - `finalize_output_default()` - Post-processes the query list before output
+
+**Advantages:**
+- Easy to maintain and extend
+- Follows pySigma conventions
+- Automatic handling of complex logic operators and precedence
+- Built-in support for modifiers, wildcards, and special characters
+
+**Example usage:**
+```python
+from sigma_backend.backends.opensearch_ppl.opensearch_ppl_textquery import OpenSearchPPLBackend
+from sigma.collection import SigmaCollection
+
+# Load Sigma rule
+rule = SigmaCollection.from_yaml("""
+title: Suspicious PowerShell Command
+detection:
+  selection:
+    EventID: 1
+    Image|endswith: '\\powershell.exe'
+    CommandLine|contains: 'bypass'
+  condition: selection
+""")
+
+# Convert to PPL
+backend = OpenSearchPPLBackend()
+ppl_query = backend.convert(rule)
+print(ppl_query)
+# Output: source = windows-process_creation-* | where EventID=1 AND LIKE(Image, "%\\powershell.exe") AND LIKE(CommandLine, "%bypass%")
+```
+
 
 ### Core Components
 

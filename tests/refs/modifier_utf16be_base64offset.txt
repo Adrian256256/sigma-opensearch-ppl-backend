@@ -1,0 +1,1 @@
+source=windows:process_creation | where like(CommandLine, "%YwBtAGQ%") OR like(CommandLine, "%AGMAbQBkA%") OR like(CommandLine, "%AYwBtAGQA%")

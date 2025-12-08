@@ -1,0 +1,11 @@
+title: UTF16BE Base64 Offset Modifier Test
+id: 00000006-0006-0006-0006-000000000003
+status: test
+description: Tests utf16be|base64offset modifier chain for UTF-16BE encoded commands
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|utf16be|base64offset|contains: 'cmd'
+    condition: selection

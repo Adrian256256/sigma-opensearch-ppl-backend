@@ -1,0 +1,11 @@
+title: Greater Than Modifier Test
+id: 00000006-0005-0005-0005-000000000001
+status: test
+description: Tests gt modifier for greater than comparison
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ProcessId|gt: 1000
+    condition: selection

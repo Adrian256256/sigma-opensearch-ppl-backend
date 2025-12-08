@@ -1,0 +1,11 @@
+title: Base64 Modifier Test
+id: 00000006-0001-0001-0001-000000000002
+status: test
+description: Tests base64 modifier for encoded command detection
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|base64|contains: 'powershell'
+    condition: selection

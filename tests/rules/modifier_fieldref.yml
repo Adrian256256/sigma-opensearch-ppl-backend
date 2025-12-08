@@ -1,0 +1,11 @@
+title: Fieldref Modifier Test
+id: 00000006-0004-0004-0004-000000000001
+status: test
+description: Tests fieldref modifier for comparing field values
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        User|fieldref: TargetUser
+    condition: selection

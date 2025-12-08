@@ -64,6 +64,14 @@ class OpenSearchPPLBackend(TextQueryBackend):
     contains_expression: ClassVar[str] = 'LIKE({field}, %{value}%)'
     wildcard_match_expression: ClassVar[str] = 'LIKE({field}, {value})'
     
+    # Case-sensitive string matching with 'cased' modifier
+    # PPL LIKE function with third parameter set to true enables case-sensitive matching
+    # Format: LIKE(field, "pattern", true)
+    case_sensitive_match_expression: ClassVar[str] = '{field}={value}'
+    case_sensitive_startswith_expression: ClassVar[str] = 'LIKE({field}, {value}%, true)'
+    case_sensitive_endswith_expression: ClassVar[str] = 'LIKE({field}, %{value}, true)'
+    case_sensitive_contains_expression: ClassVar[str] = 'LIKE({field}, %{value}%, true)'
+    
     # CIDR notation support
     # PPL supports: cidrmatch(field, "cidr")
     cidr_expression: ClassVar[str] = 'cidrmatch({field}, "{value}")'
@@ -89,6 +97,10 @@ class OpenSearchPPLBackend(TextQueryBackend):
     
     # Null value handling - in PPL use isnull() function
     field_null_expression: ClassVar[str] = "isnull({field})"
+    
+    # Field-to-field comparison (fieldref modifier)
+    # PPL supports direct field comparison: field1=field2
+    field_equals_field_expression: ClassVar[str] = "{field1}={field2}"
     
     # List expressions (IN operator)
     convert_or_as_in: ClassVar[bool] = True

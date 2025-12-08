@@ -1,0 +1,11 @@
+title: Cased Modifier Test
+id: 00000006-0002-0002-0002-000000000001
+status: test
+description: Tests cased modifier for case-sensitive value matching
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|cased|contains: 'CaseSensitiveValue'
+    condition: selection

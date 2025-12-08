@@ -1,0 +1,11 @@
+title: Exists Modifier Test - True
+id: 00000006-0003-0003-0003-000000000001
+status: test
+description: Tests exists modifier with true value to check field existence
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        User|exists: true
+    condition: selection

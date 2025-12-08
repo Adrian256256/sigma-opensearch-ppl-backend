@@ -1,0 +1,14 @@
+title: Base64 Offset Modifier Test
+id: 00000006-0001-0001-0001-000000000001
+status: test
+description: Tests base64offset modifier for shell usage in HTTP web traffic
+logsource:
+    category: web
+    product: proxy
+detection:
+    selection:
+        c-uri|base64offset|contains:
+            - '/bin/bash'
+            - '/bin/sh'
+            - '/bin/zsh'
+    condition: selection
