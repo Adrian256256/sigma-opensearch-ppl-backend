@@ -1,372 +1,378 @@
 # OpenSearch PPL Backend for Sigma
 
-This backend converts Sigma detection rules into PPL (Piped Processing Language) queries for OpenSearch.
+Backend for converting Sigma detection rules into PPL (Piped Processing Language) queries for OpenSearch.
 
 ## Table of Contents
 
-1. [Sigma Rule Data Structure](#sigma-rule-data-structure)
-   - [Main Structure](#main-structure)
-   - [Key Concepts](#key-concepts)
-2. [PPL Commands Used in Conversion](#ppl-commands-used-in-conversion)
-   - [Core Commands](#core-commands)
-   - [Pattern Matching](#pattern-matching)
-   - [String Functions](#string-functions)
-   - [Additional Commands](#additional-commands)
-3. [Structure of Generated PPL Query](#structure-of-generated-ppl-query)
-4. [Sigma → PPL Mapping](#sigma-to-ppl-mapping)
-5. [Implementation Architecture](#implementation-architecture)
-   - [Backend Implementations](#backend-implementations)
-   - [Core Components](#core-components)
-   - [Conversion Flow](#conversion-flow)
+1. [Overview](#overview)
+2. [Implementation](#implementation)
+   - [OpenSearchPPLBackend Class](#opensearchpplbackend-class)
+   - [Configuration via Class Variables](#configuration-via-class-variables)
+   - [Core Methods](#core-methods)
+3. [Sigma → PPL Conversion](#sigma--ppl-conversion)
+   - [Syntax Mapping](#syntax-mapping)
+   - [Conversion Example](#conversion-example)
+4. [PPL Functions Used](#ppl-functions-used)
+5. [Usage](#usage)
 6. [References](#references)
 
 ---
 
-## Sigma Rule Data Structure
+## Overview
 
-After parsing with the Sigma converter, rules are represented as Python dataclass objects:
+**OpenSearchPPLBackend** is a pySigma backend that converts Sigma detection rules into PPL queries for OpenSearch. The implementation is based on pySigma's `TextQueryBackend` class, providing an elegant and maintainable solution.
 
-### Main Structure
+**Features**:
+- Automatic conversion of logical operators (AND, OR, NOT) with correct precedence
+- Full support for Sigma modifiers (contains, startswith, endswith, etc.)
+- Wildcard conversion: `*` → `%`, `?` → `_`
+- Support for regular expressions, numeric comparisons, CIDR notation
+- Field existence and null value checks
+- Automatic logsource → index pattern mapping
+
+---
+
+## Implementation
+
+### OpenSearchPPLBackend Class
+
+Extends `TextQueryBackend` from pySigma, using a configuration-based approach via class variables to minimize custom code requirements.
 
 ```python
-SigmaRule
-├── title: str                     # Rule title
-├── id: UUID                       # Unique identifier
-├── logsource: SigmaLogSource      # Source specification
-│   ├── product: str               # "windows", "linux", etc.
-│   ├── category: str              # "process_creation", "network_connection"
-│   └── service: str               # "sysmon", "security"
-│
-└── detection: SigmaDetections
-    ├── detections: Dict[str, SigmaDetection]    # Named selections
-    │   └── "selection": SigmaDetection
-    │       ├── detection_items: List[SigmaDetectionItem]
-    │       │   └── SigmaDetectionItem
-    │       │       ├── field: str                    # "EventID", "CommandLine"
-    │       │       ├── modifiers: List[Type]         # [SigmaContainsModifier, ...]
-    │       │       ├── value: List[SigmaString]      # Values to match
-    │       │       └── value_linking: Type           # ConditionOR/ConditionAND
-    │       └── item_linking: Type                    # ConditionAND (how items combine)
-    │
-    └── condition: List[str]                          # ["selection1 and selection2"]
+class OpenSearchPPLBackend(TextQueryBackend):
+    """
+    OpenSearch PPL backend using pySigma's TextQueryBackend.
+    
+    Leverages pySigma's built-in conversion infrastructure,
+    requiring only configuration through class variables and minimal
+    method overrides for PPL-specific behavior.
+    """
 ```
 
-### Key Concepts
+### Configuration via Class Variables
 
-**1. Accessing Data:**
+The backend is primarily configured through class variables, eliminating the need for complex method overrides.
+
+#### 1. Logical Operators
+
 ```python
-# Logsource
-product = rule.logsource.product              # "windows"
+# Boolean operators
+or_token: ClassVar[str] = "OR"
+and_token: ClassVar[str] = "AND"
+not_token: ClassVar[str] = "NOT"
+eq_token: ClassVar[str] = "="
 
-# Detections
-detections = rule.detection.detections        # Dict of selections
-for name, selection in detections.items():
-    for item in selection.detection_items:
-        field = item.field                    # "CommandLine"
-        modifiers = item.modifiers            # [SigmaContainsModifier]
-        values = item.value                   # [SigmaString(...)]
+# Operator precedence (NOT > AND > OR)
+precedence: ClassVar[tuple] = (ConditionNOT, ConditionAND, ConditionOR)
+group_expression: ClassVar[str] = "({expr})"
 ```
 
-**2. SigmaString Values:**
-```python
-# Values stored as lists with wildcards:
-SigmaString.plain = ['System']                # Literal: "System"
-SigmaString.plain = [1, 'AUTHORI', 1]        # Wildcard: *AUTHORI*
-SigmaString.plain = ['cmd', 2, '.exe']       # Single char: cmd?.exe
+#### 2. Wildcards and Escaping
 
-# SpecialChars: 1 = * (multi), 2 = ? (single)
+PPL uses `%` and `_` for wildcards (instead of `*` and `?` from Sigma):
+
+```python
+wildcard_multi: ClassVar[str] = "%"     # Equivalent to * in Sigma
+wildcard_single: ClassVar[str] = "_"    # Equivalent to ? in Sigma
+
+str_quote: ClassVar[str] = '"'          # String quotes
+escape_char: ClassVar[str] = '\\'       # Escape character
 ```
 
-**3. Modifiers:**
+#### 3. Pattern Matching Expressions
+
+Uses PPL's `LIKE()` function for pattern matching:
+
 ```python
-# Check modifier type:
-modifier_name = item.modifiers[0].__name__
-# Returns: "SigmaContainsModifier", "SigmaEndswithModifier", etc.
+# LIKE() function expressions
+startswith_expression: ClassVar[str] = 'LIKE({field}, {value}%)'
+endswith_expression: ClassVar[str] = 'LIKE({field}, %{value})'
+contains_expression: ClassVar[str] = 'LIKE({field}, %{value}%)'
+wildcard_match_expression: ClassVar[str] = 'LIKE({field}, {value})'
+
+# Case-sensitive matching (with 'cased' modifier)
+case_sensitive_contains_expression: ClassVar[str] = 'LIKE({field}, %{value}%, true)'
 ```
 
-**4. Reconstructing Values:**
+#### 4. Comparison Operators
+
 ```python
-value_str = ""
-for part in sigma_string.plain:
-    if part == 1:        # WILDCARD_MULTI
-        value_str += "*"
-    elif part == 2:      # WILDCARD_SINGLE
-        value_str += "?"
-    else:
-        value_str += str(part)
+compare_op_expression: ClassVar[str] = "{field}{operator}{value}"
+compare_operators: ClassVar[Dict[Any, str]] = {
+    SigmaCompareExpression.CompareOperators.LT: "<",
+    SigmaCompareExpression.CompareOperators.LTE: "<=",
+    SigmaCompareExpression.CompareOperators.GT: ">",
+    SigmaCompareExpression.CompareOperators.GTE: ">=",
+}
+```
+
+#### 5. Special Expressions
+
+```python
+# Regular expressions
+re_expression: ClassVar[str] = "match({field}, '{regex}')"
+
+# CIDR notation
+cidr_expression: ClassVar[str] = 'cidrmatch({field}, "{value}")'
+
+# Field existence
+field_exists_expression: ClassVar[str] = "isnotnull({field})"
+field_not_exists_expression: ClassVar[str] = "isnull({field})"
+
+# Null checks
+field_null_expression: ClassVar[str] = "isnull({field})"
+
+# Field-to-field comparison
+field_equals_field_expression: ClassVar[str] = "{field1}={field2}"
+
+# IN operator
+field_in_list_expression: ClassVar[str] = "{field} in ({list})"
+convert_or_as_in: ClassVar[bool] = True
+```
+
+### Core Methods
+
+#### `__init__()`
+
+Initializes the backend with an optional processing pipeline:
+
+```python
+def __init__(self, processing_pipeline: Optional[object] = None, **kwargs):
+    super().__init__(processing_pipeline, **kwargs)
+```
+
+#### `_get_index_pattern()`
+
+Extracts and constructs the index pattern from the Sigma rule's logsource:
+
+```python
+def _get_index_pattern(self, rule: SigmaRule) -> str:
+    """
+    Maps Sigma logsource (product, category, service) to OpenSearch index patterns.
+    
+    Example:
+        product='windows', category='process_creation', service='sysmon'
+        → 'windows-process_creation-sysmon-*'
+    """
+    logsource = rule.logsource
+    product = getattr(logsource, 'product', None)
+    category = getattr(logsource, 'category', None)
+    service = getattr(logsource, 'service', None)
+    
+    index_parts = []
+    if product:
+        index_parts.append(product)
+    if category:
+        index_parts.append(category)
+    if service:
+        index_parts.append(service)
+    
+    return '-'.join(index_parts) + '-*' if index_parts else '*'
+```
+
+#### `finish_query()`
+
+Assembles the final PPL query by adding the `source` command and fixing wildcards:
+
+```python
+def finish_query(self, rule: SigmaRule, query: str, state: ConversionState) -> str:
+    """
+    Finalizes the query by:
+    1. Getting the index pattern from logsource
+    2. Fixing wildcard positions in LIKE() expressions
+    3. Building complete PPL query: source=<index> | where <conditions>
+    """
+    index_pattern = self._get_index_pattern(rule)
+    query = super().finish_query(rule, query, state)
+    
+    # Fix LIKE expressions: move wildcards inside quotes
+    def fix_wildcards(match):
+        leading = match.group(1) or ''
+        content = match.group(2)
+        trailing = match.group(3) or ''
+        return f'"{leading}{content}{trailing}"'
+    
+    query = re.sub(r'(%?)"([^"]*)\"(%?)', fix_wildcards, query)
+    
+    return f"source={index_pattern} | where {query}"
+```
+
+#### `finalize_query_default()` and `finalize_output_default()`
+
+Methods for finalizing queries and output:
+
+```python
+def finalize_query_default(self, rule: SigmaRule, query: str, index: int, 
+                           state: ConversionState) -> str:
+    """Called after condition conversion to add PPL-specific elements."""
+    index_pattern = self._get_index_pattern(rule)
+    state.processing_state["index"] = index_pattern
+    return query
+
+def finalize_output_default(self, queries: list[str]) -> list[str]:
+    """Returns the list of generated PPL queries."""
+    return queries
 ```
 
 ---
 
-## PPL Commands Used in Conversion
+## Sigma → PPL Conversion
 
-This backend uses the following PPL commands to convert Sigma rules into queries:
-
-### Core Commands
-
-**1. `source` - Index Specification**
-```ppl
-source = index_pattern
-```
-Maps Sigma `logsource` to OpenSearch indices using pattern: `{product}-{category}-{service}-*`
-
-Example: `source = windows-process_creation-*`
-
-**2. `where` - Filtering**
-```ppl
-source = index | where condition
-```
-Converts Sigma detection conditions. Supports: `=`, `!=`, `>`, `<`, `>=`, `<=`, `AND`, `OR`, `NOT`, `LIKE()`, `IN()`
-
-Example: `source = windows-* | where EventID = 1 AND LIKE(CommandLine, "%whoami%")`
-
-**3. `fields` - Field Selection**
-```ppl
-source = index | where condition | fields field1, field2
-```
-Returns only specified fields from Sigma rule.
-
-Example: `source = windows-* | where EventID = 1 | fields EventID, CommandLine, User`
-
-**4. `stats` - Aggregations**
-```ppl
-source = index | where condition | stats count() by field
-```
-Functions: `count()`, `sum()`, `avg()`, `min()`, `max()`, `distinct_count()`
-
-Example: `source = windows-* | where EventID = 4625 | stats count() by SourceIP`
-
-### Pattern Matching
-
-**`LIKE()` function - Pattern Matching:**
-
-The `LIKE()` function in OpenSearch PPL is used for pattern matching with wildcards:
-
-Syntax: `LIKE(field, "pattern")`
-
-Wildcards:
-- `%` = matches zero or more characters (equivalent to `*` in Sigma)
-- `_` = matches exactly one character (equivalent to `?` in Sigma)
-
-Examples:
-```ppl
-# Contains match
-where LIKE(CommandLine, "%powershell%")
-
-# Starts with
-where LIKE(Image, "C:\\Windows\\%")
-
-# Ends with
-where LIKE(Image, "%\\powershell.exe")
-
-# Single character wildcard
-where LIKE(state, "M_")
-
-# Multiple conditions
-where LIKE(User, "%AUTHORI%") OR LIKE(User, "%AUTORI%")
-```
-
-**Important:** `LIKE()` is a **function**, not an infix operator. The syntax `field like "pattern"` is **not valid** in OpenSearch PPL.
-
-**`match()` function - Regular Expressions:**
-```ppl
-where match(field, 'regex_pattern')
-```
-
-Example: `where match(CommandLine, '.*powershell.*-enc.*')`
-
-### String Functions
-
-- `lower(field)`, `upper(field)` - case conversion
-- `substring(field, start, length)` - extract substring
-- `concat(field1, field2)` - concatenate
-- `trim(field)` - remove whitespace
-
-Example: `where lower(CommandLine) like "%powershell%"`
-
-### Additional Commands
-
-- `eval` - create/transform fields
-- `dedup` - remove duplicates
-- `sort` - order results
-- `head`/`tail` - limit results
-
-## Structure of Generated PPL Query
-
-A typical PPL query generated from Sigma follows this structure:
-
-```ppl
-source = <index_pattern> 
-| where <detection_conditions>
-| [stats/eval/fields/sort/etc.]
-| [additional_commands]
-```
-
-## Sigma to PPL Mapping
+### Syntax Mapping
 
 | Sigma Concept | PPL Equivalent | Notes |
 |---------------|----------------|-------|
-| `logsource.product` | `source = <index>` | Mapping to OpenSearch indices |
-| `detection.selection` | `where condition` | Filtering conditions |
-| `fieldname: value` | `field = value` | Exact equality |
-| `fieldname\|contains: value` | `LIKE(field, "%value%")` | Substring matching with LIKE function |
-| `fieldname\|startswith: value` | `LIKE(field, "value%")` | Prefix matching with LIKE function |
-| `fieldname\|endswith: value` | `LIKE(field, "%value")` | Suffix matching with LIKE function |
+| `logsource.product` | `source=<index>` | Automatic mapping to OpenSearch indices |
+| `detection.selection` | `where condition` | Filter conditions |
+| `field: value` | `field=value` | Exact equality |
+| `field\|contains: value` | `LIKE(field, "%value%")` | Substring matching |
+| `field\|startswith: value` | `LIKE(field, "value%")` | Prefix matching |
+| `field\|endswith: value` | `LIKE(field, "%value")` | Suffix matching |
+| `field\|re: regex` | `match(field, 'regex')` | Regular expressions |
 | `condition: a and b` | `where a AND b` | Logical conjunction |
 | `condition: a or b` | `where a OR b` | Logical disjunction |
 | `condition: not a` | `where NOT a` | Logical negation |
-| Wildcard `*` in Sigma | `%` in PPL LIKE | Any sequence of characters |
-| Wildcard `?` in Sigma | `_` in PPL LIKE | Single character |
-| `fieldname\|re: regex` | `match(field, 'regex')` | Regular expression matching |
+| Wildcard `*` | `%` in LIKE | Any sequence of characters |
+| Wildcard `?` | `_` in LIKE | Exactly one character |
+| `field\|gt: 100` | `field>100` | Numeric comparisons |
+| `field\|cidr: 192.168.0.0/16` | `cidrmatch(field, "192.168.0.0/16")` | CIDR notation |
+
+### Conversion Example
+
+**Sigma Input**:
+```yaml
+title: Suspicious PowerShell Command
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    EventID: 1
+    Image|endswith: '\powershell.exe'
+    CommandLine|contains: 'bypass'
+  condition: selection
+```
+
+**PPL Output**:
+```ppl
+source=windows-process_creation-* | where EventID=1 AND LIKE(Image, "%\\powershell.exe") AND LIKE(CommandLine, "%bypass%")
+```
 
 ---
 
-## Implementation Architecture
+## PPL Functions Used
 
-### Backend Implementations
+### Pattern Matching
 
-This project implements a Sigma to OpenSearch PPL converter using the **TextQueryBackend** approach from the pySigma framework.
+**`LIKE(field, pattern)`** - Wildcard matching:
+```ppl
+LIKE(CommandLine, "%powershell%")           # Contains
+LIKE(Image, "C:\\Windows\\%")               # Starts with
+LIKE(Image, "%\\powershell.exe")            # Ends with
+LIKE(User, "%AUTHORI%") OR LIKE(User, "%AUTORI%")  # Multiple patterns
+```
 
-#### OpenSearchPPLBackend (TextQueryBackend)
+**`match(field, regex)`** - Regular expressions:
+```ppl
+match(CommandLine, '.*powershell.*-enc.*')
+```
 
-**File**: `opensearch_ppl_textquery.py`
+### Field Operations
 
-The `OpenSearchPPLBackend` class extends `TextQueryBackend` from pySigma, providing a clean and maintainable implementation that leverages pySigma's built-in conversion infrastructure.
+**`isnotnull(field)`, `isnull(field)`** - Existence checks:
+```ppl
+isnotnull(User)                             # Field exists
+isnull(ParentProcessId)                     # Field is null
+```
 
-**Key characteristics:**
+**`cidrmatch(field, cidr)`** - CIDR checks:
+```ppl
+cidrmatch(SourceIP, "192.168.0.0/16")
+```
 
-1. **Configuration-based approach**: Most conversion behavior is defined through class variables rather than complex method overrides
-2. **Minimal code**: Requires only ~250 lines of code by utilizing pySigma's existing logic
-3. **Standard patterns**: Follows pySigma best practices for backend development
+### Comparison Operators
 
-**Main components:**
+```ppl
+field = value        # Equal
+field != value       # Not equal
+field > value        # Greater than
+field < value        # Less than
+field >= value       # Greater or equal
+field <= value       # Less or equal
+field in (v1, v2)    # IN operator
+```
 
-- **Class variables for operators and tokens**:
-  - `or_token`, `and_token`, `not_token` - Boolean operators
-  - `wildcard_multi`, `wildcard_single` - Wildcard characters (`%` and `_`)
-  - String matching expressions using `LIKE()` function
-  
-- **Key methods**:
-  - `__init__()` - Initializes the backend with optional processing pipeline
-  - `finalize_query_default()` - Assembles the final PPL query with `source` and `where` clauses
-  - `_get_index_pattern()` - Maps Sigma logsource to OpenSearch index patterns
-  - `finalize_output_default()` - Post-processes the query list before output
+---
 
-**Advantages:**
-- Easy to maintain and extend
-- Follows pySigma conventions
-- Automatic handling of complex logic operators and precedence
-- Built-in support for modifiers, wildcards, and special characters
+## Usage
 
-**Example usage:**
+### Programmatic Usage
+
 ```python
 from sigma_backend.backends.opensearch_ppl.opensearch_ppl_textquery import OpenSearchPPLBackend
 from sigma.collection import SigmaCollection
 
 # Load Sigma rule
-rule = SigmaCollection.from_yaml("""
-title: Suspicious PowerShell Command
+rule_yaml = """
+title: Mimikatz Execution Detection
+logsource:
+  product: windows
+  category: process_creation
 detection:
   selection:
-    EventID: 1
-    Image|endswith: '\\powershell.exe'
-    CommandLine|contains: 'bypass'
+    Image|endswith: '\\mimikatz.exe'
+    CommandLine|contains:
+      - 'sekurlsa'
+      - 'lsadump'
   condition: selection
-""")
+"""
 
-# Convert to PPL
+# Parse and convert
+sigma_rules = SigmaCollection.from_yaml(rule_yaml)
 backend = OpenSearchPPLBackend()
-ppl_query = backend.convert(rule)
-print(ppl_query)
-# Output: source = windows-process_creation-* | where EventID=1 AND LIKE(Image, "%\\powershell.exe") AND LIKE(CommandLine, "%bypass%")
+ppl_queries = backend.convert(sigma_rules)
+
+print(ppl_queries[0])
+# Output: source=windows-process_creation-* | where LIKE(Image, "%\\mimikatz.exe") AND (LIKE(CommandLine, "%sekurlsa%") OR LIKE(CommandLine, "%lsadump%"))
 ```
 
-
-### Core Components
-
-#### Configuration via Class Variables
+### With Processing Pipeline
 
 ```python
-class OpenSearchPPLBackend(TextQueryBackend):
-    # Operators
-    or_token = "OR"
-    and_token = "AND"
-    not_token = "NOT"
-    
-    # Wildcards (PPL uses % and _ instead of * and ?)
-    wildcard_multi = "%"    # Multi-character wildcard
-    wildcard_single = "_"   # Single-character wildcard
-    
-    # String matching templates using LIKE() function
-    contains_expression = 'LIKE({field}, "%{value}%")'
-    startswith_expression = 'LIKE({field}, "{value}%")'
-    endswith_expression = 'LIKE({field}, "%{value}")'
-    wildcard_match_expression = 'LIKE({field}, "{value}")'
-    
-    # Regular expression matching
-    re_expression = "match({field}, '{regex}')"
-    
-    # Comparison operators
-    compare_operators = {
-        CompareOperators.LT: "<",
-        CompareOperators.GT: ">",
-        CompareOperators.LTE: "<=",
-        CompareOperators.GTE: ">=",
-    }
+from sigma.pipelines.opensearch import opensearch_pipeline
+
+# Initialize backend with pipeline
+backend = OpenSearchPPLBackend(processing_pipeline=opensearch_pipeline())
+ppl_queries = backend.convert(sigma_rules)
 ```
 
-#### Key Methods
+### Command Line Usage
 
-**`finish_query()`** - Assembles final PPL query:
-```python
-def finish_query(self, rule, query, state):
-    index = self._get_index_pattern(rule)  # Get index from logsource
-    return f"source = {index} | where {query}"
-```
+```bash
+# Convert single rule
+sigma convert -t opensearch_ppl rule.yml
 
-**`_get_index_pattern()`** - Maps logsource to index:
-```python
-def _get_index_pattern(self, rule):
-    # Extract: product, category, service
-    # Build: "product-category-service-*"
-    # Example: "windows-process_creation-*"
-```
+# Convert directory of rules
+sigma convert -t opensearch_ppl -o output/ rules/
 
-### Conversion Flow
-
-```
-Sigma YAML → SigmaCollection → TextQueryBackend Processing → finish_query() → PPL Query
-```
-
-**Example:**
-```yaml
-# Input
-detection:
-  selection:
-    EventID: 1
-    Image|endswith: '\powershell.exe'
-  condition: selection
-```
-↓
-```
-# Output
-['source = windows-process_creation-* | where EventID=1 AND LIKE(Image, "%\\powershell.exe")']
+# With specific pipeline
+sigma convert -t opensearch_ppl -p opensearch rules/
 ```
 
 ---
 
 ## References
 
-### OpenSearch PPL Documentation
-- **Main PPL Page**: [OpenSearch PPL Documentation](https://opensearch.org/docs/latest/search-plugins/sql/ppl/index/)
-- **PPL Commands**: [OpenSearch PPL Commands & Functions](https://opensearch.org/docs/latest/search-plugins/sql/ppl/functions/)
-- **PPL Syntax**: [OpenSearch PPL Syntax](https://opensearch.org/docs/latest/search-plugins/sql/ppl/syntax/)
-- **GitHub Documentation**: [OpenSearch SQL/PPL GitHub Docs](https://github.com/opensearch-project/sql/tree/main/docs/user/ppl)
+### OpenSearch PPL
+- **Official Documentation**: [OpenSearch PPL](https://opensearch.org/docs/latest/search-plugins/sql/ppl/index/)
+- **Commands & Functions**: [PPL Functions](https://opensearch.org/docs/latest/search-plugins/sql/ppl/functions/)
+- **PPL Syntax**: [PPL Syntax](https://opensearch.org/docs/latest/search-plugins/sql/ppl/syntax/)
+- **GitHub**: [OpenSearch SQL/PPL Docs](https://github.com/opensearch-project/sql/tree/main/docs/user/ppl)
+- **Interactive Playground**: [OpenSearch Query Workbench](https://playground.opensearch.org/app/opensearch-query-workbench)
 
-### Sigma Documentation
-- **Sigma Rules Specification**: [Sigma Rules Specification](https://github.com/SigmaHQ/sigma-specification/blob/main/specification/sigma-rules-specification.md)
-- **Sigma Project**: [Sigma HQ on GitHub](https://github.com/SigmaHQ/sigma)
-- **pySigma**: [pySigma Library](https://github.com/SigmaHQ/pySigma)
-
-### Interactive Testing
-- **Query Workbench**: [OpenSearch Playground](https://playground.opensearch.org/app/opensearch-query-workbench) - Test PPL queries interactively
+### Sigma & pySigma
+- **Sigma Specification**: [Sigma Rules Specification](https://github.com/SigmaHQ/sigma-specification/blob/main/specification/sigma-rules-specification.md)
+- **Sigma Modifiers**: [Sigma Modifiers Documentation](https://sigmahq.io/docs/basics/modifiers.html)
+- **Sigma Project**: [SigmaHQ GitHub](https://github.com/SigmaHQ/sigma)
+- **pySigma Library**: [pySigma](https://github.com/SigmaHQ/pySigma)
+- **pySigma Documentation**: [pySigma Docs](https://sigmahq-pysigma.readthedocs.io/)

@@ -141,7 +141,7 @@ ppl_query = backend.convert(collection)
 - `User` → `user.name`
 - `DestinationIp` → `destination.ip`
 
-📖 **For detailed ECS mapping documentation, see [ecs_mapping/README.md](ecs_mapping/README.md)**
+**For detailed ECS mapping documentation, see [ecs_mapping/README.md](ecs_mapping/README.md)**
 
 ## Testing
 
