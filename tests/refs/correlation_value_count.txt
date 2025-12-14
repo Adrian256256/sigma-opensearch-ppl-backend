@@ -1,1 +1,0 @@
-source=windows-security-* | where (EventID=4625 OR EventID=529) AND Status="Failed" | stats dc(User) as unique_users by ComputerName, WorkstationName | where unique_users>=100

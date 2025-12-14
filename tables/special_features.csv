@@ -1,0 +1,11 @@
+Feature,Test Case,Description,Status
+Wildcard patterns,wildcard_pattern_match,"* → % and ? → _",PASS
+Special characters,special_chars_in_path,Proper escaping of special chars in paths,PASS
+Null field check,field_null_check,Check for null/missing fields with isnull(),PASS
+Numeric comparisons,numeric_high_privilege,Integer comparison operations,PASS
+Numeric port range,numeric_suspicious_port,Port range detection,PASS
+Registry keys,registry_key_modification,Windows registry path handling,PASS
+DNS queries,suspicious_dns_query,DNS query pattern matching,PASS
+WMI execution,suspicious_wmi_execution,WMI command detection,PASS
+Scheduled tasks,scheduled_task_creation,Scheduled task creation detection,PASS
+Service installation,suspicious_service_install,Windows service installation patterns,PASS

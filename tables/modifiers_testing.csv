@@ -1,0 +1,21 @@
+Modifier,Category,Description,Test Case,PPL Output Example,Status
+contains,String Modifiers,Contains pattern (default),case_insensitive_match,"LIKE(field ""%value%"")",PASS
+startswith,String Modifiers,Starts with pattern,modifier_startswith,"LIKE(Image ""value%"")",PASS
+endswith,String Modifiers,Ends with pattern,modifier_endswith,"LIKE(Image ""%value"")",PASS
+all,String Modifiers,All values must match (AND),modifier_contains_all,"LIKE(field ""%val1%"") AND LIKE(field ""%val2%"")",PASS
+cased,String Modifiers,Case-sensitive match,modifier_cased,"LIKE(CommandLine ""%CaseSensitiveValue%"" true)",PASS
+base64,Encoding Modifiers,Base64 encode value,modifier_base64,"LIKE(CommandLine ""%cG93ZXJzaGVsbA==%"")",PASS
+base64offset,Encoding Modifiers,Base64 with 3 offsets,modifier_base64offset,"LIKE(uri ""%L2Jpbi9iYXNo%"") OR LIKE(...) OR LIKE(...)",PASS
+wide,Encoding Modifiers,UTF-16LE encoding,modifier_wide_base64offset,"LIKE(CommandLine ""%cABpAG4AZw%"") OR ...",PASS
+utf16,Encoding Modifiers,UTF-16LE encoding (alias for wide),modifier_utf16_base64offset,"LIKE(CommandLine ""%dwBoAG8AYQBtAGkA%"") OR ...",PASS
+utf16le,Encoding Modifiers,UTF-16 Little Endian encoding,modifier_utf16le_base64offset,"LIKE(CommandLine ""%cABvAHcAZQByAHMAaABlAGwAbA%"") OR ...",PASS
+utf16be,Encoding Modifiers,UTF-16 Big Endian encoding,modifier_utf16be_base64offset,"LIKE(CommandLine ""%AGMAbQBk%"") OR ...",PASS
+windash,Encoding Modifiers,Windows dash variations,modifier_windash,"LIKE(field ""% -param %"") OR LIKE(field ""% /param %"") OR ...",PASS
+gt,Comparison Modifiers,Greater than,modifier_gt,ProcessId>1000,PASS
+gte,Comparison Modifiers,Greater than or equal,modifier_gte,ProcessId>=1000,PASS
+lt,Comparison Modifiers,Less than,modifier_lt,ProcessId<5000,PASS
+lte,Comparison Modifiers,Less than or equal,modifier_lte,ProcessId<=9999,PASS
+exists,Field Modifiers,Field existence check,modifier_exists_true,isnotnull(field) or isnull(field),PASS
+fieldref,Field Modifiers,Field-to-field comparison,modifier_fieldref,field1=field2,PASS
+cidr,Network Modifiers,CIDR network matching,cidr_network_range,"cidrmatch(field ""192.168.0.0/24"")",PASS
+re,Regex Modifiers,Regular expression,regex_pattern_match,"match(field 'regex')",PASS

@@ -1,0 +1,6 @@
+Operation,Test Case,PPL Output Example,Status
+AND,logical_and_condition,"EventID=1 AND LIKE(Image ""%\cmd.exe%"")",PASS
+OR,logical_or_condition,"LIKE(Image ""%\cmd.exe"") OR LIKE(Image ""%\powershell.exe"")",PASS
+NOT,logical_not_condition,"NOT LIKE(ParentImage ""%\services.exe"")",PASS
+Complex nested,logical_complex_nested,(condition1 AND condition2) OR (condition3 AND NOT condition4),PASS
+Multiple selections,logical_multiple_selections,(Image matches) AND (CommandLine matches) AND NOT (ParentImage matches),PASS

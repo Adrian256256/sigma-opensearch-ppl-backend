@@ -1,1 +1,0 @@
-source=firewall-network-traffic-* | where action="allowed" AND direction="outbound" | stats avg(BytesOut) as avg_bytes by SourceIP, User | where avg_bytes>500000

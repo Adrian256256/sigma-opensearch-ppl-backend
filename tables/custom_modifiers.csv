@@ -1,0 +1,4 @@
+Modifier Name,Class Name,File,Encoding,Purpose,Test Case,Status
+utf16,SigmaUTF16Modifier,sigma_backend/backends/opensearch_ppl/modifiers.py,"UTF-16 Little Endian (UTF-16LE)",Provides an explicit utf16 alias for the standard wide modifier,modifier_utf16_base64offset,PASS
+utf16le,SigmaUTF16LEModifier,sigma_backend/backends/opensearch_ppl/modifiers.py,"UTF-16 Little Endian (UTF-16LE)","Explicit Little Endian UTF-16 encoding - Windows-style (null byte after each character)",modifier_utf16le_base64offset,PASS
+utf16be,SigmaUTF16BEModifier,sigma_backend/backends/opensearch_ppl/modifiers.py,"UTF-16 Big Endian (UTF-16BE)","Big Endian UTF-16 encoding - Network protocols (null byte before each character)",modifier_utf16be_base64offset,PASS

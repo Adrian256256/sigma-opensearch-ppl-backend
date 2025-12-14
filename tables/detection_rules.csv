@@ -1,0 +1,8 @@
+Rule Type,Test Case,Description,Logsource,Status
+Process Creation,windows_process_creation_basic,Basic Windows process detection,windows-process_creation,PASS
+PowerShell,windows_suspicious_powershell,Suspicious PowerShell execution patterns,windows-process_creation,PASS
+Network Connection,windows_network_connection_suspicious,Suspicious network connections,windows-network_connection,PASS
+File Creation,windows_file_creation_sensitive,File creation in sensitive directories,windows-file_event,PASS
+Linux Commands,linux_suspicious_bash_commands,Suspicious bash/shell commands,linux-process_creation,PASS
+Mimikatz,mimikatz_execution,Mimikatz credential dumping tool detection,windows-process_creation,PASS
+Lateral Movement,lateral_movement_psexec,PsExec lateral movement detection,windows-process_creation,PASS

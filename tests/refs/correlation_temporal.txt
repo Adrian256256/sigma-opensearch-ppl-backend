@@ -1,1 +1,0 @@
-source=windows-process-creation-* | where LIKE(CommandLine, "%whoami%") OR LIKE(CommandLine, "%net user%") OR LIKE(CommandLine, "%ipconfig%") OR LIKE(CommandLine, "%systeminfo%") | stats count() as cmd_count by ComputerName, User | where cmd_count>=2
