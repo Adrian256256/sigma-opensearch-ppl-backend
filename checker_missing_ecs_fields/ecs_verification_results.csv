@@ -1,363 +1,363 @@
-sigma_field,match_type,ecs_field,notes
-Message,exact,message,Official ECS field
-Action,partial,event.action,"Similar name, verify manually"
-action,partial,event.action,"Similar name, verify manually"
-Address,partial,"client.address, destination.address, email.bcc.address","Similar name, verify manually"
-answers,partial,dns.answers,"Similar name, verify manually"
-Application,partial,network.application,"Similar name, verify manually"
-AppName,partial,log.syslog.appname,"Similar name, verify manually"
-Category,partial,"event.category, rule.category, vulnerability.category","Similar name, verify manually"
-category,partial,"event.category, rule.category, vulnerability.category","Similar name, verify manually"
-cipher,partial,tls.cipher,"Similar name, verify manually"
-CommandLine,partial,"process.command_line, process.entry_leader.command_line, process.group_leader.command_line","Similar name, verify manually"
-Company,partial,"dll.pe.company, file.pe.company, process.parent.pe.company","Similar name, verify manually"
-Count,partial,gen_ai.request.choice.count,"Similar name, verify manually"
-Data,partial,"dns.answers.data, file.elf.header.data, process.elf.header.data","Similar name, verify manually"
-Description,partial,"dll.pe.description, file.pe.description, gen_ai.agent.description","Similar name, verify manually"
-Device,partial,"file.device, threat.enrichments.indicator.file.device, threat.indicator.file.device","Similar name, verify manually"
-DeviceName,partial,volume.device_name,"Similar name, verify manually"
-DistinguishedName,partial,"file.x509.issuer.distinguished_name, file.x509.subject.distinguished_name, threat.enrichments.indicator.file.x509.issuer.distinguished_name","Similar name, verify manually"
-FileVersion,partial,"dll.pe.file_version, file.pe.file_version, process.parent.pe.file_version","Similar name, verify manually"
-Hash,partial,"client.user.hash, destination.user.hash, event.hash","Similar name, verify manually"
-key,partial,"registry.key, threat.enrichments.indicator.registry.key, threat.indicator.registry.key","Similar name, verify manually"
-Level,partial,log.level,"Similar name, verify manually"
-Location,partial,"client.geo.location, destination.geo.location, host.geo.location","Similar name, verify manually"
-method,partial,http.request.method,"Similar name, verify manually"
-Name,partial,"agent.name, client.as.organization.name, client.geo.name","Similar name, verify manually"
-name,partial,"agent.name, client.as.organization.name, client.geo.name","Similar name, verify manually"
-OriginalFileName,partial,"dll.pe.original_file_name, file.pe.original_file_name, process.parent.pe.original_file_name","Similar name, verify manually"
-Path,partial,"dll.path, file.path, log.file.path","Similar name, verify manually"
-path,partial,"dll.path, file.path, log.file.path","Similar name, verify manually"
-Product,partial,"dll.pe.product, file.pe.product, observer.product","Similar name, verify manually"
-Protocol,partial,network.protocol,"Similar name, verify manually"
-Provider,partial,"cloud.origin.provider, cloud.provider, cloud.target.provider","Similar name, verify manually"
-Query,partial,"threat.enrichments.indicator.url.query, threat.indicator.url.query, url.query","Similar name, verify manually"
-query,partial,"threat.enrichments.indicator.url.query, threat.indicator.url.query, url.query","Similar name, verify manually"
-Reason,partial,event.reason,"Similar name, verify manually"
-reason,partial,event.reason,"Similar name, verify manually"
-ServerName,partial,tls.client.server_name,"Similar name, verify manually"
-State,partial,"service.origin.state, service.state, service.target.state","Similar name, verify manually"
-Status,partial,"dll.code_signature.status, file.code_signature.status, process.code_signature.status","Similar name, verify manually"
-status,partial,"dll.code_signature.status, file.code_signature.status, process.code_signature.status","Similar name, verify manually"
-subjectName,partial,"dll.code_signature.subject_name, file.code_signature.subject_name, process.code_signature.subject_name","Similar name, verify manually"
-Type,partial,"agent.type, cloud.entity.type, cloud.machine.type","Similar name, verify manually"
-type,partial,"agent.type, cloud.entity.type, cloud.machine.type","Similar name, verify manually"
-User,partial,related.user,"Similar name, verify manually"
-UserName,partial,"threat.enrichments.indicator.url.username, threat.indicator.url.username, url.username","Similar name, verify manually"
-Username,partial,"threat.enrichments.indicator.url.username, threat.indicator.url.username, url.username","Similar name, verify manually"
-Value,partial,"registry.value, threat.enrichments.indicator.registry.value, threat.indicator.registry.value","Similar name, verify manually"
-a0,none,,No official ECS equivalent found
-a1,none,,No official ECS equivalent found
-a2,none,,No official ECS equivalent found
-a3,none,,No official ECS equivalent found
-a4,none,,No official ECS equivalent found
-a5,none,,No official ECS equivalent found
-a6,none,,No official ECS equivalent found
-a7,none,,No official ECS equivalent found
-AccessList,none,,No official ECS equivalent found
-AccessMask,none,,No official ECS equivalent found
-AccountName,none,,No official ECS equivalent found
-ActivityDetails,none,,No official ECS equivalent found
-ActivityDisplayName,none,,No official ECS equivalent found
-ActivityType,none,,No official ECS equivalent found
-activityType,none,,No official ECS equivalent found
-actor.alternateid,none,,No official ECS equivalent found
-additionalDetails.additionalInfo,none,,No official ECS equivalent found
-additionalEventData.MFAUsed,none,,No official ECS equivalent found
-AdditionalInfo,none,,No official ECS equivalent found
-AllowedToDelegateTo,none,,No official ECS equivalent found
-answer,none,,No official ECS equivalent found
-apiGroup,none,,No official ECS equivalent found
-AppID,none,,No official ECS equivalent found
-AppId,none,,No official ECS equivalent found
-ApplicationId,none,,No official ECS equivalent found
-ApplicationPath,none,,No official ECS equivalent found
-AttributeLDAPDisplayName,none,,No official ECS equivalent found
-AttributeValue,none,,No official ECS equivalent found
-AuditPolicyChanges,none,,No official ECS equivalent found
-AuditSourceName,none,,No official ECS equivalent found
-auditType.action,none,,No official ECS equivalent found
-auditType.category,none,,No official ECS equivalent found
-AuthenticationPackageName,none,,No official ECS equivalent found
-AuthenticationRequirement,none,,No official ECS equivalent found
-Binary,none,,No official ECS equivalent found
-blocked,none,,No official ECS equivalent found
-c-uri,none,,No official ECS equivalent found
-c-uri-extension,none,,No official ECS equivalent found
-c-uri-query,none,,No official ECS equivalent found
-c-useragent,none,,No official ECS equivalent found
-CallTrace,none,,No official ECS equivalent found
-capabilities,none,,No official ECS equivalent found
-Caption,none,,No official ECS equivalent found
-CategoryValue,none,,No official ECS equivalent found
-certificate.serial,none,,No official ECS equivalent found
-CertThumbprint,none,,No official ECS equivalent found
-cfgpath,none,,No official ECS equivalent found
-Channel,none,,No official ECS equivalent found
-ClassName,none,,No official ECS equivalent found
-ClientAddress,none,,No official ECS equivalent found
-ClientApp,none,,No official ECS equivalent found
-ClientProcessId,none,,No official ECS equivalent found
-comm,none,,No official ECS equivalent found
-conditionalAccessStatus,none,,No official ECS equivalent found
-Configuration,none,,No official ECS equivalent found
-ConsentContext.IsAdminConsent,none,,No official ECS equivalent found
-Contents,none,,No official ECS equivalent found
-ContextInfo,none,,No official ECS equivalent found
-CreationUtcTime,none,,No official ECS equivalent found
-cs-cookie,none,,No official ECS equivalent found
-cs-host,none,,No official ECS equivalent found
-cs-method,none,,No official ECS equivalent found
-cs-referer,none,,No official ECS equivalent found
-cs-uri,none,,No official ECS equivalent found
-cs-uri-query,none,,No official ECS equivalent found
-cs-user-agent,none,,No official ECS equivalent found
-CurrentDirectory,none,,No official ECS equivalent found
-data.protoPayload.authorizationInfo.granted,none,,No official ECS equivalent found
-data.protoPayload.authorizationInfo.permission,none,,No official ECS equivalent found
-data.protoPayload.logName,none,,No official ECS equivalent found
-data.protoPayload.methodName,none,,No official ECS equivalent found
-data.protoPayload.resource.type,none,,No official ECS equivalent found
-data.protoPayload.serviceName,none,,No official ECS equivalent found
-debugcontext.debugdata.behaviors,none,,No official ECS equivalent found
-debugcontext.debugdata.logonlysecuritydata,none,,No official ECS equivalent found
-debugContext.debugData.requestUri,none,,No official ECS equivalent found
-DestAddress,none,,No official ECS equivalent found
-Destination,none,,No official ECS equivalent found
-DestinationHostname,none,,No official ECS equivalent found
-DestinationIp,none,,No official ECS equivalent found
-DestinationPort,none,,No official ECS equivalent found
-DestPort,none,,No official ECS equivalent found
-Details,none,,No official ECS equivalent found
-DeviceDescription,none,,No official ECS equivalent found
-DeviceDetail.deviceId,none,,No official ECS equivalent found
-DeviceDetail.isCompliant,none,,No official ECS equivalent found
-DeviceDetail.trusttype,none,,No official ECS equivalent found
-displaymessage,none,,No official ECS equivalent found
-dst_ip,none,,No official ECS equivalent found
-dst_port,none,,No official ECS equivalent found
-EncyptionUsed,none,,No official ECS equivalent found
-endpoint,none,,No official ECS equivalent found
-ErrorCode,none,,No official ECS equivalent found
-errorCode,none,,No official ECS equivalent found
-errorMessage,none,,No official ECS equivalent found
-euid,none,,No official ECS equivalent found
-event_type,none,,No official ECS equivalent found
-event_type_id,none,,No official ECS equivalent found
-EventID,none,,No official ECS equivalent found
-EventLog,none,,No official ECS equivalent found
-eventName,none,,No official ECS equivalent found
-eventService,none,,No official ECS equivalent found
-eventSource,none,,No official ECS equivalent found
-EventType,none,,No official ECS equivalent found
-eventType,none,,No official ECS equivalent found
-eventtype,none,,No official ECS equivalent found
-ExceptionCode,none,,No official ECS equivalent found
-exe,none,,No official ECS equivalent found
-failure_status_reason,none,,No official ECS equivalent found
-Feature_Name,none,,No official ECS equivalent found
-FileName,none,,No official ECS equivalent found
-Filename,none,,No official ECS equivalent found
-FileNameBuffer,none,,No official ECS equivalent found
-FilterName,none,,No official ECS equivalent found
-FilterOrigin,none,,No official ECS equivalent found
-gcp.audit.method_name,none,,No official ECS equivalent found
-GrantedAccess,none,,No official ECS equivalent found
-Hashes,none,,No official ECS equivalent found
-HiveName,none,,No official ECS equivalent found
-HomeTenantId,none,,No official ECS equivalent found
-host,none,,No official ECS equivalent found
-hostPath,none,,No official ECS equivalent found
-id.orig_h,none,,No official ECS equivalent found
-id.resp_h,none,,No official ECS equivalent found
-id.resp_p,none,,No official ECS equivalent found
-Image,none,,No official ECS equivalent found
-ImageLoaded,none,,No official ECS equivalent found
-ImageName,none,,No official ECS equivalent found
-ImagePath,none,,No official ECS equivalent found
-ImpersonationLevel,none,,No official ECS equivalent found
-Initiated,none,,No official ECS equivalent found
-InitiatedBy,none,,No official ECS equivalent found
-Initiatedby,none,,No official ECS equivalent found
-IntegrityLevel,none,,No official ECS equivalent found
-InterfaceUuid,none,,No official ECS equivalent found
-IpAddress,none,,No official ECS equivalent found
-IpPort,none,,No official ECS equivalent found
-IsatapRouter,none,,No official ECS equivalent found
-KeyLength,none,,No official ECS equivalent found
-Keywords,none,,No official ECS equivalent found
-LayerRTID,none,,No official ECS equivalent found
-legacyeventtype,none,,No official ECS equivalent found
-LocalName,none,,No official ECS equivalent found
-LoggedByService,none,,No official ECS equivalent found
-LogonId,none,,No official ECS equivalent found
-LogonProcessName,none,,No official ECS equivalent found
-LogonType,none,,No official ECS equivalent found
-logtype,none,,No official ECS equivalent found
-ModifiedProperties{}.NewValue,none,,No official ECS equivalent found
-ModifyingApplication,none,,No official ECS equivalent found
-nametype,none,,No official ECS equivalent found
-NetworkLocationDetails,none,,No official ECS equivalent found
-new_value,none,,No official ECS equivalent found
-NewName,none,,No official ECS equivalent found
-NewTargetUserName,none,,No official ECS equivalent found
-NewTemplateContent,none,,No official ECS equivalent found
-NewUacValue,none,,No official ECS equivalent found
-NewValue,none,,No official ECS equivalent found
-ObjectClass,none,,No official ECS equivalent found
-ObjectDN,none,,No official ECS equivalent found
-ObjectId,none,,No official ECS equivalent found
-ObjectName,none,,No official ECS equivalent found
-objectRef.apiGroup,none,,No official ECS equivalent found
-objectRef.namespace,none,,No official ECS equivalent found
-objectRef.resource,none,,No official ECS equivalent found
-objectRef.subresource,none,,No official ECS equivalent found
-ObjectServer,none,,No official ECS equivalent found
-ObjectType,none,,No official ECS equivalent found
-ObjectValueName,none,,No official ECS equivalent found
-OldUacValue,none,,No official ECS equivalent found
-OldValue,none,,No official ECS equivalent found
-Operation,none,,No official ECS equivalent found
-operation,none,,No official ECS equivalent found
-OperationName,none,,No official ECS equivalent found
-operationName,none,,No official ECS equivalent found
-OperationNameValue,none,,No official ECS equivalent found
-OpNum,none,,No official ECS equivalent found
-Origin,none,,No official ECS equivalent found
-outcome.reason,none,,No official ECS equivalent found
-outcome.result,none,,No official ECS equivalent found
-PackageFullName,none,,No official ECS equivalent found
-PackagePath,none,,No official ECS equivalent found
-param1,none,,No official ECS equivalent found
-param2,none,,No official ECS equivalent found
-param3,none,,No official ECS equivalent found
-ParentCommandLine,none,,No official ECS equivalent found
-ParentImage,none,,No official ECS equivalent found
-ParentProcessId,none,,No official ECS equivalent found
-ParentUser,none,,No official ECS equivalent found
-Payload,none,,No official ECS equivalent found
-payload,none,,No official ECS equivalent found
-PipeName,none,,No official ECS equivalent found
-PossibleCause,none,,No official ECS equivalent found
-PreAuthType,none,,No official ECS equivalent found
-PreviousCreationUtcTime,none,,No official ECS equivalent found
-PrivilegeList,none,,No official ECS equivalent found
-process,none,,No official ECS equivalent found
-ProcessId,none,,No official ECS equivalent found
-ProcessName,none,,No official ECS equivalent found
-ProcessNameBuffer,none,,No official ECS equivalent found
-ProcessPath,none,,No official ECS equivalent found
-processPath,none,,No official ECS equivalent found
-Properties,none,,No official ECS equivalent found
-properties.message,none,,No official ECS equivalent found
-Provider_Name,none,,No official ECS equivalent found
-ProviderContextName,none,,No official ECS equivalent found
-qtype_name,none,,No official ECS equivalent found
-QueryName,none,,No official ECS equivalent found
-record_type,none,,No official ECS equivalent found
-rejected,none,,No official ECS equivalent found
-RelativeTargetName,none,,No official ECS equivalent found
-RemoteName,none,,No official ECS equivalent found
-request_type,none,,No official ECS equivalent found
-RequestedPolicy,none,,No official ECS equivalent found
-requestParameters,none,,No official ECS equivalent found
-requestParameters.attribute,none,,No official ECS equivalent found
-requestParameters.containerDefinitions.command,none,,No official ECS equivalent found
-requestParameters.enable,none,,No official ECS equivalent found
-requestParameters.layers,none,,No official ECS equivalent found
-RequestType,none,,No official ECS equivalent found
-ResourceDisplayName,none,,No official ECS equivalent found
-ResourceId,none,,No official ECS equivalent found
-ResourceProviderValue,none,,No official ECS equivalent found
-ResourceTenantId,none,,No official ECS equivalent found
-resp_mime_types,none,,No official ECS equivalent found
-responseElements,none,,No official ECS equivalent found
-responseElements.ConsoleLogin,none,,No official ECS equivalent found
-responseElements.pendingModifiedValues.masterUserPassword,none,,No official ECS equivalent found
-responseElements.publiclyAccessible,none,,No official ECS equivalent found
-responseStatus.code,none,,No official ECS equivalent found
-ResultDescription,none,,No official ECS equivalent found
-Resultdescription,none,,No official ECS equivalent found
-ResultStatus,none,,No official ECS equivalent found
-ResultType,none,,No official ECS equivalent found
-riskEventType,none,,No official ECS equivalent found
-RiskState,none,,No official ECS equivalent found
-SamAccountName,none,,No official ECS equivalent found
-sc-status,none,,No official ECS equivalent found
-ScriptBlockText,none,,No official ECS equivalent found
-SearchFilter,none,,No official ECS equivalent found
-securityContext.isProxy,none,,No official ECS equivalent found
-securitycontext.isproxy,none,,No official ECS equivalent found
-Service,none,,No official ECS equivalent found
-service,none,,No official ECS equivalent found
-ServiceFileName,none,,No official ECS equivalent found
-ServiceName,none,,No official ECS equivalent found
-ServicePrincipalNames,none,,No official ECS equivalent found
-ServiceStartType,none,,No official ECS equivalent found
-ServiceType,none,,No official ECS equivalent found
-setting_name,none,,No official ECS equivalent found
-ShareName,none,,No official ECS equivalent found
-SidHistory,none,,No official ECS equivalent found
-SidList,none,,No official ECS equivalent found
-Signature,none,,No official ECS equivalent found
-SignatureStatus,none,,No official ECS equivalent found
-Signed,none,,No official ECS equivalent found
-SigningUsed,none,,No official ECS equivalent found
-SourceAddress,none,,No official ECS equivalent found
-SourceCommandLine,none,,No official ECS equivalent found
-SourceFilename,none,,No official ECS equivalent found
-SourceHostname,none,,No official ECS equivalent found
-SourceImage,none,,No official ECS equivalent found
-SourceIp,none,,No official ECS equivalent found
-sourceIPAddress,none,,No official ECS equivalent found
-SourceIsIpv6,none,,No official ECS equivalent found
-SourceName,none,,No official ECS equivalent found
-SourceParentImage,none,,No official ECS equivalent found
-SourcePort,none,,No official ECS equivalent found
-SourceUser,none,,No official ECS equivalent found
-StartAddress,none,,No official ECS equivalent found
-StartFunction,none,,No official ECS equivalent found
-StartModule,none,,No official ECS equivalent found
-SubcategoryGuid,none,,No official ECS equivalent found
-SubjectDomainName,none,,No official ECS equivalent found
-SubjectLogonId,none,,No official ECS equivalent found
-SubjectUserName,none,,No official ECS equivalent found
-SubjectUserSid,none,,No official ECS equivalent found
-SubStatus,none,,No official ECS equivalent found
-SYSCALL,none,,No official ECS equivalent found
-Target,none,,No official ECS equivalent found
-target.displayname,none,,No official ECS equivalent found
-TargetFilename,none,,No official ECS equivalent found
-TargetImage,none,,No official ECS equivalent found
-TargetName,none,,No official ECS equivalent found
-TargetObject,none,,No official ECS equivalent found
-TargetOutboundUserName,none,,No official ECS equivalent found
-TargetParentProcessId,none,,No official ECS equivalent found
-TargetResources,none,,No official ECS equivalent found
-TargetResources.modifiedProperties,none,,No official ECS equivalent found
-TargetResources.ModifiedProperties.DisplayName,none,,No official ECS equivalent found
-TargetResources.ModifiedProperties.NewValue,none,,No official ECS equivalent found
-TargetResources.modifiedProperties.newValue,none,,No official ECS equivalent found
-targetResources.type,none,,No official ECS equivalent found
-TargetServerName,none,,No official ECS equivalent found
-TargetSid,none,,No official ECS equivalent found
-TargetUserName,none,,No official ECS equivalent found
-TargetUserSid,none,,No official ECS equivalent found
-TaskContent,none,,No official ECS equivalent found
-TaskContentNew,none,,No official ECS equivalent found
-TaskName,none,,No official ECS equivalent found
-TemplateContent,none,,No official ECS equivalent found
-TicketEncryptionType,none,,No official ECS equivalent found
-TicketOptions,none,,No official ECS equivalent found
-unit,none,,No official ECS equivalent found
-uri,none,,No official ECS equivalent found
-user_agent,none,,No official ECS equivalent found
-userAgent,none,,No official ECS equivalent found
-userIdentity.arn,none,,No official ECS equivalent found
-userIdentity.sessionContext.sessionIssuer.type,none,,No official ECS equivalent found
-userIdentity.type,none,,No official ECS equivalent found
-verb,none,,No official ECS equivalent found
-Workload,none,,No official ECS equivalent found
-Workstation,none,,No official ECS equivalent found
-WorkstationName,none,,No official ECS equivalent found
-Z,none,,No official ECS equivalent found
+sigma_field,ecs_field,notes
+Message,message,High confidence - Official ECS core field
+Action,event.action,High confidence - Standard event action field
+action,event.action,High confidence - Standard event action field
+AccountName,user.name,High confidence - Standard user identification
+Address,source.address | destination.address | client.address,Medium confidence - Depends on context (source/dest/client)
+AllowedToDelegateTo,winlog.event_data.AllowedToDelegateTo,High confidence - Windows Kerberos delegation
+answer,dns.answers.name,High confidence - DNS answer field
+answers,dns.answers,High confidence - DNS answers array
+apiGroup,orchestrator.api_version,Medium confidence - Kubernetes API group
+Application,process.name,High confidence - Application/process name
+AppName,process.name,Medium confidence - Application name maps to process
+AppID,process.entity_id,Medium confidence - Process unique identifier
+AppId,process.entity_id,Medium confidence - Process unique identifier
+ApplicationId,process.entity_id,Medium confidence - Application/process ID
+ApplicationPath,process.executable,High confidence - Full path to executable
+AttributeLDAPDisplayName,winlog.event_data.AttributeLDAPDisplayName,High confidence - Windows LDAP attribute
+AttributeValue,winlog.event_data.AttributeValue,High confidence - Windows attribute value
+AuditPolicyChanges,winlog.event_data.AuditPolicyChanges,High confidence - Windows audit policy
+AuditSourceName,winlog.event_data.AuditSourceName,High confidence - Windows audit source
+auditType.action,event.action,High confidence - Audit action type
+auditType.category,event.category,High confidence - Audit category
+AuthenticationPackageName,winlog.event_data.AuthenticationPackageName,High confidence - Windows authentication package
+AuthenticationRequirement,event.action,Low confidence - Contextual authentication info
+Binary,file.path,Medium confidence - Binary file path
+blocked,event.outcome,High confidence - Maps to success/failure/unknown
+CallTrace,process.thread.call_trace,High confidence - Thread call trace
+capabilities,container.security_context.privileged,Medium confidence - Container capabilities
+Caption,host.os.full,Medium confidence - OS caption/description
+Category,event.category,High confidence - ECS event category
+category,event.category,High confidence - ECS event category
+CategoryValue,event.category,High confidence - ECS event category value
+certificate.serial,tls.server.x509.serial_number,High confidence - Certificate serial number
+CertThumbprint,tls.server.hash.sha1,High confidence - Certificate thumbprint
+cfgpath,file.path,Medium confidence - Configuration file path
+Channel,log.logger,High confidence - Log channel/logger name
+cipher,tls.cipher,High confidence - TLS cipher suite
+ClassName,winlog.event_data.ClassName,High confidence - Windows WMI class
+ClientAddress,client.address,High confidence - Client network address
+ClientApp,user_agent.original,Medium confidence - Client application
+ClientProcessId,process.parent.pid,Medium confidence - Client/parent process ID
+CommandLine,process.command_line,High confidence - Full command line
+comm,process.name,High confidence - Linux process command name
+Company,file.pe.company,High confidence - PE file company name
+conditionalAccessStatus,event.outcome,Medium confidence - Access status outcome
+Configuration,event.original,Low confidence - Generic configuration data
+ConsentContext.IsAdminConsent,event.action,Low confidence - Azure AD consent context
+Contents,file.content,Low confidence - File content data
+ContextInfo,event.original,Low confidence - Generic context information
+Count,event.sequence,Medium confidence - Event sequence/count
+CreationUtcTime,file.created,High confidence - File creation timestamp
+cs-cookie,http.request.headers,Medium confidence - HTTP cookie header
+cs-host,url.domain,High confidence - HTTP host header
+cs-method,http.request.method,High confidence - HTTP request method
+cs-referer,http.request.referrer,High confidence - HTTP referer header
+cs-uri,url.path,High confidence - HTTP URI path
+cs-uri-query,url.query,High confidence - HTTP query string
+cs-user-agent,user_agent.original,High confidence - HTTP user agent
+c-uri,url.path,High confidence - IIS URI path
+c-uri-extension,url.extension,High confidence - URI file extension
+c-uri-query,url.query,High confidence - URI query string
+c-useragent,user_agent.original,High confidence - IIS user agent
+CurrentDirectory,process.working_directory,High confidence - Process working directory
+Data,event.original,Low confidence - Generic data field
+data.protoPayload.authorizationInfo.granted,event.outcome,Medium confidence - GCP authorization result
+data.protoPayload.authorizationInfo.permission,event.action,Medium confidence - GCP permission requested
+data.protoPayload.logName,log.logger,High confidence - GCP log name
+data.protoPayload.methodName,event.action,High confidence - GCP API method
+data.protoPayload.resource.type,cloud.service.name,High confidence - GCP resource type
+data.protoPayload.serviceName,cloud.service.name,High confidence - GCP service name
+debugContext.debugData.requestUri,url.original,High confidence - Azure AD request URI
+debugcontext.debugdata.behaviors,event.action,Low confidence - Azure debug behaviors
+debugcontext.debugdata.logonlysecuritydata,event.original,Low confidence - Azure security data
+Description,rule.description,High confidence - Rule/event description
+DestAddress,destination.address,High confidence - Destination network address
+Destination,destination.address,High confidence - Destination address
+DestinationHostname,destination.domain,High confidence - Destination hostname/domain
+DestinationIp,destination.ip,High confidence - Destination IP address
+DestinationPort,destination.port,High confidence - Destination port number
+DestPort,destination.port,High confidence - Destination port
+Details,event.original,Low confidence - Generic details field
+Device,host.name,Medium confidence - Device/host name
+DeviceDescription,host.name,Medium confidence - Device description
+DeviceDetail.deviceId,device.id,High confidence - Azure AD device ID
+DeviceDetail.isCompliant,host.os.type,Low confidence - Device compliance status
+DeviceDetail.trusttype,host.os.type,Low confidence - Device trust type
+DeviceName,host.name,High confidence - Device name
+displaymessage,message,High confidence - Display message
+DistinguishedName,user.name,Medium confidence - LDAP distinguished name
+dst_ip,destination.ip,High confidence - Destination IP (Zeek/Suricata)
+dst_port,destination.port,High confidence - Destination port (Zeek/Suricata)
+EncyptionUsed,tls.cipher,Medium confidence - Encryption method used
+endpoint,url.full,High confidence - Full endpoint URL
+ErrorCode,error.code,High confidence - Error code
+errorCode,error.code,High confidence - Error code
+errorMessage,error.message,High confidence - Error message text
+euid,user.effective.id,High confidence - Effective user ID (Linux)
+EventID,event.code,High confidence - Windows Event ID
+EventLog,log.file.path,High confidence - Event log file path
+eventName,event.action,High confidence - AWS/cloud event name
+eventService,service.name,High confidence - Service generating event
+eventSource,event.provider,High confidence - Event source/provider
+EventType,event.type,High confidence - ECS event type
+eventType,event.type,High confidence - ECS event type
+event_type,event.type,High confidence - Event type
+event_type_id,event.code,High confidence - Event type identifier
+eventtype,event.type,High confidence - Event type
+ExceptionCode,error.code,High confidence - Exception code
+exe,process.executable,High confidence - Executable path
+failure_status_reason,error.message,High confidence - Failure reason
+Feature_Name,event.action,Low confidence - Feature name
+FileName,file.name,High confidence - File name without path
+Filename,file.name,High confidence - File name
+FileNameBuffer,file.name,High confidence - File name from buffer
+FileVersion,file.pe.file_version,High confidence - PE file version
+FilterName,event.action,Low confidence - Filter name
+FilterOrigin,event.action,Low confidence - Filter origin
+gcp.audit.method_name,event.action,High confidence - GCP audit method
+GrantedAccess,winlog.event_data.GrantedAccess,High confidence - Windows granted access mask
+Hash,file.hash.sha256,High confidence - File hash (SHA256)
+Hashes,file.hash.sha256,High confidence - File hashes
+HiveName,registry.hive,High confidence - Windows registry hive
+HomeTenantId,cloud.account.id,High confidence - Azure AD tenant ID
+host,host.name,High confidence - Host name
+hostPath,file.path,Medium confidence - Host path (K8s)
+id.orig_h,source.ip,High confidence - Zeek originator IP
+id.resp_h,destination.ip,High confidence - Zeek responder IP
+id.resp_p,destination.port,High confidence - Zeek responder port
+Image,process.executable,High confidence - Sysmon process image path
+ImageLoaded,dll.path,High confidence - Sysmon DLL loaded
+ImageName,process.name,High confidence - Image/process name
+ImagePath,process.executable,High confidence - Full image path
+ImpersonationLevel,winlog.event_data.ImpersonationLevel,High confidence - Windows impersonation level
+Initiated,event.start,High confidence - Action initiated timestamp
+InitiatedBy,user.name,High confidence - User who initiated action
+Initiatedby,user.name,High confidence - User who initiated action
+actor.alternateid,user.email,Medium confidence - Azure AD alternate ID
+additionalDetails.additionalInfo,event.original,Low confidence - Additional info
+additionalEventData.MFAUsed,user.mfa,Medium confidence - MFA usage indicator
+AdditionalInfo,event.original,Low confidence - Additional information
+AccessList,winlog.event_data.AccessList,High confidence - Windows access control list
+AccessMask,winlog.event_data.AccessMask,High confidence - Windows access mask
+ActivityDetails,event.action,Low confidence - Activity details
+ActivityDisplayName,event.action,Medium confidence - Activity display name
+ActivityType,event.action,Medium confidence - Activity type
+activityType,event.action,Medium confidence - Activity type
+IntegrityLevel,process.integrity_level,High confidence - Process integrity level (Windows)
+InterfaceUuid,winlog.event_data.InterfaceUuid,High confidence - Windows RPC interface UUID
+IpAddress,source.ip,High confidence - IP address (typically source)
+IpPort,source.port,High confidence - IP port
+IsatapRouter,network.name,Low confidence - ISATAP router name
+key,registry.key,High confidence - Windows registry key
+KeyLength,tls.server.x509.public_key_size,Medium confidence - Encryption key length
+Keywords,event.type,Medium confidence - Windows event keywords
+LayerRTID,winlog.event_data.LayerRTID,High confidence - Windows filtering layer ID
+legacyeventtype,event.type,Medium confidence - Legacy event type
+Level,log.level,High confidence - Log level (info/warn/error)
+LocalName,file.path,Medium confidence - Local file name/path
+Location,geo.name,High confidence - Geographic location
+LoggedByService,service.name,High confidence - Service that logged event
+LogonId,user.id,High confidence - Windows logon session ID
+LogonProcessName,winlog.event_data.LogonProcessName,High confidence - Windows logon process
+LogonType,winlog.event_data.LogonType,High confidence - Windows logon type
+logtype,log.level,Medium confidence - Log type/level
+method,http.request.method,High confidence - HTTP method (GET/POST/etc)
+ModifiedProperties{}.NewValue,event.original,Low confidence - Azure AD modified properties
+ModifyingApplication,process.name,Medium confidence - Application making modification
+Name,file.name,Medium confidence - Generic name field (context-dependent)
+name,file.name,Medium confidence - Generic name field
+nametype,dns.question.type,High confidence - DNS query type
+NetworkLocationDetails,network.name,Low confidence - Network location details
+new_value,event.original,Low confidence - New value in change
+NewName,file.name,High confidence - New file name
+NewTargetUserName,user.target.name,High confidence - New target user name
+NewTemplateContent,event.original,Low confidence - New template content
+NewUacValue,winlog.event_data.NewUacValue,High confidence - New UAC value
+NewValue,event.original,Low confidence - New value
+ObjectClass,winlog.event_data.ObjectClass,High confidence - Windows object class
+ObjectDN,user.name,Medium confidence - LDAP object distinguished name
+ObjectId,file.inode,Medium confidence - Object/file identifier
+ObjectName,file.name,High confidence - Object/file name
+objectRef.apiGroup,orchestrator.api_version,High confidence - K8s API group
+objectRef.namespace,orchestrator.namespace,High confidence - K8s namespace
+objectRef.resource,orchestrator.resource.type,High confidence - K8s resource type
+objectRef.subresource,orchestrator.resource.name,High confidence - K8s subresource
+ObjectServer,winlog.event_data.ObjectServer,High confidence - Windows object server
+ObjectType,winlog.event_data.ObjectType,High confidence - Windows object type
+ObjectValueName,registry.value,High confidence - Registry value name
+OldUacValue,winlog.event_data.OldUacValue,High confidence - Old UAC value
+OldValue,event.original,Low confidence - Old value before change
+Operation,event.action,High confidence - Operation performed
+operation,event.action,High confidence - Operation type
+OperationName,event.action,High confidence - Operation name
+operationName,event.action,High confidence - Operation name
+OperationNameValue,event.action,High confidence - Operation name value
+OpNum,winlog.event_data.OpNum,High confidence - Windows RPC operation number
+Origin,url.original,Medium confidence - Origin URL
+OriginalFileName,file.pe.original_file_name,High confidence - PE original file name
+outcome.reason,error.message,High confidence - Outcome reason
+outcome.result,event.outcome,High confidence - Outcome result
+PackageFullName,package.name,High confidence - Full package name
+PackagePath,package.path,High confidence - Package path
+param1,process.args,Medium confidence - Process argument 1
+param2,process.args,Medium confidence - Process argument 2
+param3,process.args,Medium confidence - Process argument 3
+ParentCommandLine,process.parent.command_line,High confidence - Parent process command line
+ParentImage,process.parent.executable,High confidence - Parent process executable
+ParentProcessId,process.parent.pid,High confidence - Parent process ID
+ParentUser,process.parent.user.name,High confidence - Parent process user
+Path,file.path,High confidence - File path
+path,file.path,High confidence - File path
+Payload,http.request.body.content,Medium confidence - Request payload
+payload,http.request.body.content,Medium confidence - Payload data
+PipeName,file.name,High confidence - Named pipe name
+PossibleCause,error.message,Medium confidence - Possible cause description
+PreAuthType,winlog.event_data.PreAuthType,High confidence - Kerberos pre-auth type
+PreviousCreationUtcTime,file.created,Medium confidence - Previous creation time
+PrivilegeList,user.effective.id,Medium confidence - User privileges
+process,process.name,High confidence - Process name
+ProcessId,process.pid,High confidence - Process ID
+ProcessName,process.name,High confidence - Process name
+ProcessNameBuffer,process.name,High confidence - Process name from buffer
+ProcessPath,process.executable,High confidence - Process executable path
+processPath,process.executable,High confidence - Process path
+Product,file.pe.product,High confidence - PE product name
+Properties,event.original,Low confidence - Generic properties
+properties.message,message,High confidence - Properties message
+Protocol,network.protocol,High confidence - Network protocol
+Provider,log.logger,High confidence - Log provider
+Provider_Name,log.logger,High confidence - Provider name
+ProviderContextName,service.name,Medium confidence - Provider context
+qtype_name,dns.question.type,High confidence - DNS question type name
+Query,dns.question.name,High confidence - DNS query
+query,dns.question.name,High confidence - DNS query
+QueryName,dns.question.name,High confidence - DNS query name
+Reason,error.message,High confidence - Reason description
+reason,error.message,High confidence - Reason text
+record_type,dns.question.type,High confidence - DNS record type
+rejected,event.outcome,High confidence - Rejected = failure outcome
+RelativeTargetName,file.name,Medium confidence - Relative target name
+RemoteName,network.name,Medium confidence - Remote network name
+request_type,http.request.method,High confidence - HTTP request type
+RequestedPolicy,event.action,Low confidence - Requested policy
+requestParameters,http.request.body.content,Medium confidence - AWS/API request params
+requestParameters.attribute,event.action,Medium confidence - Request attribute
+requestParameters.containerDefinitions.command,process.command_line,High confidence - Container command
+requestParameters.enable,event.action,Low confidence - Enable parameter
+requestParameters.layers,container.image.name,Medium confidence - Container layers
+RequestType,http.request.method,High confidence - HTTP request type
+ResourceDisplayName,cloud.service.name,Medium confidence - Resource display name
+ResourceId,cloud.instance.id,High confidence - Cloud resource ID
+ResourceProviderValue,cloud.provider,High confidence - Cloud provider
+ResourceTenantId,cloud.account.id,High confidence - Resource tenant ID
+resp_mime_types,http.response.mime_type,High confidence - Response MIME type
+responseElements,http.response.body.content,Medium confidence - API response elements
+responseElements.ConsoleLogin,event.action,Medium confidence - Console login response
+responseElements.pendingModifiedValues.masterUserPassword,event.action,Low confidence - Password change response
+responseElements.publiclyAccessible,event.action,Low confidence - Public accessibility
+responseStatus.code,http.response.status_code,High confidence - HTTP response status
+ResultDescription,event.outcome,Medium confidence - Result description
+Resultdescription,event.outcome,Medium confidence - Result description
+ResultStatus,event.outcome,High confidence - Result status
+ResultType,event.outcome,High confidence - Result type
+riskEventType,threat.indicator.type,High confidence - Risk event type
+RiskState,threat.indicator.confidence,Medium confidence - Risk state/level
+SamAccountName,user.name,High confidence - SAM account name
+sc-status,http.response.status_code,High confidence - HTTP status code
+ScriptBlockText,powershell.file.script_block_text,High confidence - PowerShell script text
+SearchFilter,event.action,Low confidence - LDAP search filter
+securityContext.isProxy,network.forwarded_ip,Medium confidence - Security context proxy
+securitycontext.isproxy,network.forwarded_ip,Medium confidence - Proxy indicator
+ServerName,server.address,High confidence - Server name/address
+Service,service.name,High confidence - Service name
+service,service.name,High confidence - Service name
+ServiceFileName,service.name,Medium confidence - Service file name
+ServiceName,service.name,High confidence - Service name
+ServicePrincipalNames,user.name,Medium confidence - Service principal names
+ServiceStartType,service.type,Medium confidence - Service start type
+ServiceType,service.type,High confidence - Service type
+setting_name,event.action,Low confidence - Setting name
+ShareName,file.directory,High confidence - Network share name
+SidHistory,user.id,Medium confidence - Windows SID history
+SidList,user.id,Medium confidence - List of SIDs
+Signature,file.code_signature.subject_name,High confidence - Code signature subject
+SignatureStatus,file.code_signature.status,High confidence - Signature validation status
+Signed,file.code_signature.exists,High confidence - Whether file is signed
+SigningUsed,tls.established,Medium confidence - TLS signing used
+SourceAddress,source.address,High confidence - Source network address
+SourceCommandLine,process.parent.command_line,Medium confidence - Source process command line
+SourceFilename,file.name,High confidence - Source file name
+SourceHostname,source.domain,High confidence - Source hostname
+SourceImage,process.parent.executable,High confidence - Source process image
+SourceIp,source.ip,High confidence - Source IP address
+sourceIPAddress,source.ip,High confidence - Source IP address
+SourceIsIpv6,source.ip,High confidence - Source IP (IPv6 flag)
+SourceName,source.domain,High confidence - Source name
+SourceParentImage,process.parent.parent.executable,Medium confidence - Source parent image
+SourcePort,source.port,High confidence - Source port number
+SourceUser,source.user.name,High confidence - Source user name
+StartAddress,process.thread.start_address,High confidence - Thread start address
+StartFunction,process.entry_leader.name,Medium confidence - Start function name
+StartModule,dll.name,High confidence - Start module/DLL name
+State,event.outcome,Medium confidence - State of operation
+Status,event.outcome,High confidence - Operation status
+status,event.outcome,High confidence - Status value
+SubcategoryGuid,event.code,Medium confidence - Windows event subcategory GUID
+subjectName,tls.server.subject,High confidence - TLS certificate subject
+SubjectDomainName,user.domain,High confidence - Windows subject domain
+SubjectLogonId,user.id,High confidence - Windows subject logon ID
+SubjectUserName,user.name,High confidence - Windows subject user name
+SubjectUserSid,user.id,High confidence - Windows subject user SID
+SubStatus,error.code,High confidence - Sub-status code
+SYSCALL,system.audit.syscall,High confidence - Linux system call number
+Target,file.target_path,High confidence - Symlink target path
+target.displayname,user.target.full_name,High confidence - Target display name
+TargetFilename,file.path,High confidence - Target file path
+TargetImage,process.executable,High confidence - Target process image
+TargetName,file.name,High confidence - Target name
+TargetObject,registry.path,High confidence - Registry target object
+TargetOutboundUserName,user.target.name,High confidence - Target outbound user
+TargetParentProcessId,process.parent.pid,Medium confidence - Target parent PID
+TargetResources,event.original,Low confidence - Azure AD target resources
+TargetResources.modifiedProperties,event.original,Low confidence - Modified properties
+TargetResources.ModifiedProperties.DisplayName,event.original,Low confidence - Display name
+TargetResources.ModifiedProperties.NewValue,event.original,Low confidence - New value
+TargetResources.modifiedProperties.newValue,event.original,Low confidence - New value
+targetResources.type,event.type,Medium confidence - Target resource type
+TargetServerName,server.address,High confidence - Target server name
+TargetSid,user.target.id,High confidence - Target user SID
+TargetUserName,user.target.name,High confidence - Target user name
+TargetUserSid,user.target.id,High confidence - Target user SID
+TaskContent,event.original,Low confidence - Scheduled task content
+TaskContentNew,event.original,Low confidence - New task content
+TaskName,process.name,Medium confidence - Task name
+TemplateContent,event.original,Low confidence - Template content
+TicketEncryptionType,winlog.event_data.TicketEncryptionType,High confidence - Kerberos ticket encryption
+TicketOptions,winlog.event_data.TicketOptions,High confidence - Kerberos ticket options
+Type,event.type,High confidence - Generic type field
+type,event.type,High confidence - Type field
+unit,process.name,Low confidence - Unit name (systemd)
+uri,url.original,High confidence - URI
+User,user.name,High confidence - User name
+user_agent,user_agent.original,High confidence - User agent string
+userAgent,user_agent.original,High confidence - User agent
+UserName,user.name,High confidence - User name
+Username,user.name,High confidence - Username
+userIdentity.arn,cloud.account.id,High confidence - AWS ARN
+userIdentity.sessionContext.sessionIssuer.type,user.roles,Medium confidence - AWS session issuer type
+userIdentity.type,user.roles,Medium confidence - AWS identity type
+Value,registry.data.strings,High confidence - Registry value data
+verb,http.request.method,High confidence - HTTP verb (K8s also uses this)
+Workload,service.name,Medium confidence - Workload name
+Workstation,host.name,High confidence - Workstation name
+WorkstationName,host.name,High confidence - Workstation name
+Z,process.args,Low confidence - Generic argument (audit)
+a0,process.args,High confidence - Linux audit syscall arg 0
+a1,process.args,High confidence - Linux audit syscall arg 1
+a2,process.args,High confidence - Linux audit syscall arg 2
+a3,process.args,High confidence - Linux audit syscall arg 3
+a4,process.args,High confidence - Linux audit syscall arg 4
+a5,process.args,High confidence - Linux audit syscall arg 5
+a6,process.args,High confidence - Linux audit syscall arg 6
+a7,process.args,High confidence - Linux audit syscall arg 7
