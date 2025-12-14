@@ -1,0 +1,1 @@
+source=windows-process_creation-* | where LIKE(CommandLine, "%cABvAHcAZQByAHMAaABlAGwAbA%") OR LIKE(CommandLine, "%AAbwB3AGUAcgBzAGgAZQBsAGwA%") OR LIKE(CommandLine, "%wAG8AdwBlAHIAcwBoAGUAbABsA%")

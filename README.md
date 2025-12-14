@@ -38,15 +38,33 @@ sigma-opensearch-ppl-backend/
 │   ├── yaml_loader.py                    # YAML pipeline loader
 │   ├── ecs_mapping.yml                   # ECS field mappings (YAML)
 │   └── README.md                         # ECS mapping documentation
-├── manual_test/
-│   ├── test_textquery_backend.py         # TextQueryBackend test script
-│   ├── test_ecs_pipeline.py              # ECS pipeline test script
-│   ├── example_rules/                    # Additional example rules
-│   └── README.md                         # Manual testing documentation
+├── checker_missing_ecs_fields/
+│   ├── checker.py                        # ECS field verification tool
+│   ├── ecs_verification_results.csv      # Verification results
+│   ├── sigma_fields.csv                  # Sigma fields catalog
+│   ├── sigma-master/                     # Sigma rules repository
+│   └── README.md                         # ECS checker documentation
+├── tables/
+│   ├── custom_modifiers.csv              # Custom modifiers reference
+│   ├── detection_rules.csv               # Detection rules catalog
+│   ├── logical_operations.csv            # Logical operations reference
+│   ├── modifiers_testing.csv             # Modifiers testing data
+│   └── special_features.csv              # Special features reference
 ├── tests/
-│   ├── test_checker.py                   # Automated test checker
-│   ├── rules/                            # Test Sigma rules
-│   └── refs/                             # Expected PPL outputs
+│   ├── automatic_tests/
+│   │   ├── test_checker.py               # Automated test checker
+│   │   ├── rules/                        # Test Sigma rules
+│   │   ├── refs/                         # Expected PPL outputs
+│   │   └── README.md                     # Automated testing documentation
+│   ├── manual_test/
+│   │   ├── test_textquery_backend.py     # TextQueryBackend test script
+│   │   ├── test_ecs_pipeline.py          # ECS pipeline test script
+│   │   ├── example_rules/                # Additional example rules
+│   │   └── README.md                     # Manual testing documentation
+│   └── correlation_testing/
+│       ├── sigma_rules/                  # Correlation test Sigma rules
+│       ├── ppl_refs/                     # Expected correlation PPL outputs
+│       └── README.md                     # Correlation testing documentation
 ├── .gitignore                            # Files ignored by Git
 ├── requirements.txt                      # Python dependencies
 └── README.md                             # Project documentation
@@ -147,15 +165,28 @@ ppl_query = backend.convert(collection)
 
 ### Manual Testing
 
-For quick testing and experimentation with example Sigma rules, see [manual_test/README.md](manual_test/README.md).
+For quick testing and experimentation with example Sigma rules, see [tests/manual_test/README.md](tests/manual_test/README.md).
 
 ```bash
 # Test example rules with TextQuery backend
-python manual_test/test_textquery_backend.py
+python tests/manual_test/test_textquery_backend.py
 
 # Test ECS field mapping pipeline
-python manual_test/test_ecs_pipeline.py
+python tests/manual_test/test_ecs_pipeline.py
 ```
+
+### Automated Testing
+
+For automated testing with the test checker, see [tests/automatic_tests/README.md](tests/automatic_tests/README.md).
+
+```bash
+# Run automated tests
+python tests/automatic_tests/test_checker.py
+```
+
+### Correlation Testing
+
+For correlation rule testing, see [tests/correlation_testing/README.md](tests/correlation_testing/README.md).
 
 ### Conversion Flow
 

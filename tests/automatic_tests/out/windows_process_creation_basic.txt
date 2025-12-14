@@ -1,0 +1,1 @@
+source=windows-process_creation-* | where EventID=1 AND Image="C:\\Windows\\System32\\calc.exe"

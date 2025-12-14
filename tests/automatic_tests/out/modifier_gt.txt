@@ -1,0 +1,1 @@
+source=windows-process_creation-* | where ProcessId>1000
