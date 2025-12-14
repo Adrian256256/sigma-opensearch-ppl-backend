@@ -1,0 +1,53 @@
+title: File Access to Sensitive Location
+name: sensitive_file_access
+status: test
+description: Detects access to sensitive files and directories
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4663
+    ObjectName|contains:
+      - '\Users\'
+      - '\Documents\'
+      - '\Desktop\'
+      - 'confidential'
+      - 'secret'
+    AccessMask: '0x1'  # Read access
+  condition: selection
+---
+title: Large Data Transfer
+name: large_data_transfer
+status: test
+description: Detects large outbound network data transfers
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection:
+    Initiated: 'true'
+    BytesSent|gte: 10485760  # 10 MB
+  condition: selection
+---
+title: Potential Data Exfiltration
+status: test
+description: Detects potential data exfiltration by correlating sensitive file access with large network transfers
+correlation:
+  type: temporal
+  rules:
+    - sensitive_file_access
+    - large_data_transfer
+  group-by:
+    - User
+    - ComputerName
+  timespan: 10m
+tags:
+  - attack.exfiltration
+  - attack.t1041
+  - attack.t1048
+level: high
+falsepositives:
+  - Legitimate file synchronization
+  - Backup operations
+  - Cloud storage services

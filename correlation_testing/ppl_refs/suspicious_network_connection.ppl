@@ -1,0 +1,38 @@
+# Suspicious Network Connection Detection - OpenSearch PPL Translation
+# Detects suspicious processes connecting to C2 ports (correlated by ProcessId in 60 seconds)
+
+source=windows-sysmon
+| where (EventID=1 and Image in ('%\\powershell.exe', '%\\cmd.exe', '%\\wscript.exe', '%\\cscript.exe', '%\\regsvr32.exe'))
+       or (EventID=3 and Initiated='true' and DestinationPort in (4444, 5555, 8080, 9999))
+| bin @timestamp span=60s as time_window
+| eval event_category = if(EventID=1, 'process_creation', 
+                          if(EventID=3, 'network_connection', 'other'))
+| stats dc(event_category) as event_types,
+        values(event_category) as categories,
+        count(eval(event_category='process_creation')) as process_events,
+        count(eval(event_category='network_connection')) as network_events,
+        values(Image) as processes,
+        values(DestinationPort) as ports,
+        values(DestinationIp) as destinations,
+        min(@timestamp) as first_event,
+        max(@timestamp) as last_event
+  by time_window, ProcessId, ComputerName
+| where event_types >= 2 and process_events > 0 and network_events > 0
+| fields time_window, ComputerName, ProcessId, process_events, network_events,
+        processes, ports, destinations, first_event, last_event
+| stats count() as correlation_count,
+        values(process_image) as processes,
+        values(DestinationIp) as c2_servers,
+        values(DestinationPort) as c2_ports
+  by time_window, ComputerName, process_id
+| fields time_window, ComputerName, process_id, processes, c2_servers, c2_ports
+
+# Explanation:
+# 1. Field aliases allow correlation using different field names
+# 2. ProcessId is the common key between process creation and network events
+# 3. Create event categories to distinguish process vs network events
+# 4. Use dc(event_category) to ensure BOTH event types occurred
+# 5. 60-second window captures process creation followed by network activity
+# 6. Group by ProcessId and ComputerName to correlate events from same process
+# 7. This pattern detects reverse shells, C2 beacons, etc.
+# 8. The alias concept: ProcessId correlates events across different log types

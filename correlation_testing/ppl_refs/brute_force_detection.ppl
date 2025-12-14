@@ -1,0 +1,9 @@
+# Brute Force Detection - OpenSearch PPL Translation
+# Detects brute force attacks based on failed logon frequency (10+ failures in 5 minutes)
+
+source=windows-security
+| where EventID=4625 and not SubjectUserName like '%$'
+| bin @timestamp span=5m as time_window
+| stats count() as event_count by time_window, TargetUserName, TargetDomainName
+| where event_count >= 10
+| fields time_window, TargetUserName, TargetDomainName, event_count

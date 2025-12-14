@@ -1,0 +1,50 @@
+title: Remote Service Creation
+name: remote_service_creation
+status: test
+description: Detects remote service creation which may indicate lateral movement
+logsource:
+  product: windows
+  service: system
+detection:
+  selection:
+    EventID: 7045
+    ServiceFileName|contains:
+      - '\\\\*\\'
+      - 'ADMIN$'
+  condition: selection
+---
+title: Remote Process Creation
+name: remote_process_creation
+status: test
+description: Detects process creation from remote source
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    ParentImage|endswith: '\\services.exe'
+    Image|contains:
+      - '\\cmd.exe'
+      - '\\powershell.exe'
+      - '\\wmic.exe'
+  condition: selection
+---
+title: Lateral Movement Activity
+status: test
+description: Detects potential lateral movement by correlating remote service creation with suspicious process execution
+correlation:
+  type: temporal
+  rules:
+    - remote_service_creation
+    - remote_process_creation
+  group-by:
+    - ComputerName
+  timespan: 2m
+tags:
+  - attack.lateral_movement
+  - attack.t1021
+  - attack.t1569
+level: high
+falsepositives:
+  - Legitimate administrative activity
+  - Remote management tools

@@ -1,0 +1,52 @@
+title: User Account Created
+name: user_account_created
+status: test
+description: Detects user account creation
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4720
+  condition: selection
+---
+title: User Added to Privileged Group
+name: user_added_to_group
+status: test
+description: Detects user being added to a privileged group
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4732
+    TargetUserName:
+      - Administrators
+      - Domain Admins
+      - Enterprise Admins
+  condition: selection
+---
+title: Rapid Account Creation and Privilege Escalation
+status: test
+description: Detects quick succession of account creation followed by adding the account to a privileged group
+correlation:
+  type: ordered_temporal
+  rules:
+    - user_account_created
+    - user_added_to_group
+  aliases:
+    user:
+      user_account_created: TargetUserName
+      user_added_to_group: MemberName
+  group-by:
+    - user
+  timespan: 5m
+tags:
+  - attack.persistence
+  - attack.privilege_escalation
+  - attack.t1136
+  - attack.t1098
+level: critical
+falsepositives:
+  - Legitimate administrative operations
+  - Automated provisioning systems

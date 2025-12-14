@@ -1,0 +1,42 @@
+title: High-privilege group enumeration
+name: privileged_group_enumeration
+status: stable
+description: Detects enumeration of high-privilege Active Directory groups
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4799
+    CallerProcessId: 0x0
+    TargetUserName:
+      - Administrators
+      - Remote Desktop Users
+      - Remote Management Users
+      - Distributed COM Users
+  condition: selection
+level: informational
+falsepositives:
+  - Administrative activity
+  - Directory assessment tools
+---
+title: Enumeration of multiple high-privilege groups by tools like BloodHound
+status: stable
+description: Detects enumeration of multiple high-privilege AD groups within a short time frame, which may indicate BloodHound or similar tool usage
+correlation:
+  type: value_count
+  rules:
+    - privileged_group_enumeration
+  group-by:
+    - SubjectUserName
+  timespan: 15m
+  condition:
+    gte: 4
+    field: TargetUserName
+tags:
+  - attack.discovery
+  - attack.t1087
+level: high
+falsepositives:
+  - Administrative activity
+  - Directory assessment tools

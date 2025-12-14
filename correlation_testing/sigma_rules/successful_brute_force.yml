@@ -1,0 +1,43 @@
+title: Windows Failed Logon
+name: win_failed_logon
+status: test
+description: Detects failed logon events on Windows
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4625
+  condition: selection
+---
+title: Windows Successful Logon
+name: win_successful_logon
+status: test
+description: Detects successful logon events on Windows
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4624
+    LogonType: 3  # Network logon
+  condition: selection
+---
+title: Successful Brute Force Attack Detection
+status: test
+description: Detects a successful brute force attack by correlating failed logons followed by a successful logon from the same source
+correlation:
+  type: temporal
+  rules:
+    - win_failed_logon
+    - win_successful_logon
+  group-by:
+    - IpAddress
+    - TargetUserName
+  timespan: 10m
+tags:
+  - attack.credential_access
+  - attack.t1110
+level: critical
+falsepositives:
+  - Users legitimately entering wrong password before successful login

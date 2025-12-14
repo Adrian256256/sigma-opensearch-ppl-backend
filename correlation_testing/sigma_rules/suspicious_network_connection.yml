@@ -1,0 +1,59 @@
+title: Suspicious Process Execution
+name: suspicious_process
+status: test
+description: Detects execution of commonly abused system binaries
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith:
+      - '\\powershell.exe'
+      - '\\cmd.exe'
+      - '\\wscript.exe'
+      - '\\cscript.exe'
+      - '\\regsvr32.exe'
+  condition: selection
+---
+title: Network Connection to Suspicious Port
+name: suspicious_network_connection
+status: test
+description: Detects network connections to commonly used C2 or suspicious ports
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection:
+    Initiated: 'true'
+    DestinationPort:
+      - 4444
+      - 5555
+      - 8080
+      - 9999
+  condition: selection
+---
+title: Process Execution with Suspicious Network Activity
+status: test
+description: Correlates suspicious process execution with network connections to potentially malicious ports
+correlation:
+  type: temporal
+  rules:
+    - suspicious_process
+    - suspicious_network_connection
+  aliases:
+    process:
+      suspicious_process: ProcessId
+      suspicious_network_connection: ProcessId
+  group-by:
+    - process
+    - ComputerName
+  timespan: 60s
+tags:
+  - attack.execution
+  - attack.command_and_control
+  - attack.t1059
+  - attack.t1071
+level: high
+falsepositives:
+  - Legitimate administrative scripts
+  - Development and testing activities

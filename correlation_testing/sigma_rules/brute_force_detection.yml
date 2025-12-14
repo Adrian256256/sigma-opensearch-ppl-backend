@@ -1,0 +1,33 @@
+title: Windows Failed Logon Event
+name: failed_logon
+status: test
+description: Detects failed logon events on Windows systems.
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4625
+  filter:
+    SubjectUserName|endswith: $
+  condition: selection and not filter
+---
+title: Multiple failed logons for a single user (possible brute force attack)
+status: test
+description: Detects multiple failed logon attempts within a short timeframe which may indicate a brute force attack
+correlation:
+  type: event_count
+  rules:
+    - failed_logon
+  group-by:
+    - TargetUserName
+    - TargetDomainName
+  timespan: 5m
+  condition:
+    gte: 10
+tags:
+  - attack.credential_access
+  - attack.t1110
+level: high
+falsepositives:
+  - User entering wrong password multiple times
