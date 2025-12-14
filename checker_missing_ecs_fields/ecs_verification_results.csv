@@ -1,0 +1,363 @@
+sigma_field,match_type,ecs_field,notes
+Message,exact,message,Official ECS field
+Action,partial,event.action,"Similar name, verify manually"
+action,partial,event.action,"Similar name, verify manually"
+Address,partial,"client.address, destination.address, email.bcc.address","Similar name, verify manually"
+answers,partial,dns.answers,"Similar name, verify manually"
+Application,partial,network.application,"Similar name, verify manually"
+AppName,partial,log.syslog.appname,"Similar name, verify manually"
+Category,partial,"event.category, rule.category, vulnerability.category","Similar name, verify manually"
+category,partial,"event.category, rule.category, vulnerability.category","Similar name, verify manually"
+cipher,partial,tls.cipher,"Similar name, verify manually"
+CommandLine,partial,"process.command_line, process.entry_leader.command_line, process.group_leader.command_line","Similar name, verify manually"
+Company,partial,"dll.pe.company, file.pe.company, process.parent.pe.company","Similar name, verify manually"
+Count,partial,gen_ai.request.choice.count,"Similar name, verify manually"
+Data,partial,"dns.answers.data, file.elf.header.data, process.elf.header.data","Similar name, verify manually"
+Description,partial,"dll.pe.description, file.pe.description, gen_ai.agent.description","Similar name, verify manually"
+Device,partial,"file.device, threat.enrichments.indicator.file.device, threat.indicator.file.device","Similar name, verify manually"
+DeviceName,partial,volume.device_name,"Similar name, verify manually"
+DistinguishedName,partial,"file.x509.issuer.distinguished_name, file.x509.subject.distinguished_name, threat.enrichments.indicator.file.x509.issuer.distinguished_name","Similar name, verify manually"
+FileVersion,partial,"dll.pe.file_version, file.pe.file_version, process.parent.pe.file_version","Similar name, verify manually"
+Hash,partial,"client.user.hash, destination.user.hash, event.hash","Similar name, verify manually"
+key,partial,"registry.key, threat.enrichments.indicator.registry.key, threat.indicator.registry.key","Similar name, verify manually"
+Level,partial,log.level,"Similar name, verify manually"
+Location,partial,"client.geo.location, destination.geo.location, host.geo.location","Similar name, verify manually"
+method,partial,http.request.method,"Similar name, verify manually"
+Name,partial,"agent.name, client.as.organization.name, client.geo.name","Similar name, verify manually"
+name,partial,"agent.name, client.as.organization.name, client.geo.name","Similar name, verify manually"
+OriginalFileName,partial,"dll.pe.original_file_name, file.pe.original_file_name, process.parent.pe.original_file_name","Similar name, verify manually"
+Path,partial,"dll.path, file.path, log.file.path","Similar name, verify manually"
+path,partial,"dll.path, file.path, log.file.path","Similar name, verify manually"
+Product,partial,"dll.pe.product, file.pe.product, observer.product","Similar name, verify manually"
+Protocol,partial,network.protocol,"Similar name, verify manually"
+Provider,partial,"cloud.origin.provider, cloud.provider, cloud.target.provider","Similar name, verify manually"
+Query,partial,"threat.enrichments.indicator.url.query, threat.indicator.url.query, url.query","Similar name, verify manually"
+query,partial,"threat.enrichments.indicator.url.query, threat.indicator.url.query, url.query","Similar name, verify manually"
+Reason,partial,event.reason,"Similar name, verify manually"
+reason,partial,event.reason,"Similar name, verify manually"
+ServerName,partial,tls.client.server_name,"Similar name, verify manually"
+State,partial,"service.origin.state, service.state, service.target.state","Similar name, verify manually"
+Status,partial,"dll.code_signature.status, file.code_signature.status, process.code_signature.status","Similar name, verify manually"
+status,partial,"dll.code_signature.status, file.code_signature.status, process.code_signature.status","Similar name, verify manually"
+subjectName,partial,"dll.code_signature.subject_name, file.code_signature.subject_name, process.code_signature.subject_name","Similar name, verify manually"
+Type,partial,"agent.type, cloud.entity.type, cloud.machine.type","Similar name, verify manually"
+type,partial,"agent.type, cloud.entity.type, cloud.machine.type","Similar name, verify manually"
+User,partial,related.user,"Similar name, verify manually"
+UserName,partial,"threat.enrichments.indicator.url.username, threat.indicator.url.username, url.username","Similar name, verify manually"
+Username,partial,"threat.enrichments.indicator.url.username, threat.indicator.url.username, url.username","Similar name, verify manually"
+Value,partial,"registry.value, threat.enrichments.indicator.registry.value, threat.indicator.registry.value","Similar name, verify manually"
+a0,none,,No official ECS equivalent found
+a1,none,,No official ECS equivalent found
+a2,none,,No official ECS equivalent found
+a3,none,,No official ECS equivalent found
+a4,none,,No official ECS equivalent found
+a5,none,,No official ECS equivalent found
+a6,none,,No official ECS equivalent found
+a7,none,,No official ECS equivalent found
+AccessList,none,,No official ECS equivalent found
+AccessMask,none,,No official ECS equivalent found
+AccountName,none,,No official ECS equivalent found
+ActivityDetails,none,,No official ECS equivalent found
+ActivityDisplayName,none,,No official ECS equivalent found
+ActivityType,none,,No official ECS equivalent found
+activityType,none,,No official ECS equivalent found
+actor.alternateid,none,,No official ECS equivalent found
+additionalDetails.additionalInfo,none,,No official ECS equivalent found
+additionalEventData.MFAUsed,none,,No official ECS equivalent found
+AdditionalInfo,none,,No official ECS equivalent found
+AllowedToDelegateTo,none,,No official ECS equivalent found
+answer,none,,No official ECS equivalent found
+apiGroup,none,,No official ECS equivalent found
+AppID,none,,No official ECS equivalent found
+AppId,none,,No official ECS equivalent found
+ApplicationId,none,,No official ECS equivalent found
+ApplicationPath,none,,No official ECS equivalent found
+AttributeLDAPDisplayName,none,,No official ECS equivalent found
+AttributeValue,none,,No official ECS equivalent found
+AuditPolicyChanges,none,,No official ECS equivalent found
+AuditSourceName,none,,No official ECS equivalent found
+auditType.action,none,,No official ECS equivalent found
+auditType.category,none,,No official ECS equivalent found
+AuthenticationPackageName,none,,No official ECS equivalent found
+AuthenticationRequirement,none,,No official ECS equivalent found
+Binary,none,,No official ECS equivalent found
+blocked,none,,No official ECS equivalent found
+c-uri,none,,No official ECS equivalent found
+c-uri-extension,none,,No official ECS equivalent found
+c-uri-query,none,,No official ECS equivalent found
+c-useragent,none,,No official ECS equivalent found
+CallTrace,none,,No official ECS equivalent found
+capabilities,none,,No official ECS equivalent found
+Caption,none,,No official ECS equivalent found
+CategoryValue,none,,No official ECS equivalent found
+certificate.serial,none,,No official ECS equivalent found
+CertThumbprint,none,,No official ECS equivalent found
+cfgpath,none,,No official ECS equivalent found
+Channel,none,,No official ECS equivalent found
+ClassName,none,,No official ECS equivalent found
+ClientAddress,none,,No official ECS equivalent found
+ClientApp,none,,No official ECS equivalent found
+ClientProcessId,none,,No official ECS equivalent found
+comm,none,,No official ECS equivalent found
+conditionalAccessStatus,none,,No official ECS equivalent found
+Configuration,none,,No official ECS equivalent found
+ConsentContext.IsAdminConsent,none,,No official ECS equivalent found
+Contents,none,,No official ECS equivalent found
+ContextInfo,none,,No official ECS equivalent found
+CreationUtcTime,none,,No official ECS equivalent found
+cs-cookie,none,,No official ECS equivalent found
+cs-host,none,,No official ECS equivalent found
+cs-method,none,,No official ECS equivalent found
+cs-referer,none,,No official ECS equivalent found
+cs-uri,none,,No official ECS equivalent found
+cs-uri-query,none,,No official ECS equivalent found
+cs-user-agent,none,,No official ECS equivalent found
+CurrentDirectory,none,,No official ECS equivalent found
+data.protoPayload.authorizationInfo.granted,none,,No official ECS equivalent found
+data.protoPayload.authorizationInfo.permission,none,,No official ECS equivalent found
+data.protoPayload.logName,none,,No official ECS equivalent found
+data.protoPayload.methodName,none,,No official ECS equivalent found
+data.protoPayload.resource.type,none,,No official ECS equivalent found
+data.protoPayload.serviceName,none,,No official ECS equivalent found
+debugcontext.debugdata.behaviors,none,,No official ECS equivalent found
+debugcontext.debugdata.logonlysecuritydata,none,,No official ECS equivalent found
+debugContext.debugData.requestUri,none,,No official ECS equivalent found
+DestAddress,none,,No official ECS equivalent found
+Destination,none,,No official ECS equivalent found
+DestinationHostname,none,,No official ECS equivalent found
+DestinationIp,none,,No official ECS equivalent found
+DestinationPort,none,,No official ECS equivalent found
+DestPort,none,,No official ECS equivalent found
+Details,none,,No official ECS equivalent found
+DeviceDescription,none,,No official ECS equivalent found
+DeviceDetail.deviceId,none,,No official ECS equivalent found
+DeviceDetail.isCompliant,none,,No official ECS equivalent found
+DeviceDetail.trusttype,none,,No official ECS equivalent found
+displaymessage,none,,No official ECS equivalent found
+dst_ip,none,,No official ECS equivalent found
+dst_port,none,,No official ECS equivalent found
+EncyptionUsed,none,,No official ECS equivalent found
+endpoint,none,,No official ECS equivalent found
+ErrorCode,none,,No official ECS equivalent found
+errorCode,none,,No official ECS equivalent found
+errorMessage,none,,No official ECS equivalent found
+euid,none,,No official ECS equivalent found
+event_type,none,,No official ECS equivalent found
+event_type_id,none,,No official ECS equivalent found
+EventID,none,,No official ECS equivalent found
+EventLog,none,,No official ECS equivalent found
+eventName,none,,No official ECS equivalent found
+eventService,none,,No official ECS equivalent found
+eventSource,none,,No official ECS equivalent found
+EventType,none,,No official ECS equivalent found
+eventType,none,,No official ECS equivalent found
+eventtype,none,,No official ECS equivalent found
+ExceptionCode,none,,No official ECS equivalent found
+exe,none,,No official ECS equivalent found
+failure_status_reason,none,,No official ECS equivalent found
+Feature_Name,none,,No official ECS equivalent found
+FileName,none,,No official ECS equivalent found
+Filename,none,,No official ECS equivalent found
+FileNameBuffer,none,,No official ECS equivalent found
+FilterName,none,,No official ECS equivalent found
+FilterOrigin,none,,No official ECS equivalent found
+gcp.audit.method_name,none,,No official ECS equivalent found
+GrantedAccess,none,,No official ECS equivalent found
+Hashes,none,,No official ECS equivalent found
+HiveName,none,,No official ECS equivalent found
+HomeTenantId,none,,No official ECS equivalent found
+host,none,,No official ECS equivalent found
+hostPath,none,,No official ECS equivalent found
+id.orig_h,none,,No official ECS equivalent found
+id.resp_h,none,,No official ECS equivalent found
+id.resp_p,none,,No official ECS equivalent found
+Image,none,,No official ECS equivalent found
+ImageLoaded,none,,No official ECS equivalent found
+ImageName,none,,No official ECS equivalent found
+ImagePath,none,,No official ECS equivalent found
+ImpersonationLevel,none,,No official ECS equivalent found
+Initiated,none,,No official ECS equivalent found
+InitiatedBy,none,,No official ECS equivalent found
+Initiatedby,none,,No official ECS equivalent found
+IntegrityLevel,none,,No official ECS equivalent found
+InterfaceUuid,none,,No official ECS equivalent found
+IpAddress,none,,No official ECS equivalent found
+IpPort,none,,No official ECS equivalent found
+IsatapRouter,none,,No official ECS equivalent found
+KeyLength,none,,No official ECS equivalent found
+Keywords,none,,No official ECS equivalent found
+LayerRTID,none,,No official ECS equivalent found
+legacyeventtype,none,,No official ECS equivalent found
+LocalName,none,,No official ECS equivalent found
+LoggedByService,none,,No official ECS equivalent found
+LogonId,none,,No official ECS equivalent found
+LogonProcessName,none,,No official ECS equivalent found
+LogonType,none,,No official ECS equivalent found
+logtype,none,,No official ECS equivalent found
+ModifiedProperties{}.NewValue,none,,No official ECS equivalent found
+ModifyingApplication,none,,No official ECS equivalent found
+nametype,none,,No official ECS equivalent found
+NetworkLocationDetails,none,,No official ECS equivalent found
+new_value,none,,No official ECS equivalent found
+NewName,none,,No official ECS equivalent found
+NewTargetUserName,none,,No official ECS equivalent found
+NewTemplateContent,none,,No official ECS equivalent found
+NewUacValue,none,,No official ECS equivalent found
+NewValue,none,,No official ECS equivalent found
+ObjectClass,none,,No official ECS equivalent found
+ObjectDN,none,,No official ECS equivalent found
+ObjectId,none,,No official ECS equivalent found
+ObjectName,none,,No official ECS equivalent found
+objectRef.apiGroup,none,,No official ECS equivalent found
+objectRef.namespace,none,,No official ECS equivalent found
+objectRef.resource,none,,No official ECS equivalent found
+objectRef.subresource,none,,No official ECS equivalent found
+ObjectServer,none,,No official ECS equivalent found
+ObjectType,none,,No official ECS equivalent found
+ObjectValueName,none,,No official ECS equivalent found
+OldUacValue,none,,No official ECS equivalent found
+OldValue,none,,No official ECS equivalent found
+Operation,none,,No official ECS equivalent found
+operation,none,,No official ECS equivalent found
+OperationName,none,,No official ECS equivalent found
+operationName,none,,No official ECS equivalent found
+OperationNameValue,none,,No official ECS equivalent found
+OpNum,none,,No official ECS equivalent found
+Origin,none,,No official ECS equivalent found
+outcome.reason,none,,No official ECS equivalent found
+outcome.result,none,,No official ECS equivalent found
+PackageFullName,none,,No official ECS equivalent found
+PackagePath,none,,No official ECS equivalent found
+param1,none,,No official ECS equivalent found
+param2,none,,No official ECS equivalent found
+param3,none,,No official ECS equivalent found
+ParentCommandLine,none,,No official ECS equivalent found
+ParentImage,none,,No official ECS equivalent found
+ParentProcessId,none,,No official ECS equivalent found
+ParentUser,none,,No official ECS equivalent found
+Payload,none,,No official ECS equivalent found
+payload,none,,No official ECS equivalent found
+PipeName,none,,No official ECS equivalent found
+PossibleCause,none,,No official ECS equivalent found
+PreAuthType,none,,No official ECS equivalent found
+PreviousCreationUtcTime,none,,No official ECS equivalent found
+PrivilegeList,none,,No official ECS equivalent found
+process,none,,No official ECS equivalent found
+ProcessId,none,,No official ECS equivalent found
+ProcessName,none,,No official ECS equivalent found
+ProcessNameBuffer,none,,No official ECS equivalent found
+ProcessPath,none,,No official ECS equivalent found
+processPath,none,,No official ECS equivalent found
+Properties,none,,No official ECS equivalent found
+properties.message,none,,No official ECS equivalent found
+Provider_Name,none,,No official ECS equivalent found
+ProviderContextName,none,,No official ECS equivalent found
+qtype_name,none,,No official ECS equivalent found
+QueryName,none,,No official ECS equivalent found
+record_type,none,,No official ECS equivalent found
+rejected,none,,No official ECS equivalent found
+RelativeTargetName,none,,No official ECS equivalent found
+RemoteName,none,,No official ECS equivalent found
+request_type,none,,No official ECS equivalent found
+RequestedPolicy,none,,No official ECS equivalent found
+requestParameters,none,,No official ECS equivalent found
+requestParameters.attribute,none,,No official ECS equivalent found
+requestParameters.containerDefinitions.command,none,,No official ECS equivalent found
+requestParameters.enable,none,,No official ECS equivalent found
+requestParameters.layers,none,,No official ECS equivalent found
+RequestType,none,,No official ECS equivalent found
+ResourceDisplayName,none,,No official ECS equivalent found
+ResourceId,none,,No official ECS equivalent found
+ResourceProviderValue,none,,No official ECS equivalent found
+ResourceTenantId,none,,No official ECS equivalent found
+resp_mime_types,none,,No official ECS equivalent found
+responseElements,none,,No official ECS equivalent found
+responseElements.ConsoleLogin,none,,No official ECS equivalent found
+responseElements.pendingModifiedValues.masterUserPassword,none,,No official ECS equivalent found
+responseElements.publiclyAccessible,none,,No official ECS equivalent found
+responseStatus.code,none,,No official ECS equivalent found
+ResultDescription,none,,No official ECS equivalent found
+Resultdescription,none,,No official ECS equivalent found
+ResultStatus,none,,No official ECS equivalent found
+ResultType,none,,No official ECS equivalent found
+riskEventType,none,,No official ECS equivalent found
+RiskState,none,,No official ECS equivalent found
+SamAccountName,none,,No official ECS equivalent found
+sc-status,none,,No official ECS equivalent found
+ScriptBlockText,none,,No official ECS equivalent found
+SearchFilter,none,,No official ECS equivalent found
+securityContext.isProxy,none,,No official ECS equivalent found
+securitycontext.isproxy,none,,No official ECS equivalent found
+Service,none,,No official ECS equivalent found
+service,none,,No official ECS equivalent found
+ServiceFileName,none,,No official ECS equivalent found
+ServiceName,none,,No official ECS equivalent found
+ServicePrincipalNames,none,,No official ECS equivalent found
+ServiceStartType,none,,No official ECS equivalent found
+ServiceType,none,,No official ECS equivalent found
+setting_name,none,,No official ECS equivalent found
+ShareName,none,,No official ECS equivalent found
+SidHistory,none,,No official ECS equivalent found
+SidList,none,,No official ECS equivalent found
+Signature,none,,No official ECS equivalent found
+SignatureStatus,none,,No official ECS equivalent found
+Signed,none,,No official ECS equivalent found
+SigningUsed,none,,No official ECS equivalent found
+SourceAddress,none,,No official ECS equivalent found
+SourceCommandLine,none,,No official ECS equivalent found
+SourceFilename,none,,No official ECS equivalent found
+SourceHostname,none,,No official ECS equivalent found
+SourceImage,none,,No official ECS equivalent found
+SourceIp,none,,No official ECS equivalent found
+sourceIPAddress,none,,No official ECS equivalent found
+SourceIsIpv6,none,,No official ECS equivalent found
+SourceName,none,,No official ECS equivalent found
+SourceParentImage,none,,No official ECS equivalent found
+SourcePort,none,,No official ECS equivalent found
+SourceUser,none,,No official ECS equivalent found
+StartAddress,none,,No official ECS equivalent found
+StartFunction,none,,No official ECS equivalent found
+StartModule,none,,No official ECS equivalent found
+SubcategoryGuid,none,,No official ECS equivalent found
+SubjectDomainName,none,,No official ECS equivalent found
+SubjectLogonId,none,,No official ECS equivalent found
+SubjectUserName,none,,No official ECS equivalent found
+SubjectUserSid,none,,No official ECS equivalent found
+SubStatus,none,,No official ECS equivalent found
+SYSCALL,none,,No official ECS equivalent found
+Target,none,,No official ECS equivalent found
+target.displayname,none,,No official ECS equivalent found
+TargetFilename,none,,No official ECS equivalent found
+TargetImage,none,,No official ECS equivalent found
+TargetName,none,,No official ECS equivalent found
+TargetObject,none,,No official ECS equivalent found
+TargetOutboundUserName,none,,No official ECS equivalent found
+TargetParentProcessId,none,,No official ECS equivalent found
+TargetResources,none,,No official ECS equivalent found
+TargetResources.modifiedProperties,none,,No official ECS equivalent found
+TargetResources.ModifiedProperties.DisplayName,none,,No official ECS equivalent found
+TargetResources.ModifiedProperties.NewValue,none,,No official ECS equivalent found
+TargetResources.modifiedProperties.newValue,none,,No official ECS equivalent found
+targetResources.type,none,,No official ECS equivalent found
+TargetServerName,none,,No official ECS equivalent found
+TargetSid,none,,No official ECS equivalent found
+TargetUserName,none,,No official ECS equivalent found
+TargetUserSid,none,,No official ECS equivalent found
+TaskContent,none,,No official ECS equivalent found
+TaskContentNew,none,,No official ECS equivalent found
+TaskName,none,,No official ECS equivalent found
+TemplateContent,none,,No official ECS equivalent found
+TicketEncryptionType,none,,No official ECS equivalent found
+TicketOptions,none,,No official ECS equivalent found
+unit,none,,No official ECS equivalent found
+uri,none,,No official ECS equivalent found
+user_agent,none,,No official ECS equivalent found
+userAgent,none,,No official ECS equivalent found
+userIdentity.arn,none,,No official ECS equivalent found
+userIdentity.sessionContext.sessionIssuer.type,none,,No official ECS equivalent found
+userIdentity.type,none,,No official ECS equivalent found
+verb,none,,No official ECS equivalent found
+Workload,none,,No official ECS equivalent found
+Workstation,none,,No official ECS equivalent found
+WorkstationName,none,,No official ECS equivalent found
+Z,none,,No official ECS equivalent found
