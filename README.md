@@ -49,9 +49,10 @@ sigma-opensearch-ppl-backend/
 │   ├── detection_rules.csv               # Detection rules catalog
 │   ├── logical_operations.csv            # Logical operations reference
 │   ├── modifiers_testing.csv             # Modifiers testing data
-│   └── special_features.csv              # Special features reference
+│   ├── special_features.csv              # Special features reference
+│   └── README.md                         # Tables documentation
 ├── tests/
-│   ├── automatic_tests/
+│   ├── automated_tests/
 │   │   ├── test_checker.py               # Automated test checker
 │   │   ├── rules/                        # Test Sigma rules
 │   │   ├── refs/                         # Expected PPL outputs
@@ -61,10 +62,11 @@ sigma-opensearch-ppl-backend/
 │   │   ├── test_ecs_pipeline.py          # ECS pipeline test script
 │   │   ├── example_rules/                # Additional example rules
 │   │   └── README.md                     # Manual testing documentation
-│   └── correlation_testing/
-│       ├── sigma_rules/                  # Correlation test Sigma rules
-│       ├── ppl_refs/                     # Expected correlation PPL outputs
-│       └── README.md                     # Correlation testing documentation
+│   ├── correlation_testing/
+│   │   ├── sigma_rules/                  # Correlation test Sigma rules
+│   │   ├── ppl_refs/                     # Expected correlation PPL outputs
+│   │   └── README.md                     # Correlation testing documentation
+│   └── README.md                         # Testing overview documentation
 ├── .gitignore                            # Files ignored by Git
 ├── requirements.txt                      # Python dependencies
 └── README.md                             # Project documentation
