@@ -47,32 +47,19 @@ class CorrelationTester:
             with open(rule_file, 'r', encoding='utf-8') as f:
                 collection = SigmaCollection.from_yaml(f.read())
             
-            # First, convert all base rules (non-correlation rules)
-            base_rules = [r for r in collection.rules 
-                         if not (hasattr(r, 'type') and hasattr(r, 'rules') and hasattr(r, 'timespan'))]
-            
-            for base_rule in base_rules:
-                try:
-                    self.backend.convert_rule(base_rule)
-                except Exception:
-                    pass  # Ignore errors in base rule conversion
-            
-            # Now process correlation rules
-            correlation_rules = [r for r in collection.rules 
-                               if hasattr(r, 'type') and hasattr(r, 'rules') and hasattr(r, 'timespan')]
-            
-            if not correlation_rules:
-                return
-            
+            # Convert all rules - backend automatically detects rule type
             results = []
-            for corr_rule in correlation_rules:
+            for rule in collection.rules:
                 try:
-                    queries = self.backend.convert_correlation_rule(corr_rule)
-                    results.append(queries[0] if queries else "")
-                    self.stats['successful'] += 1
+                    queries = self.backend.convert_rule(rule)
+                    # Only save correlation rule queries
+                    if queries and hasattr(rule, 'type') and hasattr(rule, 'rules') and hasattr(rule, 'timespan'):
+                        results.append(queries[0])
+                        self.stats['successful'] += 1
                 except Exception as e:
-                    results.append(f"ERROR: {str(e)}")
-                    self.stats['failed'] += 1
+                    if hasattr(rule, 'type') and hasattr(rule, 'rules') and hasattr(rule, 'timespan'):
+                        results.append(f"ERROR: {str(e)}")
+                        self.stats['failed'] += 1
             
             if results:
                 output_file = self.output_dir / f"{rule_file.stem}.txt"
