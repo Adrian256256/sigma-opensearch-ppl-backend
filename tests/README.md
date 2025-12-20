@@ -1,6 +1,6 @@
 # Tests
 
-This directory contains comprehensive test suites for the Sigma to OpenSearch PPL backend converter. The tests validate rule conversion, field mapping, logical operations, modifiers, and special features.
+This directory contains comprehensive test suites for the Sigma to OpenSearch PPL backend converter. The tests validate rule conversion, field mapping, logical operations, modifiers and special features.
 
 ## Directory Structure
 
@@ -57,13 +57,6 @@ All features documented in the `tables/` directory are verified by these automat
 python tests/manual_test/test_textquery_backend.py
 python tests/manual_test/test_ecs_pipeline.py
 ```
-
-## Test Philosophy
-
-- **Automated First**: All core features must have automated test coverage
-- **Reference-Based**: Each test rule has a corresponding reference output for validation
-- **Comprehensive Coverage**: Tests cover modifiers, logical operations, field operations, and special cases
-- **Documented**: All tested features are documented in the `tables/` directory
 
 ## Running Tests
 

@@ -13,6 +13,6 @@ This directory contains CSV files documenting all features, modifiers, and opera
 ## Verification
 
 All features and implementations documented in these tables are automatically verified by the test suite located in:
-- `tests/automatic_tests/`
+- `tests/automated_tests/`
 
 The automated tests ensure that each documented feature works correctly and maintains compatibility with the Sigma rule format and OpenSearch PPL query language.
