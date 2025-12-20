@@ -30,7 +30,7 @@ title: Rapid Account Creation and Privilege Escalation
 status: test
 description: Detects quick succession of account creation followed by adding the account to a privileged group
 correlation:
-  type: ordered_temporal
+  type: temporal
   rules:
     - user_account_created
     - user_added_to_group

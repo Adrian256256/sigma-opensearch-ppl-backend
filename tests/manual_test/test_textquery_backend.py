@@ -45,16 +45,16 @@ def test_example_rules():
     example_rules_dir = Path(__file__).parent / "example_rules"
     
     if not example_rules_dir.exists():
-        print(f"\n❌ Directory not found: {example_rules_dir}")
+        print(f"\n[ERROR] Directory not found: {example_rules_dir}")
         return
     
     # Determine which rules to test
     if TEST_ALL_EXAMPLE_RULES:
         rule_files = list(example_rules_dir.glob("*.yml"))
-        print(f"\n📚 Testing ALL {len(rule_files)} rules in example_rules/\n")
+        print(f"\n[*] Testing ALL {len(rule_files)} rules in example_rules/\n")
     else:
         rule_files = [example_rules_dir / rule_name for rule_name in EXAMPLE_RULES_TO_TEST]
-        print(f"\n📚 Testing {len(EXAMPLE_RULES_TO_TEST)} specified rules\n")
+        print(f"\n[*] Testing {len(EXAMPLE_RULES_TO_TEST)} specified rules\n")
     
     # Create backend instance
     backend = OpenSearchPPLBackend()
@@ -96,7 +96,7 @@ def test_example_rules():
 # ============================================================================
 
 if __name__ == "__main__":
-    print("\n🚀 Starting Manual Tests for OpenSearch PPL Backend\n")
+    print("\n[*] Starting Manual Tests for OpenSearch PPL Backend\n")
     
     try:
         # Test example rules from example_rules/ directory

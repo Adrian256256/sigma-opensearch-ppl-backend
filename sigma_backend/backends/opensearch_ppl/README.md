@@ -20,9 +20,23 @@ A production-ready pySigma backend for converting Sigma detection rules into PPL
    - [Syntax Mapping](#syntax-mapping)
    - [Conversion Examples](#conversion-examples)
 6. [PPL Functions Used](#ppl-functions-used)
-7. [Usage](#usage)
-8. [Project Structure](#project-structure)
-9. [References](#references)
+7. [Correlation Rules Support](#correlation-rules-support)
+   - [Overview](#overview-1)
+   - [Supported Correlation Types](#supported-correlation-types)
+   - [Transformation Process: Sigma → OpenSearch PPL](#transformation-process-sigma--opensearch-ppl)
+     - [Step 1: Rule Detection and Parsing](#step-1-rule-detection-and-parsing)
+     - [Step 2: Detection Rules Conversion](#step-2-detection-rules-conversion)
+     - [Step 3: Aggregation Construction](#step-3-aggregation-construction)
+     - [Step 4: Time Window Application](#step-4-time-window-application)
+     - [Step 5: Condition Evaluation](#step-5-condition-evaluation)
+     - [Step 6: GROUP BY Field Mapping](#step-6-group-by-field-mapping)
+   - [Complete Transformation Example](#complete-transformation-example)
+   - [Implementation Architecture](#implementation-architecture)
+   - [Technical Implementation Details](#technical-implementation-details)
+   - [Usage Examples](#usage-examples)
+8. [Usage](#usage)
+9. [Project Structure](#project-structure)
+10. [References](#references)
 
 ---
 
@@ -518,6 +532,601 @@ field in (v1, v2)    # IN operator
 
 ---
 
+## Correlation Rules Support
+
+The backend includes full support for **Sigma Correlation Rules**, enabling multi-event pattern detection across time windows. This feature is implemented in `opensearch_ppl_correlations.py` and extends the base backend to handle complex detection scenarios that require correlating multiple events.
+
+### Overview
+
+Correlation rules allow detection of attack patterns that span multiple events, such as:
+- **Brute force attacks**: Multiple failed logins followed by success
+- **Lateral movement**: Sequence of authentication and remote execution events
+- **Data exfiltration**: High-volume network transfers over time
+- **Password spraying**: Same password tried across multiple accounts
+
+**Reference**: [Sigma Correlation Rules Specification](https://github.com/SigmaHQ/sigma-specification/blob/main/Sigma_specification.md#correlation-rules)
+
+### Supported Correlation Types
+
+The backend supports all four Sigma correlation types defined in the specification:
+
+| Type | Description | Use Case | PPL Implementation |
+|------|-------------|----------|-------------------|
+| `event_count` | Count total events in timespan | Frequency-based detection (e.g., >10 failed logins) | [`stats count()`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/stats.md) |
+| `value_count` | Count distinct values in timespan | Cardinality detection (e.g., password used on >5 accounts) | [`stats dc(field)`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/aggregations.md#distinct_count-dc) |
+| `temporal` | Match multiple rule types in any order | Time-windowed multi-stage attacks | [`multisearch`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/multisearch.md) + aggregation |
+| `temporal_ordered` | Match rules in specific sequence | Sequential attack steps (recon → exploit → exfil) | [`multisearch`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/multisearch.md) with time ordering |
+
+### Transformation Process: Sigma → OpenSearch PPL
+
+The conversion from Sigma correlation rules to OpenSearch PPL follows a structured pipeline that maps Sigma constructs to PPL equivalents.
+
+#### Step 1: Rule Detection and Parsing
+
+The backend first identifies correlation rules by checking for specific attributes:
+
+```python
+if hasattr(rule, 'type') and hasattr(rule, 'rules') and hasattr(rule, 'timespan'):
+    # This is a correlation rule
+    return self.convert_correlation_rule(rule)
+```
+
+**Sigma Input Example**:
+```yaml
+title: Brute Force Attack Detection
+correlation:
+  type: event_count           # Correlation type
+  rules:
+    - failed_login_attempt    # References to detection rules
+  group-by:
+    - user                    # Aggregation fields
+    - source_ip
+  timespan: 5m               # Time window
+  condition:
+    gte: 10                   # Threshold condition
+```
+
+#### Step 2: Detection Rules Conversion
+
+Each referenced detection rule is converted to a PPL `source` and `where` clause using the base backend.
+
+**Sigma Detection Rule**:
+```yaml
+name: failed_login_attempt
+detection:
+  selection:
+    EventID: 4625
+  filter:
+    SubjectUserName|endswith: '$'
+  condition: selection and not filter
+```
+
+**Converted to PPL** (using base backend):
+```ppl
+source=windows-security-* | where EventID=4625 AND NOT LIKE(SubjectUserName, "%$")
+```
+
+**PPL Reference**: 
+- [`source` command](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/search.md) - specifies the index pattern
+- [`where` command](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/where.md) - filters events based on conditions
+
+#### Step 3: Aggregation Construction
+
+Based on the correlation type, the appropriate aggregation function is applied.
+
+##### Event Count (Frequency Detection)
+
+**Sigma**:
+```yaml
+correlation:
+  type: event_count
+  condition:
+    gte: 10
+```
+
+**PPL Aggregation**:
+```ppl
+| stats count() as event_count by user, source_ip
+| where event_count >= 10
+```
+
+**PPL Reference**: 
+- [`stats count()`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/aggregations.md#count) - counts number of events
+- [`by` clause](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/stats.md#syntax) - groups results by specified fields
+
+##### Value Count (Distinct Counting)
+
+**Sigma**:
+```yaml
+correlation:
+  type: value_count
+  condition:
+    field: user        # Field to count distinct values
+    gte: 5
+```
+
+**PPL Aggregation**:
+```ppl
+| stats dc(user) as value_count by source_ip
+| where value_count >= 5
+```
+
+**PPL Reference**: 
+- [`dc(field)`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/aggregations.md#distinct_count-dc) - returns distinct count (cardinality) of field values using HyperLogLog++ algorithm
+
+##### Temporal Correlation (Multi-Event Detection)
+
+**Sigma**:
+```yaml
+correlation:
+  type: temporal
+  rules:
+    - failed_login
+    - successful_login
+  timespan: 10m
+```
+
+**PPL Implementation using `multisearch` command**:
+
+OpenSearch PPL does **not** support the SQL `UNION` operator. For combining events from multiple rule matches, use the [`multisearch` command](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/multisearch.md) (available since v3.4):
+
+```ppl
+| multisearch [search source=windows-security-* | where EventID=4625 AND @timestamp >= now() - 10m] [search source=windows-security-* | where EventID=4624 AND LogonType=3 AND @timestamp >= now() - 10m]
+| stats count() as event_count by user
+| where event_count >= 1
+```
+
+**Key Points**:
+1. **`UNION` does not exist** in OpenSearch PPL syntax
+2. **`multisearch`** syntax: `| multisearch [search source=... | where ...] [search source=... | where ...]`
+3. Each subsearch must be **enclosed in square brackets `[ ]`** and start with **`search` keyword**
+4. Each sub-query requires **explicit time filters** (`@timestamp >= now() - 10m`)
+5. Time filters must be applied **before** aggregation for correct results
+
+**Current Implementation Limitation**: The backend may generate queries with `UNION` syntax which is **not valid PPL**. Queries need to be corrected to use `multisearch` instead.
+
+**PPL Reference**: 
+- [`multisearch` command documentation](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/multisearch.md) - Execute multiple searches and combine results
+
+#### Step 4: Time Window Application
+
+The `timespan` parameter defines the time window for correlation. This is a **critical component** that filters events to only those occurring within the specified time range.
+
+**Sigma Timespan**:
+```yaml
+timespan: 5m    # 5 minutes
+timespan: 1h    # 1 hour
+timespan: 24h   # 24 hours
+```
+
+**PPL Time Filter Implementation**:
+
+In OpenSearch PPL, time filtering is done using the [`@timestamp`](https://opensearch.org/docs/latest/field-types/supported-field-types/date/) field with the [`now()`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/datetime.md#now) function:
+
+```ppl
+@timestamp >= now() - 15m    # Events from last 15 minutes
+@timestamp >= now() - 1h     # Events from last 1 hour
+@timestamp >= now() - 24h    # Events from last 24 hours
+```
+
+**Complete Example**:
+```yaml
+# Sigma
+timespan: 15m
+```
+↓
+```ppl
+# PPL - time filter added to WHERE clause
+source=security-* | where EventID=4625 AND @timestamp >= now() - 15m
+```
+
+**Key Components**:
+- **[`@timestamp`](https://opensearch.org/docs/latest/field-types/supported-field-types/date/)**: Built-in OpenSearch field storing event time (ISO 8601 format)
+- **[`now()`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/datetime.md#now)**: PPL function returning current timestamp
+- **Time arithmetic**: `now() - 15m` calculates timestamp 15 minutes ago
+- **Comparison**: `@timestamp >= ...` filters events after that time
+
+**Conversion Logic**:
+```python
+def convert_timespan(self, timespan) -> str:
+    """Convert Sigma timespan to PPL time format."""
+    if hasattr(timespan, 'seconds'):
+        seconds = timespan.seconds
+    else:
+        seconds = int(timespan)
+    
+    if seconds >= 3600:
+        return f"{seconds // 3600}h"
+    elif seconds >= 60:
+        return f"{seconds // 60}m"
+    else:
+        return f"{seconds}s"
+
+# Then apply in query:
+time_filter = f"@timestamp >= now() - {convert_timespan(timespan)}"
+```
+
+**Important Notes**:
+
+1. **Placement**: Time filter must be in the `where` clause **before** aggregation:
+   ```ppl
+   # CORRECT - filter before stats
+   source=logs-* | where @timestamp >= now() - 5m | stats count() by user
+   
+   # INCORRECT - filter after stats (won't work as expected)
+   source=logs-* | stats count() by user | where @timestamp >= now() - 5m
+   ```
+
+2. **Multi-Rule Correlation**: Each rule in a temporal correlation should have the time filter:
+   ```ppl
+   source=security-* | where EventID=4625 AND @timestamp >= now() - 15m
+   UNION
+   (source=security-* | where EventID=4624 AND @timestamp >= now() - 15m)
+   ```
+
+3. **Current Implementation Limitation**: The current backend implementation does **not** automatically inject `@timestamp` filters into the generated queries. The timespan is converted but not applied. This means:
+   - Queries will scan all historical data instead of just the time window
+   - Performance will be slower
+   - Results may include events outside the intended time window
+   
+   **Workaround**: Time filtering can be applied at query execution time through OpenSearch Dashboards time picker, or the generated queries can be manually enhanced with timestamp filters.
+
+**PPL Reference**: 
+- [Date and Time Functions - `now()`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/datetime.md)
+- [Time-based filtering examples](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/where.md)
+
+#### Step 5: Condition Evaluation
+
+Sigma correlation conditions are mapped to PPL `where` clauses.
+
+**Sigma Condition Operators**:
+```yaml
+condition:
+  gte: 10    # Greater than or equal
+  gt: 5      # Greater than
+  lte: 100   # Less than or equal
+  lt: 50     # Less than
+  eq: 1      # Equal to
+```
+
+**PPL Mapping**:
+```python
+condition_operators = {
+    'gte': '>=',
+    'gt': '>',
+    'lte': '<=',
+    'lt': '<',
+    'eq': '='
+}
+```
+
+**PPL Output**:
+```ppl
+| where event_count >= 10
+| where value_count > 5
+| where connection_count <= 100
+```
+
+**PPL Reference**: 
+- [`where` command comparison operators](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/where.md)
+
+#### Step 6: GROUP BY Field Mapping
+
+The `group-by` fields from Sigma are converted to PPL's `by` clause in the `stats` command.
+
+**Sigma**:
+```yaml
+group-by:
+  - user
+  - source_ip
+  - destination_host
+```
+
+**PPL**:
+```ppl
+| stats count() as event_count by user, source_ip, destination_host
+```
+
+**PPL Reference**: 
+- [`stats` with multiple grouping fields](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/stats.md#example-9-calculate-the-count-by-a-gender-and-span)
+
+### Complete Transformation Example
+
+**Sigma Correlation Rule**:
+```yaml
+title: Password Spraying Detection
+correlation:
+  type: value_count
+  rules:
+    - failed_login
+  group-by:
+    - source_ip
+  timespan: 30m
+  condition:
+    field: user
+    gte: 10
+---
+name: failed_login
+detection:
+  selection:
+    EventID: 4625
+  condition: selection
+```
+
+**Step-by-Step Transformation**:
+
+1. **Detection Rule Conversion**:
+   ```ppl
+   source=windows-security-* | where EventID=4625
+   ```
+
+2. **Add Aggregation** (distinct count of users):
+   ```ppl
+   source=windows-security-* | where EventID=4625 
+   | stats dc(user) as value_count by source_ip
+   ```
+
+3. **Apply Condition** (threshold filter):
+   ```ppl
+   source=windows-security-* | where EventID=4625 
+   | stats dc(user) as value_count by source_ip 
+   | where value_count >= 10
+   ```
+
+4. **Final PPL Query**:
+   ```ppl
+   source=windows-security-* | where EventID=4625 | stats dc(user) as value_count by source_ip | where value_count >= 10
+   ```
+
+This query detects password spraying by identifying source IPs that attempt to authenticate with 10 or more distinct usernames within a 30-minute window.
+
+### Implementation Architecture
+
+#### Class Structure
+
+```python
+class OpenSearchPPLCorrelationBackend(OpenSearchPPLBackend):
+    """
+    Extends the base OpenSearch PPL backend to support correlation rules.
+    
+    Key Features:
+    - Detects correlation rules via type/rules/timespan attributes
+    - Template-based query generation for all correlation types
+    - Automatic field mapping and time range conversion
+    - Generates complete PPL queries with aggregation
+    """
+```
+
+#### Key Components
+
+1. **`PartialFormatDict`**: Helper class that handles partial string formatting
+   - Allows templates with missing placeholders to be formatted incrementally
+   - Essential for multi-phase query construction
+
+2. **Correlation Detection** (`convert_rule`):
+   ```python
+   def convert_rule(self, rule: SigmaRule) -> List[str]:
+       # Detect correlation rules by checking attributes
+       if hasattr(rule, 'type') and hasattr(rule, 'rules') and hasattr(rule, 'timespan'):
+           return self.convert_correlation_rule(rule)
+       else:
+           return super().convert_rule(rule)
+   ```
+
+3. **Template System**: Pre-defined PPL query templates for each correlation type
+   ```python
+   correlation_templates = {
+       SigmaCorrelationType.EVENT_COUNT: """
+           ({search_query}) | stats count() as event_count {group_by_clause} | where event_count {condition}
+       """,
+       SigmaCorrelationType.VALUE_COUNT: """
+           ({search_query}) | stats dc({field}) as value_count {group_by_clause} | where value_count {condition}
+       """,
+   }
+   ```
+
+### Technical Implementation Details
+
+#### Enum Handling
+
+Critical: Correlation types are **enums**, not strings:
+
+```python
+from sigma.correlations import SigmaCorrelationType
+
+# CORRECT - enum comparison
+if correlation_type == SigmaCorrelationType.VALUE_COUNT:
+    # Extract field reference
+    
+# INCORRECT - string comparison (will always fail)
+if correlation_type == "value_count":  # [X] Never matches!
+```
+
+#### Timespan Conversion
+
+```python
+def convert_timespan(self, timespan) -> str:
+    """
+    Converts Sigma timespan to PPL time range format.
+    
+    Input: SigmaCorrelationTimespan object or numeric value
+    Output: Time range string (e.g., "5m", "1h", "24h")
+    """
+    if hasattr(timespan, 'seconds'):
+        seconds = timespan.seconds
+    else:
+        seconds = int(timespan)
+    
+    # Convert to appropriate unit
+    if seconds >= 3600:
+        return f"{seconds // 3600}h"
+    elif seconds >= 60:
+        return f"{seconds // 60}m"
+    else:
+        return f"{seconds}s"
+```
+
+#### Group By Field Mapping
+
+```python
+def convert_correlation_aggregation_groupby_from_template(
+    self,
+    group_by_fields: List[str],
+    template_dict: PartialFormatDict
+) -> str:
+    """
+    Generates PPL 'by' clause for aggregations.
+    
+    Input: ['user', 'source_ip']
+    Output: "by user, source_ip"
+    """
+    if group_by_fields:
+        return f"by {', '.join(group_by_fields)}"
+    return ""
+```
+
+**PPL Reference**: [`stats` command with grouping](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/stats.md#example-3-calculate-the-average-of-a-field-by-group)
+
+### Usage Examples
+
+#### Event Count - Brute Force Detection
+
+**Sigma Rule** (`brute_force_detection.yml`):
+```yaml
+title: Brute Force Attack Detection
+correlation:
+  type: event_count
+  rules:
+    - failed_login_attempt
+  group-by:
+    - user
+    - source_ip
+  timespan: 5m
+  condition:
+    gte: 10
+```
+
+**Generated PPL Query**:
+```ppl
+(source=auth-* | where event_type="login_failed") 
+| stats count() as event_count by user, source_ip 
+| where event_count >= 10
+```
+
+**Explanation**: Detects when a user experiences ≥10 failed logins from the same IP within 5 minutes.
+
+#### Value Count - Password Spraying
+
+**Sigma Rule** (`password_spraying.yml`):
+```yaml
+title: Password Spraying Detection
+correlation:
+  type: value_count
+  rules:
+    - failed_login
+  group-by:
+    - source_ip
+  timespan: 30m
+  condition:
+    field: user
+    gte: 5
+```
+
+**Generated PPL Query**:
+```ppl
+(source=auth-* | where event_type="login_failed") 
+| stats dc(user) as value_count by source_ip 
+| where value_count >= 5
+```
+
+**Explanation**: Detects when the same password is tried against ≥5 different user accounts from one IP within 30 minutes (classic password spraying pattern).
+
+#### Temporal - Multi-Stage Attack
+
+**Sigma Rule** (`successful_brute_force.yml`):
+```yaml
+title: Successful Brute Force
+correlation:
+  type: temporal
+  rules:
+    - failed_login
+    - successful_login
+  group-by:
+    - user
+  timespan: 10m
+  condition:
+    gte: 1
+```
+
+**Generated PPL Query**:
+```ppl
+| multisearch [search source=auth-* | where event_type="login_failed" AND @timestamp >= now() - 10m] [search source=auth-* | where event_type="login_success" AND @timestamp >= now() - 10m]
+| stats count() as event_count by user 
+| where event_count >= 1
+```
+
+**Explanation**: Correlates failed and successful login events for the same user within 10 minutes, indicating a successful brute force attack.
+
+#### Temporal Ordered - Lateral Movement
+
+**Sigma Rule** (`lateral_movement_detection.yml`):
+```yaml
+title: Lateral Movement Detection
+correlation:
+  type: temporal_ordered
+  rules:
+    - authentication_event
+    - remote_execution
+  group-by:
+    - user
+  timespan: 15m
+  condition:
+    gte: 1
+```
+
+**Generated PPL Query**:
+```ppl
+| multisearch [search source=security-* | where event_id=4624 AND @timestamp >= now() - 15m] [search source=security-* | where event_id IN (4688, 592) AND @timestamp >= now() - 15m]
+| stats count() as event_count by user 
+| where event_count >= 1
+```
+
+**Explanation**: Detects when authentication is followed by remote execution within 15 minutes (lateral movement indicator).
+
+### Backend Initialization
+
+```python
+from sigma_backend.backends.opensearch_ppl import OpenSearchPPLCorrelationBackend
+from sigma.collection import SigmaCollection
+
+# Load correlation rules (YAML with 'correlation' section)
+rules = SigmaCollection.from_yaml("""
+---
+title: Brute Force Detection
+correlation:
+  type: event_count
+  rules:
+    - failed_login
+  group-by:
+    - user
+  timespan: 5m
+  condition:
+    gte: 10
+""")
+
+# Initialize correlation backend
+backend = OpenSearchPPLCorrelationBackend()
+
+# Convert correlation rule
+for rule in rules.rules:
+    ppl_query = backend.convert_rule(rule)
+    print(ppl_query[0])
+```
+
+### Testing
+
+The backend includes comprehensive testing infrastructure in `tests/correlation_testing/`:
+
 ## Usage
 
 ### Installation
@@ -637,17 +1246,19 @@ for rule in sigma_rules.rules:
 
 ```
 sigma_backend/backends/opensearch_ppl/
-├── __init__.py                      # Package initialization, modifier registration
-├── opensearch_ppl_textquery.py      # Main backend implementation
-├── modifiers.py                     # Custom UTF-16 modifiers
-└── README.md                        # This documentation file
+├── __init__.py                        # Package initialization, modifier registration
+├── opensearch_ppl_textquery.py        # Main backend implementation (base)
+├── opensearch_ppl_correlations.py     # Correlation rules backend (extends base)
+├── modifiers.py                       # Custom UTF-16 modifiers
+└── README.md                          # This documentation file
 ```
 
 ### Files
 
-- **`opensearch_ppl_textquery.py`**: Main backend class with all conversion logic
+- **`opensearch_ppl_textquery.py`**: Base backend class with standard Sigma rule conversion logic
+- **`opensearch_ppl_correlations.py`**: Correlation rules extension with multi-event detection support
 - **`modifiers.py`**: Custom Sigma modifiers for encoding (UTF-16 variants)
-- **`__init__.py`**: Exports backend and registers custom modifiers
+- **`__init__.py`**: Exports both backends and registers custom modifiers
 
 ---
 

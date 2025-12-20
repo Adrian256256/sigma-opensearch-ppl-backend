@@ -116,7 +116,7 @@ def get_all_test_rules(rules_dir: Path) -> List[str]:
 
 def print_test_result(result: TestResult, verbose: bool = False):
     """Print the result of a test"""
-    status = "✅ PASS" if result.passed else "❌ FAIL"
+    status = "[PASS]" if result.passed else "[FAIL]"
     print(f"{status} | {result.rule_name}")
     
     if not result.passed and verbose:
@@ -184,11 +184,11 @@ def main():
     
     # Validate directories exist
     if not rules_dir.exists():
-        print(f"❌ Rules directory not found: {rules_dir}")
+        print(f"[ERROR] Rules directory not found: {rules_dir}")
         sys.exit(1)
     
     if not refs_dir.exists():
-        print(f"❌ References directory not found: {refs_dir}")
+        print(f"[ERROR] References directory not found: {refs_dir}")
         sys.exit(1)
     
     # Create backend instance
@@ -214,7 +214,7 @@ def main():
             print_test_result(result, verbose=args.verbose or args.show_all)
         elif result.passed:
             # Just show the checkmark in compact mode
-            print(f"✅ PASS | {result.rule_name}")
+            print(f"[PASS] | {result.rule_name}")
     
     # Print summary
     print_summary(results)

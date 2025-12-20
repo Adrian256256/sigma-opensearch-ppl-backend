@@ -136,8 +136,10 @@ manual_test/*.log
 manual_test/*.txt
 
 # Test output files
-tests/out/
-tests/out/*
+tests/correlation_testing/out/
+tests/correlation_testing/out/*
+tests/automated_tests/out/
+tests/automated_tests/out/*
 
 # Sigma rules repository (if cloned locally)
 checker_missing_ecs_fields/sigma-master/
