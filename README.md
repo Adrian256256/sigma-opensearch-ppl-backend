@@ -31,8 +31,10 @@ sigma-opensearch-ppl-backend/
 │       ├── __init__.py
 │       └── opensearch_ppl/
 │           ├── __init__.py
-│           ├── opensearch_ppl_textquery.py    # Main TextQueryBackend implementation
-│           └── README.md                      # Backend documentation
+│           ├── opensearch_ppl_textquery.py       # Main TextQueryBackend implementation
+│           ├── opensearch_ppl_correlations.py    # Correlation rules backend
+│           ├── modifiers.py                      # Custom field modifiers
+│           └── README.md                         # Backend documentation
 ├── ecs_mapping/
 │   ├── __init__.py
 │   ├── yaml_loader.py                    # YAML pipeline loader
@@ -63,6 +65,7 @@ sigma-opensearch-ppl-backend/
 │   │   ├── example_rules/                # Additional example rules
 │   │   └── README.md                     # Manual testing documentation
 │   ├── correlation_testing/
+│   │   ├── test_correlations.py          # Correlation rules test script
 │   │   ├── sigma_rules/                  # Correlation test Sigma rules
 │   │   ├── ppl_refs/                     # Expected correlation PPL outputs
 │   │   └── README.md                     # Correlation testing documentation
