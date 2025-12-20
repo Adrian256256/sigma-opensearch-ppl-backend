@@ -1145,6 +1145,8 @@ pip install -e .
 
 ### Programmatic Usage
 
+#### Standard Detection Rules
+
 ```python
 from sigma_backend.backends.opensearch_ppl.opensearch_ppl_textquery import OpenSearchPPLBackend
 from sigma.collection import SigmaCollection
@@ -1173,6 +1175,72 @@ print(ppl_queries[0])
 # Output: source=windows-process_creation-* | where LIKE(Image, "%\\mimikatz.exe") AND (LIKE(CommandLine, "%sekurlsa%") OR LIKE(CommandLine, "%lsadump%"))
 ```
 
+#### Correlation Rules
+
+For correlation rules that detect relationships between multiple events, use the `OpenSearchPPLCorrelationBackend`:
+
+```python
+from sigma_backend.backends.opensearch_ppl.opensearch_ppl_correlations import OpenSearchPPLCorrelationBackend
+from sigma.collection import SigmaCollection
+
+# Load correlation rule with base rules
+# Note: All rules (base + correlation) must be in the same YAML (separated by ---)
+rule_yaml = """
+title: Failed Login
+name: failed_login
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4625
+  condition: selection
+---
+title: Successful Login
+name: successful_login
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4624
+  condition: selection
+---
+title: Successful Brute Force Detection
+correlation:
+  type: temporal
+  rules:
+    - failed_login
+    - successful_login
+  group-by:
+    - IpAddress
+    - TargetUserName
+  timespan: 10m
+"""
+
+# Parse and convert
+backend = OpenSearchPPLCorrelationBackend()
+collection = SigmaCollection.from_yaml(rule_yaml)
+
+# Backend automatically detects rule type (regular vs correlation)
+for rule in collection.rules:
+    queries = backend.convert_rule(rule)
+    if queries:  # Only correlation rules return queries
+        print(f"Rule: {rule.title}")
+        print(f"Query: {queries[0]}\n")
+
+# Output:
+# Rule: Successful Brute Force Detection
+# Query: | multisearch [search source=windows-security-* | where EventID=4625 AND @timestamp >= now() - 10m] [search source=windows-security-* | where EventID=4624 AND @timestamp >= now() - 10m] | stats count() as event_count by IpAddress, TargetUserName | where event_count >= 2
+```
+
+**Key points for correlation rules:**
+- All rules (base detection rules + correlation rule) must be in the same YAML file, separated by `---`
+- pySigma automatically resolves references between rules at parse time
+- Backend detects rule type automatically (no need to call different methods)
+- Base rules are converted internally; only correlation rules return PPL queries
+- Supports all correlation types: `event_count`, `value_count`, `temporal`, `temporal_ordered`
+
 ### With Processing Pipeline
 
 ```python
@@ -1197,21 +1265,6 @@ sigma convert -t opensearch_ppl -p opensearch rules/
 
 # Convert with ECS field mapping
 python manual_test/test_ecs_pipeline.py your_rule.yml
-```
-
-### Integration with OpenSearch
-
-Once you have PPL queries, you can use them directly in OpenSearch:
-
-```bash
-# Using OpenSearch REST API
-curl -X POST "localhost:9200/_plugins/_ppl" \
-  -H "Content-Type: application/json" \
-  -d '{"query": "source=windows-* | where LIKE(Image, \"%powershell.exe%\")"}'
-
-# Using OpenSearch Dashboards Query Workbench
-# Navigate to: OpenSearch Dashboards > Query Workbench > PPL
-# Paste and execute your PPL query
 ```
 
 ### Example Workflow
