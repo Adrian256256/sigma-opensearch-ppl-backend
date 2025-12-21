@@ -897,13 +897,73 @@ class OpenSearchPPLCorrelationBackend(OpenSearchPPLBackend):
     """
 ```
 
+#### How Detection Rule Conversion Works
+
+**Critical Understanding**: When processing correlation rules, the backend needs the PPL queries for referenced detection rules. Here's how it works:
+
+**The Flow**:
+
+1. **pySigma Pre-Converts Detection Rules** (before correlation processing):
+   ```python
+   # AUTOMATIC - done by pySigma library internally
+   for rule_ref in correlation_rule.rules:
+       detection_rule = rule_ref.rule  # Get the SigmaRule object
+       
+       # pySigma calls the backend to convert the detection rule
+       ppl_query = backend.convert_rule(detection_rule)
+       # Result: ['source=windows | where EventID=4625']
+       
+       # pySigma SAVES the result inside the SigmaRule object
+       detection_rule._conversion_result = ppl_query
+   ```
+
+2. **Backend Retrieves Pre-Converted Results** (in `convert_correlation_search`):
+   ```python
+   # Line 218 in opensearch_ppl_correlations.py
+   for query in referred_rule.get_conversion_result():
+       # This retrieves the already converted query from step 1
+       # query = 'source=windows | where EventID=4625'
+   ```
+
+**Key Point**: `get_conversion_result()` is a **getter method from pySigma's `SigmaRule` class** - it does NOT perform conversion, it only retrieves results that were already saved by pySigma during an earlier automatic conversion phase.
+
+**Why This Matters**:
+- The backend doesn't need to manage detection rule conversion manually
+- pySigma handles the orchestration automatically
+- The backend only needs to read the pre-converted results and assemble them into correlation queries
+
+**Visual Flow**:
+```
+┌─────────────────────────────────────────────────────────────┐
+│ 1. User calls: backend.convert_rule(correlation_rule)       │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 2. pySigma identifies referenced detection rules            │
+│    [failed_login, successful_login]                         │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 3. pySigma AUTO-CONVERTS each detection rule                │
+│    backend.convert_rule(failed_login)                       │
+│    → 'source=windows | where EventID=4625'                  │
+│    SAVES to: failed_login._conversion_result                │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 4. Backend's convert_correlation_search() is called         │
+│    for query in referred_rule.get_conversion_result():      │
+│       # Reads the saved result from step 3                  │
+│       # Assembles it into correlation query                 │
+└─────────────────────────────────────────────────────────────┘
+```
+
 #### Key Components
 
-1. **`PartialFormatDict`**: Helper class that handles partial string formatting
-   - Allows templates with missing placeholders to be formatted incrementally
-   - Essential for multi-phase query construction
-
-2. **Correlation Detection** (`convert_rule`):
+1. **Correlation Detection** (`convert_rule`):
    ```python
    def convert_rule(self, rule: SigmaRule) -> List[str]:
        # Detect correlation rules by checking attributes
@@ -913,16 +973,31 @@ class OpenSearchPPLCorrelationBackend(OpenSearchPPLBackend):
            return super().convert_rule(rule)
    ```
 
-3. **Template System**: Pre-defined PPL query templates for each correlation type
+2. **Template System**: Pre-defined PPL query templates for each correlation type
    ```python
-   correlation_templates = {
-       SigmaCorrelationType.EVENT_COUNT: """
-           ({search_query}) | stats count() as event_count {group_by_clause} | where event_count {condition}
-       """,
-       SigmaCorrelationType.VALUE_COUNT: """
-           ({search_query}) | stats dc({field}) as value_count {group_by_clause} | where value_count {condition}
-       """,
+   # All correlation types use the same structure (line 62-64)
+   default_correlation_query = {
+       "default": "{search} | stats {aggregate} | where {condition}"
    }
+   
+   # Different aggregations for different types
+   event_count_aggregation = "count() as event_count by {groupby}"
+   value_count_aggregation = "dc({field}) as value_count by {groupby}"
+   ```
+
+3. **Three-Phase Query Construction** (`convert_correlation_rule_from_template`):
+   ```python
+   # Phase 1: Search - get pre-converted detection rules
+   search = self.convert_correlation_search(rule)
+   
+   # Phase 2: Aggregate - count/distinct count with grouping
+   aggregate = self.convert_correlation_aggregation_from_template(...)
+   
+   # Phase 3: Condition - threshold filtering
+   condition = self.convert_correlation_condition_from_template(...)
+   
+   # Assemble final query
+   query = template.format(search=search, aggregate=aggregate, condition=condition)
    ```
 
 ### Technical Implementation Details
