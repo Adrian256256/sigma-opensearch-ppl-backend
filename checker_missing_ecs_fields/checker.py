@@ -71,13 +71,15 @@ def extract_fields_from_detection(detection: Dict[str, Any]) -> Set[str]:
     return fields
 
 
-def process_sigma_rules(rules_directory: str, output_csv: str) -> None:
+def process_sigma_rules(rules_directory: str, output_csv: str, output_unique_csv: str) -> None:
     """
-    Process all Sigma rules in the directory and extract unique fields to CSV.
+    Process all Sigma rules in the directory and extract fields with their rule paths to CSV.
+    Also generates a separate CSV with unique fields only.
     
     Args:
         rules_directory: Path to the sigma-master/rules directory
-        output_csv: Path to the output CSV file
+        output_csv: Path to the output CSV file with field-path pairs
+        output_unique_csv: Path to the output CSV file with unique fields only
     """
     rules_path = Path(rules_directory)
     
@@ -90,7 +92,8 @@ def process_sigma_rules(rules_directory: str, output_csv: str) -> None:
     
     print(f"Found {len(yaml_files)} Sigma rule files")
     
-    # Use a set to collect all unique fields
+    # Use a list to collect all field-path pairs (field, rule_path)
+    field_path_pairs = []
     all_fields = set()
     errors = []
     processed_count = 0
@@ -107,7 +110,14 @@ def process_sigma_rules(rules_directory: str, output_csv: str) -> None:
             fields = extract_fields_from_detection(rule_data['detection'])
             
             if fields:
-                all_fields.update(fields)
+                # Get relative path from the rules directory
+                relative_path = yaml_file.relative_to(rules_path)
+                
+                # Add each field with its rule path
+                for field in fields:
+                    field_path_pairs.append((field, str(relative_path)))
+                    all_fields.add(field)
+                
                 processed_count += 1
         
         except yaml.YAMLError as e:
@@ -115,23 +125,37 @@ def process_sigma_rules(rules_directory: str, output_csv: str) -> None:
         except Exception as e:
             errors.append(f"Error processing {yaml_file}: {e}")
     
-    # Sort fields alphabetically for consistent output
-    sorted_fields = sorted(all_fields)
+    # Sort by field name first, then by path
+    field_path_pairs.sort(key=lambda x: (x[0], x[1]))
     
-    # Write results to CSV - one field per line
+    # Write results to CSV with field-path pairs
     with open(output_csv, 'w', newline='', encoding='utf-8') as csvfile:
+        writer = csv.writer(csvfile)
+        
+        # Write header
+        writer.writerow(['field', 'rule_path'])
+        
+        # Write each field-path pair
+        for field, rule_path in field_path_pairs:
+            writer.writerow([field, rule_path])
+    
+    # Write unique fields to separate CSV
+    sorted_fields = sorted(all_fields)
+    with open(output_unique_csv, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
         
         # Write header
         writer.writerow(['field'])
         
-        # Write each unique field on its own line
+        # Write each unique field
         for field in sorted_fields:
             writer.writerow([field])
     
     print(f"\nProcessed {processed_count} rules successfully")
-    print(f"Found {len(sorted_fields)} unique fields")
-    print(f"Output written to: {output_csv}")
+    print(f"Found {len(all_fields)} unique fields")
+    print(f"Total field-rule pairs: {len(field_path_pairs)}")
+    print(f"Output with paths written to: {output_csv}")
+    print(f"Unique fields written to: {output_unique_csv}")
     
     if errors:
         print(f"\nEncountered {len(errors)} errors:")
@@ -148,17 +172,19 @@ def main():
     
     # Define paths
     rules_directory = script_dir / "sigma-master" / "rules"
-    output_csv = script_dir / "sigma_fields.csv"
+    output_csv = script_dir / "sigma_fields_with_paths.csv"
+    output_unique_csv = script_dir / "sigma_fields.csv"
     
     print("=" * 60)
     print("Sigma Rules Field Extractor")
     print("=" * 60)
     print(f"Rules directory: {rules_directory}")
-    print(f"Output CSV: {output_csv}")
+    print(f"Output CSV (with paths): {output_csv}")
+    print(f"Output CSV (unique only): {output_unique_csv}")
     print("=" * 60)
     print()
     
-    process_sigma_rules(str(rules_directory), str(output_csv))
+    process_sigma_rules(str(rules_directory), str(output_csv), str(output_unique_csv))
     
     print("\nDone!")
 
