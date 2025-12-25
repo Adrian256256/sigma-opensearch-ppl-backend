@@ -128,16 +128,20 @@ def process_sigma_rules(rules_directory: str, output_csv: str, output_unique_csv
     # Sort by field name first, then by path
     field_path_pairs.sort(key=lambda x: (x[0], x[1]))
     
+    # GitHub base URL for Sigma rules
+    github_base_url = "https://github.com/SigmaHQ/sigma/blob/master/rules/"
+    
     # Write results to CSV with field-path pairs
     with open(output_csv, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
         
         # Write header
-        writer.writerow(['field', 'rule_path'])
+        writer.writerow(['field', 'rule_path', 'github_link'])
         
         # Write each field-path pair
         for field, rule_path in field_path_pairs:
-            writer.writerow([field, rule_path])
+            github_link = github_base_url + rule_path
+            writer.writerow([field, rule_path, github_link])
     
     # Write unique fields to separate CSV
     sorted_fields = sorted(all_fields)
