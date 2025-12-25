@@ -1,363 +1,363 @@
-sigma_field,ecs_field,notes
-Message,message,High confidence - Official ECS core field
-Action,event.action,High confidence - Standard event action field
-action,event.action,High confidence - Standard event action field
-AccountName,user.name,High confidence - Standard user identification
-Address,source.address | destination.address | client.address,Medium confidence - Depends on context (source/dest/client)
-AllowedToDelegateTo,winlog.event_data.AllowedToDelegateTo,High confidence - Windows Kerberos delegation
-answer,dns.answers.name,High confidence - DNS answer field
-answers,dns.answers,High confidence - DNS answers array
-apiGroup,orchestrator.api_version,Medium confidence - Kubernetes API group
-Application,process.name,High confidence - Application/process name
-AppName,process.name,Medium confidence - Application name maps to process
-AppID,process.entity_id,Medium confidence - Process unique identifier
-AppId,process.entity_id,Medium confidence - Process unique identifier
-ApplicationId,process.entity_id,Medium confidence - Application/process ID
-ApplicationPath,process.executable,High confidence - Full path to executable
-AttributeLDAPDisplayName,winlog.event_data.AttributeLDAPDisplayName,High confidence - Windows LDAP attribute
-AttributeValue,winlog.event_data.AttributeValue,High confidence - Windows attribute value
-AuditPolicyChanges,winlog.event_data.AuditPolicyChanges,High confidence - Windows audit policy
-AuditSourceName,winlog.event_data.AuditSourceName,High confidence - Windows audit source
-auditType.action,event.action,High confidence - Audit action type
-auditType.category,event.category,High confidence - Audit category
-AuthenticationPackageName,winlog.event_data.AuthenticationPackageName,High confidence - Windows authentication package
-AuthenticationRequirement,event.action,Low confidence - Contextual authentication info
-Binary,file.path,Medium confidence - Binary file path
-blocked,event.outcome,High confidence - Maps to success/failure/unknown
-CallTrace,process.thread.call_trace,High confidence - Thread call trace
-capabilities,container.security_context.privileged,Medium confidence - Container capabilities
-Caption,host.os.full,Medium confidence - OS caption/description
-Category,event.category,High confidence - ECS event category
-category,event.category,High confidence - ECS event category
-CategoryValue,event.category,High confidence - ECS event category value
-certificate.serial,tls.server.x509.serial_number,High confidence - Certificate serial number
-CertThumbprint,tls.server.hash.sha1,High confidence - Certificate thumbprint
-cfgpath,file.path,Medium confidence - Configuration file path
-Channel,log.logger,High confidence - Log channel/logger name
-cipher,tls.cipher,High confidence - TLS cipher suite
-ClassName,winlog.event_data.ClassName,High confidence - Windows WMI class
-ClientAddress,client.address,High confidence - Client network address
-ClientApp,user_agent.original,Medium confidence - Client application
-ClientProcessId,process.parent.pid,Medium confidence - Client/parent process ID
-CommandLine,process.command_line,High confidence - Full command line
-comm,process.name,High confidence - Linux process command name
-Company,file.pe.company,High confidence - PE file company name
-conditionalAccessStatus,event.outcome,Medium confidence - Access status outcome
-Configuration,event.original,Low confidence - Generic configuration data
-ConsentContext.IsAdminConsent,event.action,Low confidence - Azure AD consent context
-Contents,file.content,Low confidence - File content data
-ContextInfo,event.original,Low confidence - Generic context information
-Count,event.sequence,Medium confidence - Event sequence/count
-CreationUtcTime,file.created,High confidence - File creation timestamp
-cs-cookie,http.request.headers,Medium confidence - HTTP cookie header
-cs-host,url.domain,High confidence - HTTP host header
-cs-method,http.request.method,High confidence - HTTP request method
-cs-referer,http.request.referrer,High confidence - HTTP referer header
-cs-uri,url.path,High confidence - HTTP URI path
-cs-uri-query,url.query,High confidence - HTTP query string
-cs-user-agent,user_agent.original,High confidence - HTTP user agent
-c-uri,url.path,High confidence - IIS URI path
-c-uri-extension,url.extension,High confidence - URI file extension
-c-uri-query,url.query,High confidence - URI query string
-c-useragent,user_agent.original,High confidence - IIS user agent
-CurrentDirectory,process.working_directory,High confidence - Process working directory
-Data,event.original,Low confidence - Generic data field
-data.protoPayload.authorizationInfo.granted,event.outcome,Medium confidence - GCP authorization result
-data.protoPayload.authorizationInfo.permission,event.action,Medium confidence - GCP permission requested
-data.protoPayload.logName,log.logger,High confidence - GCP log name
-data.protoPayload.methodName,event.action,High confidence - GCP API method
-data.protoPayload.resource.type,cloud.service.name,High confidence - GCP resource type
-data.protoPayload.serviceName,cloud.service.name,High confidence - GCP service name
-debugContext.debugData.requestUri,url.original,High confidence - Azure AD request URI
-debugcontext.debugdata.behaviors,event.action,Low confidence - Azure debug behaviors
-debugcontext.debugdata.logonlysecuritydata,event.original,Low confidence - Azure security data
-Description,rule.description,High confidence - Rule/event description
-DestAddress,destination.address,High confidence - Destination network address
-Destination,destination.address,High confidence - Destination address
-DestinationHostname,destination.domain,High confidence - Destination hostname/domain
-DestinationIp,destination.ip,High confidence - Destination IP address
-DestinationPort,destination.port,High confidence - Destination port number
-DestPort,destination.port,High confidence - Destination port
-Details,event.original,Low confidence - Generic details field
-Device,host.name,Medium confidence - Device/host name
-DeviceDescription,host.name,Medium confidence - Device description
-DeviceDetail.deviceId,device.id,High confidence - Azure AD device ID
-DeviceDetail.isCompliant,host.os.type,Low confidence - Device compliance status
-DeviceDetail.trusttype,host.os.type,Low confidence - Device trust type
-DeviceName,host.name,High confidence - Device name
-displaymessage,message,High confidence - Display message
-DistinguishedName,user.name,Medium confidence - LDAP distinguished name
-dst_ip,destination.ip,High confidence - Destination IP (Zeek/Suricata)
-dst_port,destination.port,High confidence - Destination port (Zeek/Suricata)
-EncyptionUsed,tls.cipher,Medium confidence - Encryption method used
-endpoint,url.full,High confidence - Full endpoint URL
-ErrorCode,error.code,High confidence - Error code
-errorCode,error.code,High confidence - Error code
-errorMessage,error.message,High confidence - Error message text
-euid,user.effective.id,High confidence - Effective user ID (Linux)
-EventID,event.code,High confidence - Windows Event ID
-EventLog,log.file.path,High confidence - Event log file path
-eventName,event.action,High confidence - AWS/cloud event name
-eventService,service.name,High confidence - Service generating event
-eventSource,event.provider,High confidence - Event source/provider
-EventType,event.type,High confidence - ECS event type
-eventType,event.type,High confidence - ECS event type
-event_type,event.type,High confidence - Event type
-event_type_id,event.code,High confidence - Event type identifier
-eventtype,event.type,High confidence - Event type
-ExceptionCode,error.code,High confidence - Exception code
-exe,process.executable,High confidence - Executable path
-failure_status_reason,error.message,High confidence - Failure reason
-Feature_Name,event.action,Low confidence - Feature name
-FileName,file.name,High confidence - File name without path
-Filename,file.name,High confidence - File name
-FileNameBuffer,file.name,High confidence - File name from buffer
-FileVersion,file.pe.file_version,High confidence - PE file version
-FilterName,event.action,Low confidence - Filter name
-FilterOrigin,event.action,Low confidence - Filter origin
-gcp.audit.method_name,event.action,High confidence - GCP audit method
-GrantedAccess,winlog.event_data.GrantedAccess,High confidence - Windows granted access mask
-Hash,file.hash.sha256,High confidence - File hash (SHA256)
-Hashes,file.hash.sha256,High confidence - File hashes
-HiveName,registry.hive,High confidence - Windows registry hive
-HomeTenantId,cloud.account.id,High confidence - Azure AD tenant ID
-host,host.name,High confidence - Host name
-hostPath,file.path,Medium confidence - Host path (K8s)
-id.orig_h,source.ip,High confidence - Zeek originator IP
-id.resp_h,destination.ip,High confidence - Zeek responder IP
-id.resp_p,destination.port,High confidence - Zeek responder port
-Image,process.executable,High confidence - Sysmon process image path
-ImageLoaded,dll.path,High confidence - Sysmon DLL loaded
-ImageName,process.name,High confidence - Image/process name
-ImagePath,process.executable,High confidence - Full image path
-ImpersonationLevel,winlog.event_data.ImpersonationLevel,High confidence - Windows impersonation level
-Initiated,event.start,High confidence - Action initiated timestamp
-InitiatedBy,user.name,High confidence - User who initiated action
-Initiatedby,user.name,High confidence - User who initiated action
-actor.alternateid,user.email,Medium confidence - Azure AD alternate ID
-additionalDetails.additionalInfo,event.original,Low confidence - Additional info
-additionalEventData.MFAUsed,user.mfa,Medium confidence - MFA usage indicator
-AdditionalInfo,event.original,Low confidence - Additional information
-AccessList,winlog.event_data.AccessList,High confidence - Windows access control list
-AccessMask,winlog.event_data.AccessMask,High confidence - Windows access mask
-ActivityDetails,event.action,Low confidence - Activity details
-ActivityDisplayName,event.action,Medium confidence - Activity display name
-ActivityType,event.action,Medium confidence - Activity type
-activityType,event.action,Medium confidence - Activity type
-IntegrityLevel,process.integrity_level,High confidence - Process integrity level (Windows)
-InterfaceUuid,winlog.event_data.InterfaceUuid,High confidence - Windows RPC interface UUID
-IpAddress,source.ip,High confidence - IP address (typically source)
-IpPort,source.port,High confidence - IP port
-IsatapRouter,network.name,Low confidence - ISATAP router name
-key,registry.key,High confidence - Windows registry key
-KeyLength,tls.server.x509.public_key_size,Medium confidence - Encryption key length
-Keywords,event.type,Medium confidence - Windows event keywords
-LayerRTID,winlog.event_data.LayerRTID,High confidence - Windows filtering layer ID
-legacyeventtype,event.type,Medium confidence - Legacy event type
-Level,log.level,High confidence - Log level (info/warn/error)
-LocalName,file.path,Medium confidence - Local file name/path
-Location,geo.name,High confidence - Geographic location
-LoggedByService,service.name,High confidence - Service that logged event
-LogonId,user.id,High confidence - Windows logon session ID
-LogonProcessName,winlog.event_data.LogonProcessName,High confidence - Windows logon process
-LogonType,winlog.event_data.LogonType,High confidence - Windows logon type
-logtype,log.level,Medium confidence - Log type/level
-method,http.request.method,High confidence - HTTP method (GET/POST/etc)
-ModifiedProperties{}.NewValue,event.original,Low confidence - Azure AD modified properties
-ModifyingApplication,process.name,Medium confidence - Application making modification
-Name,file.name,Medium confidence - Generic name field (context-dependent)
-name,file.name,Medium confidence - Generic name field
-nametype,dns.question.type,High confidence - DNS query type
-NetworkLocationDetails,network.name,Low confidence - Network location details
-new_value,event.original,Low confidence - New value in change
-NewName,file.name,High confidence - New file name
-NewTargetUserName,user.target.name,High confidence - New target user name
-NewTemplateContent,event.original,Low confidence - New template content
-NewUacValue,winlog.event_data.NewUacValue,High confidence - New UAC value
-NewValue,event.original,Low confidence - New value
-ObjectClass,winlog.event_data.ObjectClass,High confidence - Windows object class
-ObjectDN,user.name,Medium confidence - LDAP object distinguished name
-ObjectId,file.inode,Medium confidence - Object/file identifier
-ObjectName,file.name,High confidence - Object/file name
-objectRef.apiGroup,orchestrator.api_version,High confidence - K8s API group
-objectRef.namespace,orchestrator.namespace,High confidence - K8s namespace
-objectRef.resource,orchestrator.resource.type,High confidence - K8s resource type
-objectRef.subresource,orchestrator.resource.name,High confidence - K8s subresource
-ObjectServer,winlog.event_data.ObjectServer,High confidence - Windows object server
-ObjectType,winlog.event_data.ObjectType,High confidence - Windows object type
-ObjectValueName,registry.value,High confidence - Registry value name
-OldUacValue,winlog.event_data.OldUacValue,High confidence - Old UAC value
-OldValue,event.original,Low confidence - Old value before change
-Operation,event.action,High confidence - Operation performed
-operation,event.action,High confidence - Operation type
-OperationName,event.action,High confidence - Operation name
-operationName,event.action,High confidence - Operation name
-OperationNameValue,event.action,High confidence - Operation name value
-OpNum,winlog.event_data.OpNum,High confidence - Windows RPC operation number
-Origin,url.original,Medium confidence - Origin URL
-OriginalFileName,file.pe.original_file_name,High confidence - PE original file name
-outcome.reason,error.message,High confidence - Outcome reason
-outcome.result,event.outcome,High confidence - Outcome result
-PackageFullName,package.name,High confidence - Full package name
-PackagePath,package.path,High confidence - Package path
-param1,process.args,Medium confidence - Process argument 1
-param2,process.args,Medium confidence - Process argument 2
-param3,process.args,Medium confidence - Process argument 3
-ParentCommandLine,process.parent.command_line,High confidence - Parent process command line
-ParentImage,process.parent.executable,High confidence - Parent process executable
-ParentProcessId,process.parent.pid,High confidence - Parent process ID
-ParentUser,process.parent.user.name,High confidence - Parent process user
-Path,file.path,High confidence - File path
-path,file.path,High confidence - File path
-Payload,http.request.body.content,Medium confidence - Request payload
-payload,http.request.body.content,Medium confidence - Payload data
-PipeName,file.name,High confidence - Named pipe name
-PossibleCause,error.message,Medium confidence - Possible cause description
-PreAuthType,winlog.event_data.PreAuthType,High confidence - Kerberos pre-auth type
-PreviousCreationUtcTime,file.created,Medium confidence - Previous creation time
-PrivilegeList,user.effective.id,Medium confidence - User privileges
-process,process.name,High confidence - Process name
-ProcessId,process.pid,High confidence - Process ID
-ProcessName,process.name,High confidence - Process name
-ProcessNameBuffer,process.name,High confidence - Process name from buffer
-ProcessPath,process.executable,High confidence - Process executable path
-processPath,process.executable,High confidence - Process path
-Product,file.pe.product,High confidence - PE product name
-Properties,event.original,Low confidence - Generic properties
-properties.message,message,High confidence - Properties message
-Protocol,network.protocol,High confidence - Network protocol
-Provider,log.logger,High confidence - Log provider
-Provider_Name,log.logger,High confidence - Provider name
-ProviderContextName,service.name,Medium confidence - Provider context
-qtype_name,dns.question.type,High confidence - DNS question type name
-Query,dns.question.name,High confidence - DNS query
-query,dns.question.name,High confidence - DNS query
-QueryName,dns.question.name,High confidence - DNS query name
-Reason,error.message,High confidence - Reason description
-reason,error.message,High confidence - Reason text
-record_type,dns.question.type,High confidence - DNS record type
-rejected,event.outcome,High confidence - Rejected = failure outcome
-RelativeTargetName,file.name,Medium confidence - Relative target name
-RemoteName,network.name,Medium confidence - Remote network name
-request_type,http.request.method,High confidence - HTTP request type
-RequestedPolicy,event.action,Low confidence - Requested policy
-requestParameters,http.request.body.content,Medium confidence - AWS/API request params
-requestParameters.attribute,event.action,Medium confidence - Request attribute
-requestParameters.containerDefinitions.command,process.command_line,High confidence - Container command
-requestParameters.enable,event.action,Low confidence - Enable parameter
-requestParameters.layers,container.image.name,Medium confidence - Container layers
-RequestType,http.request.method,High confidence - HTTP request type
-ResourceDisplayName,cloud.service.name,Medium confidence - Resource display name
-ResourceId,cloud.instance.id,High confidence - Cloud resource ID
-ResourceProviderValue,cloud.provider,High confidence - Cloud provider
-ResourceTenantId,cloud.account.id,High confidence - Resource tenant ID
-resp_mime_types,http.response.mime_type,High confidence - Response MIME type
-responseElements,http.response.body.content,Medium confidence - API response elements
-responseElements.ConsoleLogin,event.action,Medium confidence - Console login response
-responseElements.pendingModifiedValues.masterUserPassword,event.action,Low confidence - Password change response
-responseElements.publiclyAccessible,event.action,Low confidence - Public accessibility
-responseStatus.code,http.response.status_code,High confidence - HTTP response status
-ResultDescription,event.outcome,Medium confidence - Result description
-Resultdescription,event.outcome,Medium confidence - Result description
-ResultStatus,event.outcome,High confidence - Result status
-ResultType,event.outcome,High confidence - Result type
-riskEventType,threat.indicator.type,High confidence - Risk event type
-RiskState,threat.indicator.confidence,Medium confidence - Risk state/level
-SamAccountName,user.name,High confidence - SAM account name
-sc-status,http.response.status_code,High confidence - HTTP status code
-ScriptBlockText,powershell.file.script_block_text,High confidence - PowerShell script text
-SearchFilter,event.action,Low confidence - LDAP search filter
-securityContext.isProxy,network.forwarded_ip,Medium confidence - Security context proxy
-securitycontext.isproxy,network.forwarded_ip,Medium confidence - Proxy indicator
-ServerName,server.address,High confidence - Server name/address
-Service,service.name,High confidence - Service name
-service,service.name,High confidence - Service name
-ServiceFileName,service.name,Medium confidence - Service file name
-ServiceName,service.name,High confidence - Service name
-ServicePrincipalNames,user.name,Medium confidence - Service principal names
-ServiceStartType,service.type,Medium confidence - Service start type
-ServiceType,service.type,High confidence - Service type
-setting_name,event.action,Low confidence - Setting name
-ShareName,file.directory,High confidence - Network share name
-SidHistory,user.id,Medium confidence - Windows SID history
-SidList,user.id,Medium confidence - List of SIDs
-Signature,file.code_signature.subject_name,High confidence - Code signature subject
-SignatureStatus,file.code_signature.status,High confidence - Signature validation status
-Signed,file.code_signature.exists,High confidence - Whether file is signed
-SigningUsed,tls.established,Medium confidence - TLS signing used
-SourceAddress,source.address,High confidence - Source network address
-SourceCommandLine,process.parent.command_line,Medium confidence - Source process command line
-SourceFilename,file.name,High confidence - Source file name
-SourceHostname,source.domain,High confidence - Source hostname
-SourceImage,process.parent.executable,High confidence - Source process image
-SourceIp,source.ip,High confidence - Source IP address
-sourceIPAddress,source.ip,High confidence - Source IP address
-SourceIsIpv6,source.ip,High confidence - Source IP (IPv6 flag)
-SourceName,source.domain,High confidence - Source name
-SourceParentImage,process.parent.parent.executable,Medium confidence - Source parent image
-SourcePort,source.port,High confidence - Source port number
-SourceUser,source.user.name,High confidence - Source user name
-StartAddress,process.thread.start_address,High confidence - Thread start address
-StartFunction,process.entry_leader.name,Medium confidence - Start function name
-StartModule,dll.name,High confidence - Start module/DLL name
-State,event.outcome,Medium confidence - State of operation
-Status,event.outcome,High confidence - Operation status
-status,event.outcome,High confidence - Status value
-SubcategoryGuid,event.code,Medium confidence - Windows event subcategory GUID
-subjectName,tls.server.subject,High confidence - TLS certificate subject
-SubjectDomainName,user.domain,High confidence - Windows subject domain
-SubjectLogonId,user.id,High confidence - Windows subject logon ID
-SubjectUserName,user.name,High confidence - Windows subject user name
-SubjectUserSid,user.id,High confidence - Windows subject user SID
-SubStatus,error.code,High confidence - Sub-status code
-SYSCALL,system.audit.syscall,High confidence - Linux system call number
-Target,file.target_path,High confidence - Symlink target path
-target.displayname,user.target.full_name,High confidence - Target display name
-TargetFilename,file.path,High confidence - Target file path
-TargetImage,process.executable,High confidence - Target process image
-TargetName,file.name,High confidence - Target name
-TargetObject,registry.path,High confidence - Registry target object
-TargetOutboundUserName,user.target.name,High confidence - Target outbound user
-TargetParentProcessId,process.parent.pid,Medium confidence - Target parent PID
-TargetResources,event.original,Low confidence - Azure AD target resources
-TargetResources.modifiedProperties,event.original,Low confidence - Modified properties
-TargetResources.ModifiedProperties.DisplayName,event.original,Low confidence - Display name
-TargetResources.ModifiedProperties.NewValue,event.original,Low confidence - New value
-TargetResources.modifiedProperties.newValue,event.original,Low confidence - New value
-targetResources.type,event.type,Medium confidence - Target resource type
-TargetServerName,server.address,High confidence - Target server name
-TargetSid,user.target.id,High confidence - Target user SID
-TargetUserName,user.target.name,High confidence - Target user name
-TargetUserSid,user.target.id,High confidence - Target user SID
-TaskContent,event.original,Low confidence - Scheduled task content
-TaskContentNew,event.original,Low confidence - New task content
-TaskName,process.name,Medium confidence - Task name
-TemplateContent,event.original,Low confidence - Template content
-TicketEncryptionType,winlog.event_data.TicketEncryptionType,High confidence - Kerberos ticket encryption
-TicketOptions,winlog.event_data.TicketOptions,High confidence - Kerberos ticket options
-Type,event.type,High confidence - Generic type field
-type,event.type,High confidence - Type field
-unit,process.name,Low confidence - Unit name (systemd)
-uri,url.original,High confidence - URI
-User,user.name,High confidence - User name
-user_agent,user_agent.original,High confidence - User agent string
-userAgent,user_agent.original,High confidence - User agent
-UserName,user.name,High confidence - User name
-Username,user.name,High confidence - Username
-userIdentity.arn,cloud.account.id,High confidence - AWS ARN
-userIdentity.sessionContext.sessionIssuer.type,user.roles,Medium confidence - AWS session issuer type
-userIdentity.type,user.roles,Medium confidence - AWS identity type
-Value,registry.data.strings,High confidence - Registry value data
-verb,http.request.method,High confidence - HTTP verb (K8s also uses this)
-Workload,service.name,Medium confidence - Workload name
-Workstation,host.name,High confidence - Workstation name
-WorkstationName,host.name,High confidence - Workstation name
-Z,process.args,Low confidence - Generic argument (audit)
-a0,process.args,High confidence - Linux audit syscall arg 0
-a1,process.args,High confidence - Linux audit syscall arg 1
-a2,process.args,High confidence - Linux audit syscall arg 2
-a3,process.args,High confidence - Linux audit syscall arg 3
-a4,process.args,High confidence - Linux audit syscall arg 4
-a5,process.args,High confidence - Linux audit syscall arg 5
-a6,process.args,High confidence - Linux audit syscall arg 6
-a7,process.args,High confidence - Linux audit syscall arg 7
+sigma_field,ecs_field,ecs_documentation_link,notes
+Message,message,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Official ECS core field
+Action,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Standard event action field
+action,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Standard event action field
+AccountName,user.name,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,High confidence - Standard user identification
+Address,source.address | destination.address | client.address,https://www.elastic.co/guide/en/ecs/current/ecs-source.html,Medium confidence - Depends on context (source/dest/client)
+AllowedToDelegateTo,winlog.event_data.AllowedToDelegateTo,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Windows Kerberos delegation
+answer,dns.answers.name,https://www.elastic.co/guide/en/ecs/current/ecs-dns.html,High confidence - DNS answer field
+answers,dns.answers,https://www.elastic.co/guide/en/ecs/current/ecs-dns.html,High confidence - DNS answers array
+apiGroup,orchestrator.api_version,https://www.elastic.co/guide/en/ecs/current/ecs-orchestrator.html,Medium confidence - Kubernetes API group
+Application,process.name,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Application/process name
+AppName,process.name,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,Medium confidence - Application name maps to process
+AppID,process.entity_id,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,Medium confidence - Process unique identifier
+AppId,process.entity_id,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,Medium confidence - Process unique identifier
+ApplicationId,process.entity_id,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,Medium confidence - Application/process ID
+ApplicationPath,process.executable,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Full path to executable
+AttributeLDAPDisplayName,winlog.event_data.AttributeLDAPDisplayName,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Windows LDAP attribute
+AttributeValue,winlog.event_data.AttributeValue,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Windows attribute value
+AuditPolicyChanges,winlog.event_data.AuditPolicyChanges,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Windows audit policy
+AuditSourceName,winlog.event_data.AuditSourceName,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Windows audit source
+auditType.action,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Audit action type
+auditType.category,event.category,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Audit category
+AuthenticationPackageName,winlog.event_data.AuthenticationPackageName,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Windows authentication package
+AuthenticationRequirement,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Contextual authentication info
+Binary,file.path,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,Medium confidence - Binary file path
+blocked,event.outcome,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Maps to success/failure/unknown
+CallTrace,process.thread.call_trace,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Thread call trace
+capabilities,container.security_context.privileged,https://www.elastic.co/guide/en/ecs/current/ecs-container.html,Medium confidence - Container capabilities
+Caption,host.os.full,https://www.elastic.co/guide/en/ecs/current/ecs-host.html,Medium confidence - OS caption/description
+Category,event.category,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - ECS event category
+category,event.category,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - ECS event category
+CategoryValue,event.category,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - ECS event category value
+certificate.serial,tls.server.x509.serial_number,https://www.elastic.co/guide/en/ecs/current/ecs-tls.html,High confidence - Certificate serial number
+CertThumbprint,tls.server.hash.sha1,https://www.elastic.co/guide/en/ecs/current/ecs-tls.html,High confidence - Certificate thumbprint
+cfgpath,file.path,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,Medium confidence - Configuration file path
+Channel,log.logger,https://www.elastic.co/guide/en/ecs/current/ecs-log.html,High confidence - Log channel/logger name
+cipher,tls.cipher,https://www.elastic.co/guide/en/ecs/current/ecs-tls.html,High confidence - TLS cipher suite
+ClassName,winlog.event_data.ClassName,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Windows WMI class
+ClientAddress,client.address,https://www.elastic.co/guide/en/ecs/current/ecs-client.html,High confidence - Client network address
+ClientApp,user_agent.original,https://www.elastic.co/guide/en/ecs/current/ecs-user-agent.html,Medium confidence - Client application
+ClientProcessId,process.parent.pid,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,Medium confidence - Client/parent process ID
+CommandLine,process.command_line,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Full command line
+comm,process.name,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Linux process command name
+Company,file.pe.company,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - PE file company name
+conditionalAccessStatus,event.outcome,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Medium confidence - Access status outcome
+Configuration,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Generic configuration data
+ConsentContext.IsAdminConsent,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Azure AD consent context
+Contents,file.content,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,Low confidence - File content data
+ContextInfo,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Generic context information
+Count,event.sequence,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Medium confidence - Event sequence/count
+CreationUtcTime,file.created,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - File creation timestamp
+cs-cookie,http.request.headers,https://www.elastic.co/guide/en/ecs/current/ecs-http.html,Medium confidence - HTTP cookie header
+cs-host,url.domain,https://www.elastic.co/guide/en/ecs/current/ecs-url.html,High confidence - HTTP host header
+cs-method,http.request.method,https://www.elastic.co/guide/en/ecs/current/ecs-http.html,High confidence - HTTP request method
+cs-referer,http.request.referrer,https://www.elastic.co/guide/en/ecs/current/ecs-http.html,High confidence - HTTP referer header
+cs-uri,url.path,https://www.elastic.co/guide/en/ecs/current/ecs-url.html,High confidence - HTTP URI path
+cs-uri-query,url.query,https://www.elastic.co/guide/en/ecs/current/ecs-url.html,High confidence - HTTP query string
+cs-user-agent,user_agent.original,https://www.elastic.co/guide/en/ecs/current/ecs-user-agent.html,High confidence - HTTP user agent
+c-uri,url.path,https://www.elastic.co/guide/en/ecs/current/ecs-url.html,High confidence - IIS URI path
+c-uri-extension,url.extension,https://www.elastic.co/guide/en/ecs/current/ecs-url.html,High confidence - URI file extension
+c-uri-query,url.query,https://www.elastic.co/guide/en/ecs/current/ecs-url.html,High confidence - URI query string
+c-useragent,user_agent.original,https://www.elastic.co/guide/en/ecs/current/ecs-user-agent.html,High confidence - IIS user agent
+CurrentDirectory,process.working_directory,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Process working directory
+Data,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Generic data field
+data.protoPayload.authorizationInfo.granted,event.outcome,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Medium confidence - GCP authorization result
+data.protoPayload.authorizationInfo.permission,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Medium confidence - GCP permission requested
+data.protoPayload.logName,log.logger,https://www.elastic.co/guide/en/ecs/current/ecs-log.html,High confidence - GCP log name
+data.protoPayload.methodName,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - GCP API method
+data.protoPayload.resource.type,cloud.service.name,https://www.elastic.co/guide/en/ecs/current/ecs-cloud.html,High confidence - GCP resource type
+data.protoPayload.serviceName,cloud.service.name,https://www.elastic.co/guide/en/ecs/current/ecs-cloud.html,High confidence - GCP service name
+debugContext.debugData.requestUri,url.original,https://www.elastic.co/guide/en/ecs/current/ecs-url.html,High confidence - Azure AD request URI
+debugcontext.debugdata.behaviors,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Azure debug behaviors
+debugcontext.debugdata.logonlysecuritydata,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Azure security data
+Description,rule.description,https://www.elastic.co/guide/en/ecs/current/ecs-rule.html,High confidence - Rule/event description
+DestAddress,destination.address,https://www.elastic.co/guide/en/ecs/current/ecs-destination.html,High confidence - Destination network address
+Destination,destination.address,https://www.elastic.co/guide/en/ecs/current/ecs-destination.html,High confidence - Destination address
+DestinationHostname,destination.domain,https://www.elastic.co/guide/en/ecs/current/ecs-destination.html,High confidence - Destination hostname/domain
+DestinationIp,destination.ip,https://www.elastic.co/guide/en/ecs/current/ecs-destination.html,High confidence - Destination IP address
+DestinationPort,destination.port,https://www.elastic.co/guide/en/ecs/current/ecs-destination.html,High confidence - Destination port number
+DestPort,destination.port,https://www.elastic.co/guide/en/ecs/current/ecs-destination.html,High confidence - Destination port
+Details,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Generic details field
+Device,host.name,https://www.elastic.co/guide/en/ecs/current/ecs-host.html,Medium confidence - Device/host name
+DeviceDescription,host.name,https://www.elastic.co/guide/en/ecs/current/ecs-host.html,Medium confidence - Device description
+DeviceDetail.deviceId,device.id,https://www.elastic.co/guide/en/ecs/current/ecs-device.html,High confidence - Azure AD device ID
+DeviceDetail.isCompliant,host.os.type,https://www.elastic.co/guide/en/ecs/current/ecs-host.html,Low confidence - Device compliance status
+DeviceDetail.trusttype,host.os.type,https://www.elastic.co/guide/en/ecs/current/ecs-host.html,Low confidence - Device trust type
+DeviceName,host.name,https://www.elastic.co/guide/en/ecs/current/ecs-host.html,High confidence - Device name
+displaymessage,message,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Display message
+DistinguishedName,user.name,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,Medium confidence - LDAP distinguished name
+dst_ip,destination.ip,https://www.elastic.co/guide/en/ecs/current/ecs-destination.html,High confidence - Destination IP (Zeek/Suricata)
+dst_port,destination.port,https://www.elastic.co/guide/en/ecs/current/ecs-destination.html,High confidence - Destination port (Zeek/Suricata)
+EncyptionUsed,tls.cipher,https://www.elastic.co/guide/en/ecs/current/ecs-tls.html,Medium confidence - Encryption method used
+endpoint,url.full,https://www.elastic.co/guide/en/ecs/current/ecs-url.html,High confidence - Full endpoint URL
+ErrorCode,error.code,https://www.elastic.co/guide/en/ecs/current/ecs-error.html,High confidence - Error code
+errorCode,error.code,https://www.elastic.co/guide/en/ecs/current/ecs-error.html,High confidence - Error code
+errorMessage,error.message,https://www.elastic.co/guide/en/ecs/current/ecs-error.html,High confidence - Error message text
+euid,user.effective.id,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,High confidence - Effective user ID (Linux)
+EventID,event.code,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Windows Event ID
+EventLog,log.file.path,https://www.elastic.co/guide/en/ecs/current/ecs-log.html,High confidence - Event log file path
+eventName,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - AWS/cloud event name
+eventService,service.name,https://www.elastic.co/guide/en/ecs/current/ecs-service.html,High confidence - Service generating event
+eventSource,event.provider,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Event source/provider
+EventType,event.type,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - ECS event type
+eventType,event.type,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - ECS event type
+event_type,event.type,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Event type
+event_type_id,event.code,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Event type identifier
+eventtype,event.type,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Event type
+ExceptionCode,error.code,https://www.elastic.co/guide/en/ecs/current/ecs-error.html,High confidence - Exception code
+exe,process.executable,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Executable path
+failure_status_reason,error.message,https://www.elastic.co/guide/en/ecs/current/ecs-error.html,High confidence - Failure reason
+Feature_Name,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Feature name
+FileName,file.name,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - File name without path
+Filename,file.name,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - File name
+FileNameBuffer,file.name,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - File name from buffer
+FileVersion,file.pe.file_version,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - PE file version
+FilterName,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Filter name
+FilterOrigin,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Filter origin
+gcp.audit.method_name,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - GCP audit method
+GrantedAccess,winlog.event_data.GrantedAccess,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Windows granted access mask
+Hash,file.hash.sha256,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - File hash (SHA256)
+Hashes,file.hash.sha256,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - File hashes
+HiveName,registry.hive,https://www.elastic.co/guide/en/ecs/current/ecs-registry.html,High confidence - Windows registry hive
+HomeTenantId,cloud.account.id,https://www.elastic.co/guide/en/ecs/current/ecs-cloud.html,High confidence - Azure AD tenant ID
+host,host.name,https://www.elastic.co/guide/en/ecs/current/ecs-host.html,High confidence - Host name
+hostPath,file.path,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,Medium confidence - Host path (K8s)
+id.orig_h,source.ip,https://www.elastic.co/guide/en/ecs/current/ecs-source.html,High confidence - Zeek originator IP
+id.resp_h,destination.ip,https://www.elastic.co/guide/en/ecs/current/ecs-destination.html,High confidence - Zeek responder IP
+id.resp_p,destination.port,https://www.elastic.co/guide/en/ecs/current/ecs-destination.html,High confidence - Zeek responder port
+Image,process.executable,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Sysmon process image path
+ImageLoaded,dll.path,https://www.elastic.co/guide/en/ecs/current/ecs-dll.html,High confidence - Sysmon DLL loaded
+ImageName,process.name,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Image/process name
+ImagePath,process.executable,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Full image path
+ImpersonationLevel,winlog.event_data.ImpersonationLevel,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Windows impersonation level
+Initiated,event.start,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Action initiated timestamp
+InitiatedBy,user.name,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,High confidence - User who initiated action
+Initiatedby,user.name,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,High confidence - User who initiated action
+actor.alternateid,user.email,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,Medium confidence - Azure AD alternate ID
+additionalDetails.additionalInfo,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Additional info
+additionalEventData.MFAUsed,user.mfa,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,Medium confidence - MFA usage indicator
+AdditionalInfo,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Additional information
+AccessList,winlog.event_data.AccessList,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Windows access control list
+AccessMask,winlog.event_data.AccessMask,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Windows access mask
+ActivityDetails,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Activity details
+ActivityDisplayName,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Medium confidence - Activity display name
+ActivityType,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Medium confidence - Activity type
+activityType,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Medium confidence - Activity type
+IntegrityLevel,process.integrity_level,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Process integrity level (Windows)
+InterfaceUuid,winlog.event_data.InterfaceUuid,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Windows RPC interface UUID
+IpAddress,source.ip,https://www.elastic.co/guide/en/ecs/current/ecs-source.html,High confidence - IP address (typically source)
+IpPort,source.port,https://www.elastic.co/guide/en/ecs/current/ecs-source.html,High confidence - IP port
+IsatapRouter,network.name,https://www.elastic.co/guide/en/ecs/current/ecs-network.html,Low confidence - ISATAP router name
+key,registry.key,https://www.elastic.co/guide/en/ecs/current/ecs-registry.html,High confidence - Windows registry key
+KeyLength,tls.server.x509.public_key_size,https://www.elastic.co/guide/en/ecs/current/ecs-tls.html,Medium confidence - Encryption key length
+Keywords,event.type,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Medium confidence - Windows event keywords
+LayerRTID,winlog.event_data.LayerRTID,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Windows filtering layer ID
+legacyeventtype,event.type,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Medium confidence - Legacy event type
+Level,log.level,https://www.elastic.co/guide/en/ecs/current/ecs-log.html,High confidence - Log level (info/warn/error)
+LocalName,file.path,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,Medium confidence - Local file name/path
+Location,geo.name,https://www.elastic.co/guide/en/ecs/current/ecs-geo.html,High confidence - Geographic location
+LoggedByService,service.name,https://www.elastic.co/guide/en/ecs/current/ecs-service.html,High confidence - Service that logged event
+LogonId,user.id,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,High confidence - Windows logon session ID
+LogonProcessName,winlog.event_data.LogonProcessName,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Windows logon process
+LogonType,winlog.event_data.LogonType,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Windows logon type
+logtype,log.level,https://www.elastic.co/guide/en/ecs/current/ecs-log.html,Medium confidence - Log type/level
+method,http.request.method,https://www.elastic.co/guide/en/ecs/current/ecs-http.html,High confidence - HTTP method (GET/POST/etc)
+ModifiedProperties{}.NewValue,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Azure AD modified properties
+ModifyingApplication,process.name,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,Medium confidence - Application making modification
+Name,file.name,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,Medium confidence - Generic name field (context-dependent)
+name,file.name,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,Medium confidence - Generic name field
+nametype,dns.question.type,https://www.elastic.co/guide/en/ecs/current/ecs-dns.html,High confidence - DNS query type
+NetworkLocationDetails,network.name,https://www.elastic.co/guide/en/ecs/current/ecs-network.html,Low confidence - Network location details
+new_value,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - New value in change
+NewName,file.name,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - New file name
+NewTargetUserName,user.target.name,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,High confidence - New target user name
+NewTemplateContent,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - New template content
+NewUacValue,winlog.event_data.NewUacValue,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - New UAC value
+NewValue,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - New value
+ObjectClass,winlog.event_data.ObjectClass,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Windows object class
+ObjectDN,user.name,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,Medium confidence - LDAP object distinguished name
+ObjectId,file.inode,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,Medium confidence - Object/file identifier
+ObjectName,file.name,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - Object/file name
+objectRef.apiGroup,orchestrator.api_version,https://www.elastic.co/guide/en/ecs/current/ecs-orchestrator.html,High confidence - K8s API group
+objectRef.namespace,orchestrator.namespace,https://www.elastic.co/guide/en/ecs/current/ecs-orchestrator.html,High confidence - K8s namespace
+objectRef.resource,orchestrator.resource.type,https://www.elastic.co/guide/en/ecs/current/ecs-orchestrator.html,High confidence - K8s resource type
+objectRef.subresource,orchestrator.resource.name,https://www.elastic.co/guide/en/ecs/current/ecs-orchestrator.html,High confidence - K8s subresource
+ObjectServer,winlog.event_data.ObjectServer,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Windows object server
+ObjectType,winlog.event_data.ObjectType,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Windows object type
+ObjectValueName,registry.value,https://www.elastic.co/guide/en/ecs/current/ecs-registry.html,High confidence - Registry value name
+OldUacValue,winlog.event_data.OldUacValue,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Old UAC value
+OldValue,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Old value before change
+Operation,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Operation performed
+operation,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Operation type
+OperationName,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Operation name
+operationName,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Operation name
+OperationNameValue,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Operation name value
+OpNum,winlog.event_data.OpNum,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Windows RPC operation number
+Origin,url.original,https://www.elastic.co/guide/en/ecs/current/ecs-url.html,Medium confidence - Origin URL
+OriginalFileName,file.pe.original_file_name,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - PE original file name
+outcome.reason,error.message,https://www.elastic.co/guide/en/ecs/current/ecs-error.html,High confidence - Outcome reason
+outcome.result,event.outcome,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Outcome result
+PackageFullName,package.name,https://www.elastic.co/guide/en/ecs/current/ecs-package.html,High confidence - Full package name
+PackagePath,package.path,https://www.elastic.co/guide/en/ecs/current/ecs-package.html,High confidence - Package path
+param1,process.args,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,Medium confidence - Process argument 1
+param2,process.args,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,Medium confidence - Process argument 2
+param3,process.args,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,Medium confidence - Process argument 3
+ParentCommandLine,process.parent.command_line,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Parent process command line
+ParentImage,process.parent.executable,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Parent process executable
+ParentProcessId,process.parent.pid,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Parent process ID
+ParentUser,process.parent.user.name,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Parent process user
+Path,file.path,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - File path
+path,file.path,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - File path
+Payload,http.request.body.content,https://www.elastic.co/guide/en/ecs/current/ecs-http.html,Medium confidence - Request payload
+payload,http.request.body.content,https://www.elastic.co/guide/en/ecs/current/ecs-http.html,Medium confidence - Payload data
+PipeName,file.name,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - Named pipe name
+PossibleCause,error.message,https://www.elastic.co/guide/en/ecs/current/ecs-error.html,Medium confidence - Possible cause description
+PreAuthType,winlog.event_data.PreAuthType,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Kerberos pre-auth type
+PreviousCreationUtcTime,file.created,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,Medium confidence - Previous creation time
+PrivilegeList,user.effective.id,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,Medium confidence - User privileges
+process,process.name,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Process name
+ProcessId,process.pid,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Process ID
+ProcessName,process.name,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Process name
+ProcessNameBuffer,process.name,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Process name from buffer
+ProcessPath,process.executable,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Process executable path
+processPath,process.executable,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Process path
+Product,file.pe.product,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - PE product name
+Properties,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Generic properties
+properties.message,message,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Properties message
+Protocol,network.protocol,https://www.elastic.co/guide/en/ecs/current/ecs-network.html,High confidence - Network protocol
+Provider,log.logger,https://www.elastic.co/guide/en/ecs/current/ecs-log.html,High confidence - Log provider
+Provider_Name,log.logger,https://www.elastic.co/guide/en/ecs/current/ecs-log.html,High confidence - Provider name
+ProviderContextName,service.name,https://www.elastic.co/guide/en/ecs/current/ecs-service.html,Medium confidence - Provider context
+qtype_name,dns.question.type,https://www.elastic.co/guide/en/ecs/current/ecs-dns.html,High confidence - DNS question type name
+Query,dns.question.name,https://www.elastic.co/guide/en/ecs/current/ecs-dns.html,High confidence - DNS query
+query,dns.question.name,https://www.elastic.co/guide/en/ecs/current/ecs-dns.html,High confidence - DNS query
+QueryName,dns.question.name,https://www.elastic.co/guide/en/ecs/current/ecs-dns.html,High confidence - DNS query name
+Reason,error.message,https://www.elastic.co/guide/en/ecs/current/ecs-error.html,High confidence - Reason description
+reason,error.message,https://www.elastic.co/guide/en/ecs/current/ecs-error.html,High confidence - Reason text
+record_type,dns.question.type,https://www.elastic.co/guide/en/ecs/current/ecs-dns.html,High confidence - DNS record type
+rejected,event.outcome,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Rejected = failure outcome
+RelativeTargetName,file.name,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,Medium confidence - Relative target name
+RemoteName,network.name,https://www.elastic.co/guide/en/ecs/current/ecs-network.html,Medium confidence - Remote network name
+request_type,http.request.method,https://www.elastic.co/guide/en/ecs/current/ecs-http.html,High confidence - HTTP request type
+RequestedPolicy,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Requested policy
+requestParameters,http.request.body.content,https://www.elastic.co/guide/en/ecs/current/ecs-http.html,Medium confidence - AWS/API request params
+requestParameters.attribute,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Medium confidence - Request attribute
+requestParameters.containerDefinitions.command,process.command_line,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Container command
+requestParameters.enable,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Enable parameter
+requestParameters.layers,container.image.name,https://www.elastic.co/guide/en/ecs/current/ecs-container.html,Medium confidence - Container layers
+RequestType,http.request.method,https://www.elastic.co/guide/en/ecs/current/ecs-http.html,High confidence - HTTP request type
+ResourceDisplayName,cloud.service.name,https://www.elastic.co/guide/en/ecs/current/ecs-cloud.html,Medium confidence - Resource display name
+ResourceId,cloud.instance.id,https://www.elastic.co/guide/en/ecs/current/ecs-cloud.html,High confidence - Cloud resource ID
+ResourceProviderValue,cloud.provider,https://www.elastic.co/guide/en/ecs/current/ecs-cloud.html,High confidence - Cloud provider
+ResourceTenantId,cloud.account.id,https://www.elastic.co/guide/en/ecs/current/ecs-cloud.html,High confidence - Resource tenant ID
+resp_mime_types,http.response.mime_type,https://www.elastic.co/guide/en/ecs/current/ecs-http.html,High confidence - Response MIME type
+responseElements,http.response.body.content,https://www.elastic.co/guide/en/ecs/current/ecs-http.html,Medium confidence - API response elements
+responseElements.ConsoleLogin,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Medium confidence - Console login response
+responseElements.pendingModifiedValues.masterUserPassword,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Password change response
+responseElements.publiclyAccessible,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Public accessibility
+responseStatus.code,http.response.status_code,https://www.elastic.co/guide/en/ecs/current/ecs-http.html,High confidence - HTTP response status
+ResultDescription,event.outcome,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Medium confidence - Result description
+Resultdescription,event.outcome,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Medium confidence - Result description
+ResultStatus,event.outcome,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Result status
+ResultType,event.outcome,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Result type
+riskEventType,threat.indicator.type,https://www.elastic.co/guide/en/ecs/current/ecs-threat.html,High confidence - Risk event type
+RiskState,threat.indicator.confidence,https://www.elastic.co/guide/en/ecs/current/ecs-threat.html,Medium confidence - Risk state/level
+SamAccountName,user.name,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,High confidence - SAM account name
+sc-status,http.response.status_code,https://www.elastic.co/guide/en/ecs/current/ecs-http.html,High confidence - HTTP status code
+ScriptBlockText,powershell.file.script_block_text,https://www.elastic.co/guide/en/ecs/current/ecs-powershell.html,High confidence - PowerShell script text
+SearchFilter,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - LDAP search filter
+securityContext.isProxy,network.forwarded_ip,https://www.elastic.co/guide/en/ecs/current/ecs-network.html,Medium confidence - Security context proxy
+securitycontext.isproxy,network.forwarded_ip,https://www.elastic.co/guide/en/ecs/current/ecs-network.html,Medium confidence - Proxy indicator
+ServerName,server.address,https://www.elastic.co/guide/en/ecs/current/ecs-server.html,High confidence - Server name/address
+Service,service.name,https://www.elastic.co/guide/en/ecs/current/ecs-service.html,High confidence - Service name
+service,service.name,https://www.elastic.co/guide/en/ecs/current/ecs-service.html,High confidence - Service name
+ServiceFileName,service.name,https://www.elastic.co/guide/en/ecs/current/ecs-service.html,Medium confidence - Service file name
+ServiceName,service.name,https://www.elastic.co/guide/en/ecs/current/ecs-service.html,High confidence - Service name
+ServicePrincipalNames,user.name,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,Medium confidence - Service principal names
+ServiceStartType,service.type,https://www.elastic.co/guide/en/ecs/current/ecs-service.html,Medium confidence - Service start type
+ServiceType,service.type,https://www.elastic.co/guide/en/ecs/current/ecs-service.html,High confidence - Service type
+setting_name,event.action,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Setting name
+ShareName,file.directory,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - Network share name
+SidHistory,user.id,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,Medium confidence - Windows SID history
+SidList,user.id,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,Medium confidence - List of SIDs
+Signature,file.code_signature.subject_name,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - Code signature subject
+SignatureStatus,file.code_signature.status,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - Signature validation status
+Signed,file.code_signature.exists,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - Whether file is signed
+SigningUsed,tls.established,https://www.elastic.co/guide/en/ecs/current/ecs-tls.html,Medium confidence - TLS signing used
+SourceAddress,source.address,https://www.elastic.co/guide/en/ecs/current/ecs-source.html,High confidence - Source network address
+SourceCommandLine,process.parent.command_line,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,Medium confidence - Source process command line
+SourceFilename,file.name,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - Source file name
+SourceHostname,source.domain,https://www.elastic.co/guide/en/ecs/current/ecs-source.html,High confidence - Source hostname
+SourceImage,process.parent.executable,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Source process image
+SourceIp,source.ip,https://www.elastic.co/guide/en/ecs/current/ecs-source.html,High confidence - Source IP address
+sourceIPAddress,source.ip,https://www.elastic.co/guide/en/ecs/current/ecs-source.html,High confidence - Source IP address
+SourceIsIpv6,source.ip,https://www.elastic.co/guide/en/ecs/current/ecs-source.html,High confidence - Source IP (IPv6 flag)
+SourceName,source.domain,https://www.elastic.co/guide/en/ecs/current/ecs-source.html,High confidence - Source name
+SourceParentImage,process.parent.parent.executable,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,Medium confidence - Source parent image
+SourcePort,source.port,https://www.elastic.co/guide/en/ecs/current/ecs-source.html,High confidence - Source port number
+SourceUser,source.user.name,https://www.elastic.co/guide/en/ecs/current/ecs-source.html,High confidence - Source user name
+StartAddress,process.thread.start_address,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Thread start address
+StartFunction,process.entry_leader.name,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,Medium confidence - Start function name
+StartModule,dll.name,https://www.elastic.co/guide/en/ecs/current/ecs-dll.html,High confidence - Start module/DLL name
+State,event.outcome,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Medium confidence - State of operation
+Status,event.outcome,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Operation status
+status,event.outcome,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Status value
+SubcategoryGuid,event.code,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Medium confidence - Windows event subcategory GUID
+subjectName,tls.server.subject,https://www.elastic.co/guide/en/ecs/current/ecs-tls.html,High confidence - TLS certificate subject
+SubjectDomainName,user.domain,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,High confidence - Windows subject domain
+SubjectLogonId,user.id,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,High confidence - Windows subject logon ID
+SubjectUserName,user.name,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,High confidence - Windows subject user name
+SubjectUserSid,user.id,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,High confidence - Windows subject user SID
+SubStatus,error.code,https://www.elastic.co/guide/en/ecs/current/ecs-error.html,High confidence - Sub-status code
+SYSCALL,system.audit.syscall,https://www.elastic.co/guide/en/ecs/current/ecs-system.html,High confidence - Linux system call number
+Target,file.target_path,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - Symlink target path
+target.displayname,user.target.full_name,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,High confidence - Target display name
+TargetFilename,file.path,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - Target file path
+TargetImage,process.executable,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Target process image
+TargetName,file.name,https://www.elastic.co/guide/en/ecs/current/ecs-file.html,High confidence - Target name
+TargetObject,registry.path,https://www.elastic.co/guide/en/ecs/current/ecs-registry.html,High confidence - Registry target object
+TargetOutboundUserName,user.target.name,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,High confidence - Target outbound user
+TargetParentProcessId,process.parent.pid,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,Medium confidence - Target parent PID
+TargetResources,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Azure AD target resources
+TargetResources.modifiedProperties,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Modified properties
+TargetResources.ModifiedProperties.DisplayName,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Display name
+TargetResources.ModifiedProperties.NewValue,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - New value
+TargetResources.modifiedProperties.newValue,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - New value
+targetResources.type,event.type,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Medium confidence - Target resource type
+TargetServerName,server.address,https://www.elastic.co/guide/en/ecs/current/ecs-server.html,High confidence - Target server name
+TargetSid,user.target.id,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,High confidence - Target user SID
+TargetUserName,user.target.name,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,High confidence - Target user name
+TargetUserSid,user.target.id,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,High confidence - Target user SID
+TaskContent,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Scheduled task content
+TaskContentNew,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - New task content
+TaskName,process.name,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,Medium confidence - Task name
+TemplateContent,event.original,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,Low confidence - Template content
+TicketEncryptionType,winlog.event_data.TicketEncryptionType,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Kerberos ticket encryption
+TicketOptions,winlog.event_data.TicketOptions,https://www.elastic.co/guide/en/ecs/current/ecs-base.html,High confidence - Kerberos ticket options
+Type,event.type,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Generic type field
+type,event.type,https://www.elastic.co/guide/en/ecs/current/ecs-event.html,High confidence - Type field
+unit,process.name,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,Low confidence - Unit name (systemd)
+uri,url.original,https://www.elastic.co/guide/en/ecs/current/ecs-url.html,High confidence - URI
+User,user.name,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,High confidence - User name
+user_agent,user_agent.original,https://www.elastic.co/guide/en/ecs/current/ecs-user-agent.html,High confidence - User agent string
+userAgent,user_agent.original,https://www.elastic.co/guide/en/ecs/current/ecs-user-agent.html,High confidence - User agent
+UserName,user.name,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,High confidence - User name
+Username,user.name,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,High confidence - Username
+userIdentity.arn,cloud.account.id,https://www.elastic.co/guide/en/ecs/current/ecs-cloud.html,High confidence - AWS ARN
+userIdentity.sessionContext.sessionIssuer.type,user.roles,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,Medium confidence - AWS session issuer type
+userIdentity.type,user.roles,https://www.elastic.co/guide/en/ecs/current/ecs-user.html,Medium confidence - AWS identity type
+Value,registry.data.strings,https://www.elastic.co/guide/en/ecs/current/ecs-registry.html,High confidence - Registry value data
+verb,http.request.method,https://www.elastic.co/guide/en/ecs/current/ecs-http.html,High confidence - HTTP verb (K8s also uses this)
+Workload,service.name,https://www.elastic.co/guide/en/ecs/current/ecs-service.html,Medium confidence - Workload name
+Workstation,host.name,https://www.elastic.co/guide/en/ecs/current/ecs-host.html,High confidence - Workstation name
+WorkstationName,host.name,https://www.elastic.co/guide/en/ecs/current/ecs-host.html,High confidence - Workstation name
+Z,process.args,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,Low confidence - Generic argument (audit)
+a0,process.args,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Linux audit syscall arg 0
+a1,process.args,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Linux audit syscall arg 1
+a2,process.args,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Linux audit syscall arg 2
+a3,process.args,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Linux audit syscall arg 3
+a4,process.args,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Linux audit syscall arg 4
+a5,process.args,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Linux audit syscall arg 5
+a6,process.args,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Linux audit syscall arg 6
+a7,process.args,https://www.elastic.co/guide/en/ecs/current/ecs-process.html,High confidence - Linux audit syscall arg 7
