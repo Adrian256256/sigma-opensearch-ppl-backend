@@ -271,7 +271,7 @@ python tests/manual_test/test_ecs_pipeline.py
 
 ### Automated Testing
 
-For automated testing with the test checker, see [tests/automatic_tests/README.md](tests/automatic_tests/README.md).
+For automated testing with the test checker, see [tests/automatic_tests/README.md](tests/automated_tests/README.md).
 
 ```bash
 # Run automated tests
