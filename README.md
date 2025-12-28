@@ -271,11 +271,11 @@ python tests/manual_test/test_ecs_pipeline.py
 
 ### Automated Testing
 
-For automated testing with the test checker, see [tests/automatic_tests/README.md](tests/automated_tests/README.md).
+For automated testing with the test checker, see [tests/automated_tests/README.md](tests/automated_tests/README.md).
 
 ```bash
 # Run automated tests
-python tests/automatic_tests/test_checker.py
+python tests/automated_tests/test_checker.py
 ```
 
 ### Correlation Testing
