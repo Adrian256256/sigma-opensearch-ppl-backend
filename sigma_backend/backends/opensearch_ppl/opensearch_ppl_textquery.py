@@ -179,7 +179,7 @@ class OpenSearchPPLBackend(TextQueryBackend):
             rule: Sigma rule containing logsource information
             
         Returns:
-            OpenSearch index pattern (e.g., "windows-process_creation-*")
+            OpenSearch index pattern ("windows-process_creation-*")
         """
         logsource = rule.logsource
         product = getattr(logsource, 'product', None)

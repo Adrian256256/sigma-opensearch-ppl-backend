@@ -211,7 +211,7 @@ detection:
     CommandLine|base64: 'powershell'  # Matches: cG93ZXJzaGVsbA==
 ```
 
-**Use Case**: Detect Base64-encoded commands in logs (e.g., Linux bash history, web requests).
+**Use Case**: Detect Base64-encoded commands in logs (Linux bash history, web requests).
 
 #### `base64offset` Modifier
 **Purpose**: Encode string as Base64 with **3 different offsets** to match it anywhere in encoded data  
@@ -244,7 +244,7 @@ detection:
 
 **Result**: Generates 3 variations to catch the string regardless of where it appears in the encoded data.
 
-**Use Case**: Essential for detecting substrings within Base64-encoded data (e.g., malicious code fragments in encoded payloads).
+**Use Case**: Essential for detecting substrings within Base64-encoded data (malicious code fragments in encoded payloads).
 
 ---
 
@@ -352,7 +352,7 @@ utf16_string = utf16_bytes.decode("utf-8")     # 'i\x00e\x00x\x00'
 # Now Sigma can match this pattern in base64-encoded PowerShell commands!
 ```
 
-**Use Case**: Detect obfuscated commands in logs where strings are encoded (e.g., PowerShell `-EncodedCommand` uses UTF-16LE + Base64).
+**Use Case**: Detect obfuscated commands in logs where strings are encoded (PowerShell `-EncodedCommand` uses UTF-16LE + Base64).
 
 These modifiers extend pySigma's built-in encoding capabilities and are automatically available when using the backend.
 
@@ -552,8 +552,8 @@ The backend supports all four Sigma correlation types defined in the specificati
 
 | Type | Description | Use Case | PPL Implementation |
 |------|-------------|----------|-------------------|
-| `event_count` | Count total events in timespan | Frequency-based detection (e.g., >10 failed logins) | [`stats count()`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/stats.md) |
-| `value_count` | Count distinct values in timespan | Cardinality detection (e.g., password used on >5 accounts) | [`stats dc(field)`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/aggregations.md#distinct_count-dc) |
+| `event_count` | Count total events in timespan | Frequency-based detection (>10 failed logins) | [`stats count()`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/stats.md) |
+| `value_count` | Count distinct values in timespan | Cardinality detection (password used on >5 accounts) | [`stats dc(field)`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/aggregations.md#distinct_count-dc) |
 | `temporal` | Match multiple rule types in any order | Time-windowed multi-stage attacks | [`multisearch`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/multisearch.md) + aggregation |
 | `temporal_ordered` | Match rules in specific sequence | Sequential attack steps (recon → exploit → exfil) | [`multisearch`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/multisearch.md) with time ordering |
 
@@ -1025,7 +1025,7 @@ def convert_timespan(self, timespan) -> str:
     Converts Sigma timespan to PPL time range format.
     
     Input: SigmaCorrelationTimespan object or numeric value
-    Output: Time range string (e.g., "5m", "1h", "24h")
+    Output: Time range string ("5m", "1h", "24h")
     """
     if hasattr(timespan, 'seconds'):
         seconds = timespan.seconds

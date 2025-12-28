@@ -18,8 +18,8 @@ A Python script that extracts all field names from Sigma rules in the official [
 1. **Recursively scans** all Sigma rule files (`.yml` and `.yaml`) in the `sigma-master/rules/` directory
 2. **Parses** the `detection` section of each rule
 3. **Extracts** field names, including:
-   - Plain field names (e.g., `CommandLine`, `Image`)
-   - Fields with modifiers (e.g., `CommandLine|contains` → extracts `CommandLine`)
+   - Plain field names (`CommandLine`, `Image`)
+   - Fields with modifiers (`CommandLine|contains` → extracts `CommandLine`)
    - Nested fields from complex detection logic
 4. **Tracks** which rule each field was extracted from
 5. **Generates GitHub links** to each rule in the official Sigma repository
@@ -44,7 +44,7 @@ A Python script that enhances the `ecs_verification_results.csv` file by adding 
 
 ##### What it does:
 1. **Reads** the existing `ecs_verification_results.csv` file
-2. **Extracts** the field set from each ECS field (e.g., `process` from `process.command_line`)
+2. **Extracts** the field set from each ECS field (`process` from `process.command_line`)
 3. **Generates** direct links to the ECS documentation for each field set
 4. **Updates** the CSV file with a new `ecs_documentation_link` column
 
@@ -128,8 +128,8 @@ AccessMask,winlog.event_data.AccessMask,https://www.elastic.co/guide/en/ecs/curr
 #### Columns:
 - **`sigma_field`**: The original Sigma field name
 - **`ecs_field`**: The recommended ECS field(s) to use
-  - Single field for direct mappings (e.g., `user.name`)
-  - Multiple fields separated by `|` for context-dependent mappings (e.g., `source.address | destination.address`)
+  - Single field for direct mappings (`user.name`)
+  - Multiple fields separated by `|` for context-dependent mappings (`source.address | destination.address`)
 - **`ecs_documentation_link`**: Direct link to the official ECS documentation for the field set
 - **`notes`**: Confidence level and explanation
   - **High confidence**: Direct match with official ECS fields

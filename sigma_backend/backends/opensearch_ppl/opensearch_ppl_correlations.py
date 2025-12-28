@@ -246,7 +246,7 @@ class OpenSearchPPLCorrelationBackend(OpenSearchPPLBackend):
             return queries[0] if queries else ""
     
     def _format_timespan(self, timespan) -> str:
-        """Format timespan for PPL query (e.g., "5m", "30m", "2h")."""
+        """Format timespan for PPL query ("5m", "30m", "2h")."""
         if hasattr(timespan, 'spec'):
             return str(timespan.spec)
         elif hasattr(timespan, 'total_seconds'):
@@ -311,7 +311,7 @@ class OpenSearchPPLCorrelationBackend(OpenSearchPPLBackend):
         
         # Extract operator and count from condition
         if hasattr(condition, 'op') and hasattr(condition, 'count'):
-            op_str = condition.op.name  # Get enum name (e.g., 'GTE')
+            op_str = condition.op.name  # Get enum name ('GTE')
             count = condition.count
         elif isinstance(condition, dict):
             op_str = list(condition.keys())[0].upper()

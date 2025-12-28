@@ -11,7 +11,7 @@ from pathlib import Path
 def get_ecs_field_set(ecs_field):
     """
     Extract the field set (first part) from an ECS field.
-    E.g., 'process.command_line' -> 'process'
+    'process.command_line' -> 'process'
     """
     if not ecs_field:
         return None
