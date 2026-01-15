@@ -53,16 +53,19 @@ sigma-opensearch-ppl-backend/
 │       ├── __init__.py
 │       └── opensearch_ppl/
 │           ├── __init__.py
-│           ├── opensearch_ppl_textquery.py       # Main TextQueryBackend implementation
-│           ├── opensearch_ppl_correlations.py    # Correlation rules backend
+│           ├── opensearch_ppl.py                 # Unified backend (supports regular & correlation rules)
 │           ├── modifiers.py                      # Custom field modifiers
 │           └── README.md                         # Backend documentation
+├── cli/
+│   ├── sigma-ppl                         # Command-line conversion tool
+│   ├── examples.sh                       # Usage examples script
+│   └── README.md                         # CLI documentation
 ├── ecs_mapping/
 │   ├── __init__.py
 │   ├── yaml_loader.py                    # YAML pipeline loader
 │   ├── ecs_mapping.yml                   # ECS field mappings (YAML)
 │   └── README.md                         # ECS mapping documentation
-├── checker_missing_ecs_fields/
+├── ecs_fields_info/
 │   ├── checker.py                        # ECS field verification tool
 │   ├── ecs_verification_results.csv      # Verification results
 │   ├── sigma_fields.csv                  # Unique Sigma fields catalog
@@ -100,12 +103,18 @@ sigma-opensearch-ppl-backend/
 
 ### Quick Links to Project Components
 
+#### [`cli/`](./cli/)
+Command-line interface for converting Sigma rules.
+
+- [`sigma-ppl`](./cli/sigma-ppl) - CLI conversion tool
+- [`examples.sh`](./cli/examples.sh) - Usage examples
+- [`README.md`](./cli/README.md) - CLI documentation
+
 #### [`sigma_backend/`](./sigma_backend/)
 Core backend implementation for Sigma to PPL conversion.
 
 - [`backends/opensearch_ppl/`](./sigma_backend/backends/opensearch_ppl/)
-  - [`opensearch_ppl_textquery.py`](./sigma_backend/backends/opensearch_ppl/opensearch_ppl_textquery.py) - Main TextQueryBackend implementation
-  - [`opensearch_ppl_correlations.py`](./sigma_backend/backends/opensearch_ppl/opensearch_ppl_correlations.py) - Correlation rules backend
+  - [`opensearch_ppl.py`](./sigma_backend/backends/opensearch_ppl/opensearch_ppl.py) - Unified backend supporting both regular and correlation rules
   - [`modifiers.py`](./sigma_backend/backends/opensearch_ppl/modifiers.py) - Custom field modifiers
   - [`README.md`](./sigma_backend/backends/opensearch_ppl/README.md) - Backend documentation
 
@@ -116,14 +125,14 @@ Elastic Common Schema (ECS) field mapping for Sigma rules.
 - [`ecs_mapping.yml`](./ecs_mapping/ecs_mapping.yml) - ECS field mappings (YAML)
 - [`README.md`](./ecs_mapping/README.md) - ECS mapping documentation
 
-#### [`checker_missing_ecs_fields/`](./checker_missing_ecs_fields/)
+#### [`ecs_fields_info/`](./ecs_fields_info/)
 Tools for extracting and verifying Sigma fields against ECS.
 
-- [`checker.py`](./checker_missing_ecs_fields/checker.py) - ECS field verification tool
-- [`ecs_verification_results.csv`](./checker_missing_ecs_fields/ecs_verification_results.csv) - Verification results
-- [`sigma_fields.csv`](./checker_missing_ecs_fields/sigma_fields.csv) - Unique Sigma fields catalog
-- [`sigma_fields_with_paths.csv`](./checker_missing_ecs_fields/sigma_fields_with_paths.csv) - Sigma fields with rule paths
-- [`README.md`](./checker_missing_ecs_fields/README.md) - ECS checker documentation
+- [`checker.py`](./ecs_fields_info/checker.py) - ECS field verification tool
+- [`ecs_verification_results.csv`](./ecs_fields_info/ecs_verification_results.csv) - Verification results
+- [`sigma_fields.csv`](./ecs_fields_info/sigma_fields.csv) - Unique Sigma fields catalog
+- [`sigma_fields_with_paths.csv`](./ecs_fields_info/sigma_fields_with_paths.csv) - Sigma fields with rule paths
+- [`README.md`](./ecs_fields_info/README.md) - ECS checker documentation
 
 #### [`tables/`](./tables/)
 Reference tables for modifiers, operations, and detection rules.
@@ -167,11 +176,18 @@ Comprehensive test suite for the backend.
 
 ## Installation
 
+## Installation
+
 ### Dependencies
 
 Install required dependencies:
 
 ```bash
+# Create and activate virtual environment
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
@@ -182,17 +198,33 @@ Main dependencies:
 
 ## Usage
 
-### Quick Start
+### Command-Line Interface (Recommended)
+
+The easiest way to convert Sigma rules is using the CLI tool:
+
+```bash
+# Basic conversion
+./cli/sigma-ppl tests/automated_tests/rules/case_insensitive_match.yml
+
+# Save to file
+./cli/sigma-ppl rule.yml -o output.ppl
+```
+
+**[Full CLI Documentation](./cli/README.md)**
+
+### Python API
+
+For programmatic usage:
 
 ```python
 from sigma.collection import SigmaCollection
-from sigma_backend.backends.opensearch_ppl.opensearch_ppl_textquery import OpenSearchPPLBackend
+from sigma_backend.backends.opensearch_ppl import OpenSearchPPLBackend
 
 # Load a Sigma rule
 with open('rule.yml', 'r') as f:
     sigma_collection = SigmaCollection.from_yaml(f.read())
 
-# Create the backend
+# Create the backend (supports both regular and correlation rules)
 backend = OpenSearchPPLBackend()
 
 # Convert to PPL
@@ -233,7 +265,7 @@ This backend supports **Elastic Common Schema (ECS)** field mapping through a YA
 
 ```python
 from sigma.collection import SigmaCollection
-from sigma_backend.backends.opensearch_ppl.opensearch_ppl_textquery import OpenSearchPPLBackend
+from sigma_backend.backends.opensearch_ppl import OpenSearchPPLBackend
 from ecs_mapping import load_ecs_pipeline_from_yaml
 
 # Load ECS pipeline from YAML

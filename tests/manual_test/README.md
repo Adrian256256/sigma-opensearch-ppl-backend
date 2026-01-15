@@ -52,9 +52,9 @@ manual_test/
 
 ## Testing Scripts
 
-### `test_textquery_backend.py` - TextQuery Backend
+### `test_textquery_backend.py` - Backend Testing
 
-Tests the pySigma TextQueryBackend implementation (`opensearch_ppl_textquery.py`).
+Tests the unified OpenSearch PPL backend (`opensearch_ppl.py`) with various Sigma rules.
 
 ### `test_ecs_pipeline.py` - ECS Field Mapping
 

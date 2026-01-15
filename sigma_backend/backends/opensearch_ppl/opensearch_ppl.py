@@ -1,10 +1,18 @@
 """
-OpenSearch PPL backend with correlation rule support.
+OpenSearch PPL backend for Sigma rules.
 
-This module extends the base OpenSearch PPL backend to support Sigma correlation rules,
-enabling detection of complex patterns across multiple events within time windows.
+This backend converts Sigma detection rules (both regular and correlation rules)
+into PPL (Piped Processing Language) queries for OpenSearch.
+
+Supports:
+- Regular Sigma detection rules
+- Correlation rules (event_count, value_count, temporal, temporal_ordered)
+- All standard Sigma modifiers and features
 """
-from typing import ClassVar, Dict, Optional, Any
+from typing import ClassVar, Optional, Pattern, Dict, Union, Any
+import re
+
+from sigma.conversion.base import TextQueryBackend
 from sigma.conversion.state import ConversionState
 from sigma.correlations import (
     SigmaCorrelationRule,
@@ -14,48 +22,125 @@ from sigma.correlations import (
 from sigma.exceptions import SigmaConversionError
 from sigma.processing.pipeline import ProcessingPipeline
 from sigma.rule import SigmaRule
+from sigma.types import SigmaCompareExpression
+from sigma.conditions import ConditionItem, ConditionAND, ConditionOR, ConditionNOT
 
-from .opensearch_ppl_textquery import OpenSearchPPLBackend
 
-
-class OpenSearchPPLCorrelationBackend(OpenSearchPPLBackend):
+class OpenSearchPPLBackend(TextQueryBackend):
     """
-    OpenSearch PPL backend with correlation rule support.
+    OpenSearch PPL backend for both regular and correlation Sigma rules.
     
-    This backend extends the base OpenSearchPPLBackend to convert Sigma correlation rules
-    into PPL queries that can detect complex patterns across multiple events.
+    This backend leverages pySigma's built-in conversion infrastructure,
+    requiring only configuration through class variables and minimal
+    method overrides for PPL-specific behavior.
     
-    Supported correlation types:
-    - event_count: Count events in aggregation bucket
-    - value_count: Count distinct values of a field
-    - temporal: Multiple event types close in time (order doesn't matter)
-    - temporal_ordered: Multiple event types in specific order
+    Features:
+    - Converts regular Sigma detection rules to PPL queries
+    - Supports correlation rules with multiple correlation types
+    - Handles all standard Sigma modifiers (contains, startswith, etc.)
+    - Supports CIDR notation, regex, field references, and more
     """
     
-    def __init__(
-        self,
-        processing_pipeline: Optional[ProcessingPipeline] = None,
-        collect_errors: bool = False,
-        **backend_options: Dict,
-    ):
-        """
-        Initialize the OpenSearch PPL correlation backend.
-        
-        Args:
-            processing_pipeline: Optional processing pipeline for rule transformation
-            collect_errors: If True, collect errors instead of raising them
-            time_field: Name of the timestamp field (default: "@timestamp")
-            **backend_options: Additional backend options
-        """
-        super().__init__(processing_pipeline, collect_errors=collect_errors, **backend_options)
-        self._time_field: str = backend_options.get("time_field", "@timestamp")
+    # Backend metadata
+    name: ClassVar[str] = "OpenSearch PPL Backend"
+    formats: ClassVar[Dict[str, str]] = {
+        "default": "Plain PPL queries",
+        "kibana": "Kibana dashboard format (future)",
+    }
+    requires_pipeline: ClassVar[bool] = False
+    
+    # Operator precedence (NOT > AND > OR)
+    precedence: ClassVar[tuple] = (ConditionNOT, ConditionAND, ConditionOR)
+    group_expression: ClassVar[str] = "({expr})"
+    
+    # Boolean operators for PPL
+    token_separator: str = " "
+    or_token: ClassVar[str] = "OR"
+    and_token: ClassVar[str] = "AND"
+    not_token: ClassVar[str] = "NOT"
+    eq_token: ClassVar[str] = "="
+    
+    # Field quoting - PPL allows unquoted alphanumeric field names
+    field_quote: ClassVar[str] = "`"  # Backticks for fields with special chars
+    field_quote_pattern: ClassVar[Pattern] = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
+    field_quote_pattern_negation: ClassVar[bool] = True  # Quote if pattern does NOT match
+    
+    # String quoting and escaping  
+    str_quote: ClassVar[str] = '"'  # Double quotes for string values
+    escape_char: ClassVar[str] = '\\'
+    wildcard_multi: ClassVar[str] = "%"  # PPL uses % for multi-character wildcard
+    wildcard_single: ClassVar[str] = "_"  # PPL uses _ for single-character wildcard
+    add_escaped: ClassVar[str] = "\\"
+    filter_chars: ClassVar[str] = ""
+    
+    # String matching operators with PPL's LIKE() function
+    # PPL uses: LIKE(field, "pattern") with % for wildcards  
+    # PPL uses: field = "exact" for exact match
+    # Template values will be auto-quoted by str_quote
+    startswith_expression: ClassVar[str] = 'LIKE({field}, {value}%)'
+    endswith_expression: ClassVar[str] = 'LIKE({field}, %{value})'
+    contains_expression: ClassVar[str] = 'LIKE({field}, %{value}%)'
+    wildcard_match_expression: ClassVar[str] = 'LIKE({field}, {value})'
+    
+    # Case-sensitive string matching with 'cased' modifier
+    # PPL LIKE function with third parameter set to true enables case-sensitive matching
+    # Format: LIKE(field, "pattern", true)
+    case_sensitive_match_expression: ClassVar[str] = '{field}={value}'
+    case_sensitive_startswith_expression: ClassVar[str] = 'LIKE({field}, {value}%, true)'
+    case_sensitive_endswith_expression: ClassVar[str] = 'LIKE({field}, %{value}, true)'
+    case_sensitive_contains_expression: ClassVar[str] = 'LIKE({field}, %{value}%, true)'
+    
+    # CIDR notation support
+    # PPL supports: cidrmatch(field, "cidr")
+    cidr_expression: ClassVar[str] = 'cidrmatch({field}, "{value}")'
+    
+    # Regular expressions in PPL
+    # PPL supports: field match 'regex' or match(field, 'regex')
+    re_expression: ClassVar[str] = "match({field}, '{regex}')"
+    re_escape_char: ClassVar[str] = "\\"
+    re_escape: ClassVar[tuple] = ("\\", "'")
+    
+    # Comparison operators for numeric values
+    compare_op_expression: ClassVar[str] = "{field}{operator}{value}"
+    compare_operators: ClassVar[Dict[Any, str]] = {
+        SigmaCompareExpression.CompareOperators.LT: "<",
+        SigmaCompareExpression.CompareOperators.LTE: "<=",
+        SigmaCompareExpression.CompareOperators.GT: ">",
+        SigmaCompareExpression.CompareOperators.GTE: ">=",
+    }
+    
+    # Field existence checks
+    field_exists_expression: ClassVar[str] = "isnotnull({field})"
+    field_not_exists_expression: ClassVar[str] = "isnull({field})"
+    
+    # Null value handling - in PPL use isnull() function
+    field_null_expression: ClassVar[str] = "isnull({field})"
+    
+    # Field-to-field comparison (fieldref modifier)
+    # PPL supports direct field comparison: field1=field2
+    field_equals_field_expression: ClassVar[str] = "{field1}={field2}"
+    
+    # List expressions (IN operator)
+    convert_or_as_in: ClassVar[bool] = True
+    convert_and_as_in: ClassVar[bool] = False
+    in_expressions_allow_wildcards: ClassVar[bool] = False
+    field_in_list_expression: ClassVar[str] = "{field} in ({list})"
+    or_in_operator: ClassVar[str] = "in"
+    list_separator: ClassVar[str] = ", "
+    
+    # Value expressions (for unbound values - not typical in Sigma)
+    unbound_value_str_expression: ClassVar[str] = '"{value}"'
+    unbound_value_num_expression: ClassVar[str] = '{value}'
+    
+    # Query expression template - just the condition, we add source in finish_query
+    query_expression: ClassVar[str] = "{query}"
+    
+    ### Correlation support ###
     
     # Correlation methods supported by this backend
     correlation_methods: ClassVar[Dict[str, str]] = {
         "default": "Default method",
     }
-    
-    ### Correlation query templates ###
     
     # All correlation types use the same query structure:
     # {search} | stats {aggregate} | where {condition}
@@ -63,12 +148,8 @@ class OpenSearchPPLCorrelationBackend(OpenSearchPPLBackend):
         "default": "{search} | stats {aggregate} | where {condition}"
     }
     
-    ## Correlation query search phase ##
-    
     # Joiner between multiple rule queries (unused but kept for compatibility)
     correlation_search_multi_rule_query_expression_joiner: ClassVar[str] = " "
-    
-    ## Correlation query aggregation phase ##
     
     # Aggregation expressions for different correlation types
     default_aggregation_expression: ClassVar[Dict[str, str]] = {
@@ -86,15 +167,12 @@ class OpenSearchPPLCorrelationBackend(OpenSearchPPLBackend):
     # Convert timespan to seconds for PPL (False = use original format like 5m, 30m)
     timespan_seconds: ClassVar[bool] = False
     
-    ## Group-by expression templates ##
-    
+    # Group-by expression templates
     groupby_expression: ClassVar[Dict[str, str]] = {"default": "{fields}"}
     groupby_field_expression: ClassVar[Dict[str, str]] = {"default": "{field}"}
     groupby_field_expression_joiner: ClassVar[Dict[str, str]] = {"default": ", "}
     
-    ## Correlation query condition phase ##
-    
-    # All correlation types use similar condition expressions
+    # Correlation condition expressions
     default_condition_expression: ClassVar[Dict[str, str]] = {
         "default": "event_count {op} {count}",
     }
@@ -112,15 +190,156 @@ class OpenSearchPPLCorrelationBackend(OpenSearchPPLBackend):
         "eq": "=", "ne": "!=", "lt": "<", "lte": "<=", "gt": ">", "gte": ">=",
     }
     
-    ### Correlation conversion methods ###
+    def __init__(
+        self,
+        processing_pipeline: Optional[ProcessingPipeline] = None,
+        collect_errors: bool = False,
+        **backend_options: Dict,
+    ):
+        """
+        Initialize the OpenSearch PPL backend.
+        
+        Args:
+            processing_pipeline: Optional processing pipeline for rule transformation
+            collect_errors: If True, collect errors instead of raising them
+            time_field: Name of the timestamp field (default: "@timestamp")
+            **backend_options: Additional backend options
+        """
+        super().__init__(processing_pipeline, collect_errors=collect_errors, **backend_options)
+        self._time_field: str = backend_options.get("time_field", "@timestamp")
     
-    def convert_rule(self, rule: SigmaRule, output_format: str = "default") -> list[str]:
+    ### Regular rule conversion methods ###
+    
+    def finalize_query_default(
+        self, rule: SigmaRule, query: str, index: int, state: ConversionState
+    ) -> str:
+        """
+        Finalize the query by adding the source command.
+        
+        This method is called after the condition has been converted to add
+        PPL-specific elements like the source index pattern.
+        
+        Args:
+            rule: The Sigma rule being converted
+            query: The converted condition query
+            index: Query index (if rule generates multiple queries)
+            state: Conversion state
+            
+        Returns:
+            Complete PPL query with source command
+        """
+        # Correlation rules are already finalized
+        if isinstance(rule, SigmaCorrelationRule):
+            return query
+        
+        # Get index pattern from logsource
+        index_pattern = self._get_index_pattern(rule)
+        
+        # Build complete PPL query
+        # The query_expression template is already applied in finish_query
+        # We just need to ensure the state has the index
+        state.processing_state["index"] = index_pattern
+        
+        return query
+    
+    def finalize_output_default(self, queries: list[str]) -> list[str]:
+        """
+        Finalize the output by returning the list of queries.
+        
+        Args:
+            queries: List of generated PPL queries
+            
+        Returns:
+            List of PPL query strings
+        """
+        return queries
+    
+    def _get_index_pattern(self, rule: SigmaRule) -> str:
+        """
+        Extract OpenSearch index pattern from Sigma logsource.
+        
+        Maps Sigma logsource (product, category, service) to OpenSearch
+        index patterns. This is a simple implementation that can be
+        extended with configurable mappings.
+        
+        Args:
+            rule: Sigma rule containing logsource information
+            
+        Returns:
+            OpenSearch index pattern ("windows-process_creation-*")
+        """
+        logsource = rule.logsource
+        product = getattr(logsource, 'product', None)
+        category = getattr(logsource, 'category', None)
+        service = getattr(logsource, 'service', None)
+        
+        # Build index pattern from logsource components
+        index_parts = []
+        
+        if product:
+            index_parts.append(product)
+        
+        if category:
+            index_parts.append(category)
+        
+        if service:
+            index_parts.append(service)
+        
+        # Build final index pattern
+        if index_parts:
+            return '-'.join(index_parts) + '-*'
+        else:
+            # Fallback to wildcard if no logsource specified
+            return '*'
+    
+    def finish_query(
+        self, rule: SigmaRule, query: str, state: ConversionState
+    ) -> str:
+        """
+        Finish the query before finalization.
+        
+        This is called before finalize_query and is where we can add
+        the source command and other PPL-specific structure.
+        
+        Args:
+            rule: The Sigma rule being converted
+            query: The converted condition
+            state: Conversion state
+            
+        Returns:
+            Query with PPL source command added
+        """
+        # Get index pattern from logsource
+        index_pattern = self._get_index_pattern(rule)
+        
+        # Handle deferred expressions (if any)
+        query = super().finish_query(rule, query, state)
+        
+        # Fix LIKE expressions: move wildcards inside quotes
+        # Handle all patterns in one comprehensive replacement
+        def fix_wildcards(match):
+            leading = match.group(1) or ''  # % before "
+            content = match.group(2)         # content between quotes
+            trailing = match.group(3) or ''  # % after "
+            return f'"{leading}{content}{trailing}"'
+        
+        query = re.sub(r'(%?)"([^"]*)\"(%?)', fix_wildcards, query)
+        
+        # Build complete PPL query with source command
+        ppl_query = f"source={index_pattern} | where {query}"
+        
+        return ppl_query
+    
+    ### Correlation rule conversion methods ###
+    
+    def convert_rule(self, rule: SigmaRule, output_format: str = "default", callback=None) -> list[str]:
         """
         Convert a Sigma rule (regular or correlation) to PPL query.
         
         Args:
             rule: The Sigma rule to convert (can be regular or correlation)
             output_format: Output format to use
+            callback: Optional callback function
             
         Returns:
             List of generated PPL queries
@@ -129,7 +348,7 @@ class OpenSearchPPLCorrelationBackend(OpenSearchPPLBackend):
         if hasattr(rule, 'type') and hasattr(rule, 'rules') and hasattr(rule, 'timespan'):
             return self.convert_correlation_rule(rule, method="default")
         else:
-            return super().convert_rule(rule, output_format)
+            return super().convert_rule(rule, output_format, callback)
     
     def convert_correlation_rule(
         self, rule: SigmaCorrelationRule, method: str = "default"
@@ -206,8 +425,6 @@ class OpenSearchPPLCorrelationBackend(OpenSearchPPLBackend):
         Returns:
             Combined search expression
         """
-        from sigma.correlations import SigmaCorrelationType
-        
         timespan = self._format_timespan(rule.timespan)
         is_temporal = rule.type in [SigmaCorrelationType.TEMPORAL, SigmaCorrelationType.TEMPORAL_ORDERED]
         
@@ -332,12 +549,3 @@ class OpenSearchPPLCorrelationBackend(OpenSearchPPLBackend):
             field = condition.fieldref or ""
         
         return template.format(op=op, count=count, field=field)
-    
-    def finalize_query_default(
-        self, rule: SigmaRule, query: str, index: int, state: ConversionState
-    ) -> Any:
-        """Finalize query - handle both regular rules and correlation rules."""
-        # Correlation rules are already finalized, regular rules use parent's finalization
-        if isinstance(rule, SigmaCorrelationRule):
-            return query
-        return super().finalize_query_default(rule, query, index, state)

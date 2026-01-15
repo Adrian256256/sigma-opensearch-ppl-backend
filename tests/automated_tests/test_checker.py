@@ -12,11 +12,12 @@ from pathlib import Path
 from typing import Tuple, List
 import argparse
 
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Add project root directory to path for imports
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
 
 from sigma.collection import SigmaCollection
-from sigma_backend.backends.opensearch_ppl.opensearch_ppl_textquery import OpenSearchPPLBackend
+from sigma_backend.backends.opensearch_ppl import OpenSearchPPLBackend
 
 
 class TestResult:

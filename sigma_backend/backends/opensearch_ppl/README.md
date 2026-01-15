@@ -42,7 +42,7 @@ A production-ready pySigma backend for converting Sigma detection rules into PPL
 
 ## Overview
 
-**OpenSearchPPLBackend** is a robust pySigma backend that converts Sigma detection rules into PPL (Piped Processing Language) queries optimized for OpenSearch. Built on pySigma's `TextQueryBackend` class, it provides a production-ready solution for security detection rule conversion.
+**OpenSearchPPLBackend** is a robust pySigma backend that converts Sigma detection rules (both regular and correlation rules) into PPL (Piped Processing Language) queries optimized for OpenSearch. Built on pySigma's `TextQueryBackend` class, it provides a unified, production-ready solution for security detection rule conversion.
 
 The backend follows pySigma's best practices by leveraging configuration-based design through class variables, minimizing custom code while maximizing functionality and maintainability.
 
@@ -51,6 +51,13 @@ The backend follows pySigma's best practices by leveraging configuration-based d
 ## Features
 
 ### Core Capabilities
+
+**Rule Support**
+- **Regular Sigma Detection Rules**: Standard single-event detection patterns
+- **Correlation Rules**: Multi-event pattern detection with time windows
+  - Event count correlations
+  - Value count correlations
+  - Temporal correlations (ordered and unordered)
 
 **Logical Operators**
 - Full support for AND, OR, NOT with correct precedence
@@ -534,7 +541,7 @@ field in (v1, v2)    # IN operator
 
 ## Correlation Rules Support
 
-The backend includes full support for **Sigma Correlation Rules**, enabling multi-event pattern detection across time windows. This feature is implemented in `opensearch_ppl_correlations.py` and extends the base backend to handle complex detection scenarios that require correlating multiple events.
+The backend includes full support for **Sigma Correlation Rules**, enabling multi-event pattern detection across time windows. This feature is integrated directly into the `OpenSearchPPLBackend` class, allowing it to handle both regular detection rules and complex correlation scenarios seamlessly.
 
 ### Overview
 
@@ -543,6 +550,8 @@ Correlation rules allow detection of attack patterns that span multiple events, 
 - **Lateral movement**: Sequence of authentication and remote execution events
 - **Data exfiltration**: High-volume network transfers over time
 - **Password spraying**: Same password tried across multiple accounts
+
+**The same backend (`OpenSearchPPLBackend`) automatically detects and converts both regular and correlation rules** - no need for separate backend classes.
 
 **Reference**: [Sigma Correlation Rules Specification](https://github.com/SigmaHQ/sigma-specification/blob/main/Sigma_specification.md#correlation-rules)
 
@@ -882,20 +891,31 @@ This query detects password spraying by identifying source IPs that attempt to a
 
 ### Implementation Architecture
 
-#### Class Structure
+#### Unified Backend Design
+
+The `OpenSearchPPLBackend` class handles both regular and correlation rules through intelligent routing:
 
 ```python
-class OpenSearchPPLCorrelationBackend(OpenSearchPPLBackend):
+def convert_rule(self, rule: SigmaRule, output_format: str = "default", callback=None):
     """
-    Extends the base OpenSearch PPL backend to support correlation rules.
+    Convert a Sigma rule (regular or correlation) to PPL query.
     
-    Key Features:
-    - Detects correlation rules via type/rules/timespan attributes
-    - Template-based query generation for all correlation types
-    - Automatic field mapping and time range conversion
-    - Generates complete PPL queries with aggregation
+    Automatically detects rule type and routes to appropriate conversion:
+    - If rule has type/rules/timespan attributes → correlation conversion
+    - Otherwise → regular rule conversion
     """
+    # Check if this is a correlation rule
+    if hasattr(rule, 'type') and hasattr(rule, 'rules') and hasattr(rule, 'timespan'):
+        return self.convert_correlation_rule(rule, method="default")
+    else:
+        return super().convert_rule(rule, output_format, callback)
 ```
+
+**Key Benefits**:
+- Single backend class for all rule types
+- Automatic rule type detection
+- No need to choose between different backend classes
+- Simplified API and usage
 
 #### How Detection Rule Conversion Works
 
@@ -1168,13 +1188,13 @@ correlation:
 
 **Explanation**: Detects when authentication is followed by remote execution within 15 minutes (lateral movement indicator).
 
-### Backend Initialization
+### Backend Usage
 
 ```python
-from sigma_backend.backends.opensearch_ppl import OpenSearchPPLCorrelationBackend
+from sigma_backend.backends.opensearch_ppl import OpenSearchPPLBackend
 from sigma.collection import SigmaCollection
 
-# Load correlation rules (YAML with 'correlation' section)
+# Load any Sigma rules (regular or correlation - backend handles both automatically)
 rules = SigmaCollection.from_yaml("""
 ---
 title: Brute Force Detection
@@ -1189,10 +1209,10 @@ correlation:
     gte: 10
 """)
 
-# Initialize correlation backend
-backend = OpenSearchPPLCorrelationBackend()
+# Initialize the unified backend (handles both regular and correlation rules)
+backend = OpenSearchPPLBackend()
 
-# Convert correlation rule
+# Convert any rule type - backend auto-detects and converts appropriately
 for rule in rules.rules:
     ppl_query = backend.convert_rule(rule)
     print(ppl_query[0])
@@ -1223,7 +1243,7 @@ pip install -e .
 #### Standard Detection Rules
 
 ```python
-from sigma_backend.backends.opensearch_ppl.opensearch_ppl_textquery import OpenSearchPPLBackend
+from sigma_backend.backends.opensearch_ppl import OpenSearchPPLBackend
 from sigma.collection import SigmaCollection
 
 # Load Sigma rule
@@ -1252,10 +1272,10 @@ print(ppl_queries[0])
 
 #### Correlation Rules
 
-For correlation rules that detect relationships between multiple events, use the `OpenSearchPPLCorrelationBackend`:
+The same backend handles correlation rules automatically - no separate class needed:
 
 ```python
-from sigma_backend.backends.opensearch_ppl.opensearch_ppl_correlations import OpenSearchPPLCorrelationBackend
+from sigma_backend.backends.opensearch_ppl import OpenSearchPPLBackend
 from sigma.collection import SigmaCollection
 
 # Load correlation rule with base rules
@@ -1293,8 +1313,8 @@ correlation:
   timespan: 10m
 """
 
-# Parse and convert
-backend = OpenSearchPPLCorrelationBackend()
+# Parse and convert using the same unified backend
+backend = OpenSearchPPLBackend()
 collection = SigmaCollection.from_yaml(rule_yaml)
 
 # Backend automatically detects rule type (regular vs correlation)
@@ -1329,7 +1349,7 @@ ppl_queries = backend.convert(sigma_rules)
 ### Command Line Usage
 
 ```bash
-# Convert single rule
+# Convert single rule (regular or correlation - auto-detected)
 sigma convert -t opensearch_ppl rule.yml
 
 # Convert directory of rules
@@ -1345,7 +1365,7 @@ python manual_test/test_ecs_pipeline.py your_rule.yml
 ### Example Workflow
 
 ```python
-from sigma_backend.backends.opensearch_ppl.opensearch_ppl_textquery import OpenSearchPPLBackend
+from sigma_backend.backends.opensearch_ppl import OpenSearchPPLBackend
 from sigma.collection import SigmaCollection
 from pathlib import Path
 
@@ -1374,19 +1394,17 @@ for rule in sigma_rules.rules:
 
 ```
 sigma_backend/backends/opensearch_ppl/
-├── __init__.py                        # Package initialization, modifier registration
-├── opensearch_ppl_textquery.py        # Main backend implementation (base)
-├── opensearch_ppl_correlations.py     # Correlation rules backend (extends base)
+├── __init__.py                        # Package initialization, exports, modifier registration
+├── opensearch_ppl.py                  # Unified backend (regular + correlation rules)
 ├── modifiers.py                       # Custom UTF-16 modifiers
 └── README.md                          # This documentation file
 ```
 
 ### Files
 
-- **`opensearch_ppl_textquery.py`**: Base backend class with standard Sigma rule conversion logic
-- **`opensearch_ppl_correlations.py`**: Correlation rules extension with multi-event detection support
+- **`opensearch_ppl.py`**: Unified backend class supporting both regular Sigma rules and correlation rules
 - **`modifiers.py`**: Custom Sigma modifiers for encoding (UTF-16 variants)
-- **`__init__.py`**: Exports both backends and registers custom modifiers
+- **`__init__.py`**: Exports the backend and registers custom modifiers
 
 ---
 

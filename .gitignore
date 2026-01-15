@@ -142,4 +142,4 @@ tests/automated_tests/out/
 tests/automated_tests/out/*
 
 # Sigma rules repository (if cloned locally)
-checker_missing_ecs_fields/sigma-master/
+ecs_fields_info/sigma-master/

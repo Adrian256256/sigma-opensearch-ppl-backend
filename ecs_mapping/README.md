@@ -10,7 +10,7 @@ This pipeline automatically maps Sigma field names to ECS-compliant fields when 
 
 ```python
 from sigma.collection import SigmaCollection
-from sigma_backend.backends.opensearch_ppl.opensearch_ppl_textquery import OpenSearchPPLBackend
+from sigma_backend.backends.opensearch_ppl import OpenSearchPPLBackend
 from ecs_mapping import load_ecs_pipeline_from_yaml
 
 # Load ECS pipeline

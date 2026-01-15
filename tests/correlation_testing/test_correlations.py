@@ -9,7 +9,7 @@ project_root = script_dir.parent.parent
 sys.path.insert(0, str(project_root))
 
 from sigma.collection import SigmaCollection
-from sigma_backend.backends.opensearch_ppl import OpenSearchPPLCorrelationBackend
+from sigma_backend.backends.opensearch_ppl import OpenSearchPPLBackend
 
 
 class CorrelationTester:
@@ -19,7 +19,7 @@ class CorrelationTester:
         self.rules_dir = rules_dir
         self.output_dir = output_dir
         self.refs_dir = refs_dir
-        self.backend = OpenSearchPPLCorrelationBackend()
+        self.backend = OpenSearchPPLBackend()
         self.output_dir.mkdir(exist_ok=True)
         
         self.stats = {
