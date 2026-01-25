@@ -1,6 +1,17 @@
 # Log Generator
 
-Python script for generating synthetic security logs in ECS format to test Sigma rules in OpenSearch.
+Python script for generating synthetic security logs to test Sigma rules in OpenSearch.
+
+## How It Works
+
+This script generates realistic Windows security event logs by simulating various system activities:
+
+1. **Creates base log structure** - Each log includes standard fields like timestamp, hostname, Windows event metadata (Sysmon)
+2. **Generates malicious events** - Simulates common attack patterns with authentic field names from Sigma rules (Image, CommandLine, QueryName, etc.)
+3. **Adds benign events** - Creates normal system activity to provide realistic background noise
+4. **Outputs in bulk format** - Produces NDJSON file ready for direct import into OpenSearch
+
+The generated logs use **Sigma original field names** (Image, CommandLine, QueryName) ensuring direct compatibility with PPL queries converted by `sigma-ppl`.
 
 ## Usage
 
