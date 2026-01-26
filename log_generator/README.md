@@ -150,14 +150,3 @@ search source=security-logs
 | fields @timestamp, host.name, process.name, process.executable
 | head 20
 ```
-
-## Log Structure
-
-Logs follow ECS (Elastic Common Schema) v8.0 format with fields including:
-- `@timestamp`
-- `event.category`, `event.type`
-- `process.executable`, `process.name`, `process.command_line`
-- `dns.question.name`
-- `registry.path`
-- `network.destination.ip`, `network.destination.port`
-- `winlog.event_id`
