@@ -83,7 +83,6 @@ sigma-opensearch-ppl-backend/
 ├── real_dataset_testing/
 │   ├── evtx_to_opensearch.py             # EVTX to OpenSearch converter
 │   ├── evtx_attack_samples_bulk.ndjson   # Converted EVTX dataset
-│   ├── EVTX-ATTACK-SAMPLES/              # Real Windows attack samples
 │   └── README.md                         # Dataset testing documentation
 ├── tables/
 │   ├── custom_modifiers.csv              # Custom modifiers reference
@@ -163,7 +162,6 @@ Real-world dataset testing with EVTX-ATTACK-SAMPLES (31,911 Windows events).
 
 - [`evtx_to_opensearch.py`](./real_dataset_testing/evtx_to_opensearch.py) - EVTX to OpenSearch converter
 - [`evtx_attack_samples_bulk.ndjson`](./real_dataset_testing/evtx_attack_samples_bulk.ndjson) - Converted EVTX dataset
-- [`EVTX-ATTACK-SAMPLES/`](./real_dataset_testing/EVTX-ATTACK-SAMPLES/) - Real Windows attack samples
 - [`README.md`](./real_dataset_testing/README.md) - Dataset testing documentation with 5 validated Sigma rules
 
 #### [`tables/`](./tables/)
