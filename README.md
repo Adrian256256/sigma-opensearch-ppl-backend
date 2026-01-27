@@ -58,7 +58,7 @@ sigma-opensearch-ppl-backend/
 │           └── README.md                         # Backend documentation
 ├── cli/
 │   ├── sigma-ppl                         # Command-line conversion tool
-│   ├── examples.sh                       # Usage examples script
+│   ├── rule.yaml                         # Example Sigma rule
 │   └── README.md                         # CLI documentation
 ├── ecs_mapping/
 │   ├── __init__.py
@@ -67,11 +67,24 @@ sigma-opensearch-ppl-backend/
 │   └── README.md                         # ECS mapping documentation
 ├── ecs_fields_info/
 │   ├── checker.py                        # ECS field verification tool
+│   ├── add_ecs_links.py                  # ECS link enrichment tool
+│   ├── count_field_frequency.py          # Field frequency analysis
 │   ├── ecs_verification_results.csv      # Verification results
 │   ├── sigma_fields.csv                  # Unique Sigma fields catalog
 │   ├── sigma_fields_with_paths.csv       # Sigma fields with rule paths
+│   ├── sigma_fields_frequency.csv        # Field usage frequency
 │   ├── sigma-master/                     # Sigma rules repository
 │   └── README.md                         # ECS checker documentation
+├── log_generator/
+│   ├── generate_logs.py                  # Synthetic log generator
+│   ├── bulk_ready.ndjson                 # Generated bulk logs
+│   ├── TESTING_QUERIES.md                # Example test queries
+│   └── README.md                         # Log generator documentation
+├── real_dataset_testing/
+│   ├── evtx_to_opensearch.py             # EVTX to OpenSearch converter
+│   ├── evtx_attack_samples_bulk.ndjson   # Converted EVTX dataset
+│   ├── EVTX-ATTACK-SAMPLES/              # Real Windows attack samples
+│   └── README.md                         # Dataset testing documentation
 ├── tables/
 │   ├── custom_modifiers.csv              # Custom modifiers reference
 │   ├── detection_rules.csv               # Detection rules catalog
@@ -129,10 +142,29 @@ Elastic Common Schema (ECS) field mapping for Sigma rules.
 Tools for extracting and verifying Sigma fields against ECS.
 
 - [`checker.py`](./ecs_fields_info/checker.py) - ECS field verification tool
+- [`add_ecs_links.py`](./ecs_fields_info/add_ecs_links.py) - ECS link enrichment tool
+- [`count_field_frequency.py`](./ecs_fields_info/count_field_frequency.py) - Field frequency analysis
 - [`ecs_verification_results.csv`](./ecs_fields_info/ecs_verification_results.csv) - Verification results
 - [`sigma_fields.csv`](./ecs_fields_info/sigma_fields.csv) - Unique Sigma fields catalog
 - [`sigma_fields_with_paths.csv`](./ecs_fields_info/sigma_fields_with_paths.csv) - Sigma fields with rule paths
+- [`sigma_fields_frequency.csv`](./ecs_fields_info/sigma_fields_frequency.csv) - Field usage frequency
 - [`README.md`](./ecs_fields_info/README.md) - ECS checker documentation
+
+#### [`log_generator/`](./log_generator/)
+Synthetic log generation for testing detection rules.
+
+- [`generate_logs.py`](./log_generator/generate_logs.py) - Synthetic log generator
+- [`bulk_ready.ndjson`](./log_generator/bulk_ready.ndjson) - Generated bulk logs
+- [`TESTING_QUERIES.md`](./log_generator/TESTING_QUERIES.md) - Example test queries
+- [`README.md`](./log_generator/README.md) - Log generator documentation
+
+#### [`real_dataset_testing/`](./real_dataset_testing/)
+Real-world dataset testing with EVTX-ATTACK-SAMPLES (31,911 Windows events).
+
+- [`evtx_to_opensearch.py`](./real_dataset_testing/evtx_to_opensearch.py) - EVTX to OpenSearch converter
+- [`evtx_attack_samples_bulk.ndjson`](./real_dataset_testing/evtx_attack_samples_bulk.ndjson) - Converted EVTX dataset
+- [`EVTX-ATTACK-SAMPLES/`](./real_dataset_testing/EVTX-ATTACK-SAMPLES/) - Real Windows attack samples
+- [`README.md`](./real_dataset_testing/README.md) - Dataset testing documentation with 5 validated Sigma rules
 
 #### [`tables/`](./tables/)
 Reference tables for modifiers, operations, and detection rules.

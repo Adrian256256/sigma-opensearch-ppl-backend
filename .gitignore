@@ -146,3 +146,4 @@ ecs_fields_info/sigma-master/
 
 # Dataset json
 real_dataset_testing/evtx_attack_samples_bulk.ndjson
+real_dataset_testing/EVTX-ATTACK-SAMPLES
