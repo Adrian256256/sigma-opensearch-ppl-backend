@@ -35,8 +35,11 @@ ppl_query = backend.convert(collection)
 # Handle output
 if len(args) >= 3 and args[1] == '-o':
     with open(args[2], 'w') as f:
-        f.write(ppl_query)
+        for query in ppl_query:
+            f.write(query + '\n')
     print(f'✓ Converted to: {args[2]}')
 else:
-    print(ppl_query)
+    # Print each query on its own line (not as a list representation)
+    for query in ppl_query:
+        print(query)
 " "$@"

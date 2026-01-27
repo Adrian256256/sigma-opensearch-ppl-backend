@@ -96,9 +96,11 @@ class OpenSearchPPLBackend(TextQueryBackend):
     
     # Regular expressions in PPL
     # PPL supports: field match 'regex' or match(field, 'regex')
+    # Note: Backslashes in regex are NOT escaped because they're already within single quotes
+    # Only single quotes need escaping by doubling them
     re_expression: ClassVar[str] = "match({field}, '{regex}')"
-    re_escape_char: ClassVar[str] = "\\"
-    re_escape: ClassVar[tuple] = ("\\", "'")
+    re_escape_char: ClassVar[str] = "'"
+    re_escape: ClassVar[tuple] = ("'",)
     
     # Comparison operators for numeric values
     compare_op_expression: ClassVar[str] = "{field}{operator}{value}"
