@@ -3,6 +3,90 @@
 This folder contains the **EVTX-ATTACK-SAMPLES** dataset that has been imported into local OpenSearch.
 The dataset contains ~31,911 Windows events mapped to MITRE ATT&CK techniques.
 
+## evtx_to_opensearch.py
+
+Python script that converts Windows Event Log files (EVTX) to OpenSearch bulk-ready NDJSON format.
+
+**Step-by-step process:**
+
+1. **EVTX File Discovery**
+   - Recursively scans the `EVTX-ATTACK-SAMPLES` directory for all `.evtx` files
+   - Limits processing to first 20 files by default (configurable via `max_files` parameter)
+
+2. **Binary EVTX Parsing**
+   - Opens each EVTX file using `python-evtx` library
+   - Iterates through binary event records in the EVTX file format
+   - Extracts raw XML representation of each Windows event
+
+3. **XML to Dictionary Conversion**
+   - Converts XML event string to Python dictionary using `xmltodict`
+   - Preserves the hierarchical structure: `Event -> System` and `Event -> EventData`
+
+4. **System Data Extraction**
+   - Extracts core event metadata from the `System` node:
+     - `EventID`: The Windows event identifier (e.g., 4624 for logon, 1 for Sysmon process creation)
+     - `TimeCreated/@SystemTime`: Event timestamp in ISO 8601 format
+     - `Provider/@Name`: Event source (e.g., Microsoft-Windows-Sysmon, Security)
+     - `Channel`: Log channel (e.g., Microsoft-Windows-Sysmon/Operational, Security)
+     - `Computer`: Hostname where the event was generated
+     - `EventRecordID`: Unique record identifier in the log file
+
+5. **EventData Field Parsing**
+   - Processes the `EventData` node containing event-specific details
+   - Handles both single and multiple `Data` elements
+   - Extracts key-value pairs where `@Name` is the field name and `#text` is the value
+   - Example: `<Data Name="CommandLine">powershell.exe -enc ...</Data>` -> `{"CommandLine": "powershell.exe -enc ..."}`
+
+6. **Sigma Field Mapping**
+   - Maps common Windows/Sysmon fields to root-level document fields for Sigma rule compatibility:
+     - `Image`: Process executable path (e.g., `C:\Windows\System32\cmd.exe`)
+     - `CommandLine`: Full command line with arguments
+     - `ParentImage`: Parent process executable path
+     - `ParentCommandLine`: Parent process command line
+     - `User`: Account that executed the process
+     - `TargetObject`: Registry key or file path (for Sysmon events)
+     - `Details`: Registry value details
+     - `QueryName`: DNS query name (Sysmon Event ID 22)
+     - `DestinationIp`, `DestinationPort`, `SourceIp`, `SourcePort`: Network connection details
+     - `OriginalFileName`, `ImageLoaded`, `TargetFilename`: File operation fields
+     - `ServiceName`, `ServiceFileName`: Service-related fields
+     - `TargetUserName`, `SubjectUserName`, `AccountName`: User account fields
+     - `WorkstationName`, `IpAddress`: Logon/authentication fields
+
+7. **Document Structure Creation**
+   - Builds an ECS-compatible JSON document with the following structure:
+     ```json
+     {
+       "@timestamp": "2024-01-15T10:30:45.123Z",
+       "EventID": 1,
+       "event": {
+         "code": "1",
+         "provider": "Microsoft-Windows-Sysmon",
+         "category": "Microsoft-Windows-Sysmon/Operational"
+       },
+       "host": {
+         "name": "DESKTOP-ABC123"
+       },
+       "winlog": {
+         "event_id": 1,
+         "channel": "Microsoft-Windows-Sysmon/Operational",
+         "computer_name": "DESKTOP-ABC123",
+         "event_data": { "CommandLine": "...", "Image": "..." },
+         "record_id": 12345
+       },
+       "CommandLine": "powershell.exe -enc ...",
+       "Image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+       "ParentImage": "C:\\Windows\\System32\\cmd.exe"
+     }
+     ```
+
+8. **Bulk NDJSON Generation**
+   - Creates `evtx_attack_samples_bulk.ndjson` with OpenSearch bulk API format
+   - Each event generates **two lines**:
+     - Line 1: Index action → `{"index": {"_index": "evtx-attack-samples"}}`
+     - Line 2: Document JSON → the complete event document
+   - First line of file contains `POST _bulk` header (removed during import)
+
 ## Dataset Import/Re-import Commands
 
 To delete the existing index and re-import the dataset into OpenSearch:
