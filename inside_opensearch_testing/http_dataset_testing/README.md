@@ -7,22 +7,6 @@ The dataset contains Apache access logs with various attack types: vulnerability
 
 **Repository:** [ocatak/apache-http-logs](https://github.com/ocatak/apache-http-logs)
 
-**Citation:**
-```
-@article{BASSEYYAR201828,
-    title = "Detection of attack-targeted scans from the Apache HTTP Server access logs",
-    journal = "Applied Computing and Informatics",
-    volume = "14",
-    number = "1",
-    pages = "28 - 36",
-    year = "2018",
-    issn = "2210-8327",
-    doi = "https://doi.org/10.1016/j.aci.2017.04.002",
-    url = "http://www.sciencedirect.com/science/article/pii/S2210832717300169",
-    author = "Merve Baş Seyyar and Ferhat Özgür Çatak and Ensar Gül",
-    keywords = "Rule-based model, Log analysis, Scan detection, Web application security, XSS detection, SQLI detection"
-}
-```
 
 ## Dataset Setup
 
@@ -147,20 +131,6 @@ Python script that converts Apache HTTP access logs to OpenSearch bulk-ready NDJ
      - Line 2: Document JSON → the complete log document
    - First line of file contains `POST _bulk` header (removed during import)
 
-9. **Statistics and Output**
-   - Tracks total logs processed
-   - Counts attacks detected by type (XSS, SQLI, scans, etc.)
-   - Handles parsing errors gracefully
-   - Prints detection summary and statistics
-   - Provides OpenSearch indexing instructions
-
-**Key benefits for Sigma web rule testing:**
-- ECS-compatible structure for standard detection rules
-- Web proxy field compatibility (cs-uri-query, cs-method, c-ip, etc.)
-- Automatic attack classification and tagging
-- Preserves original Apache log format details
-- Fast bulk import into OpenSearch for large datasets
-
 ## Dataset Import/Re-import Commands
 
 To delete the existing index and re-import the dataset into OpenSearch:
@@ -179,60 +149,73 @@ tail -n +2 apache_http_logs_bulk.ndjson | curl -X POST "localhost:9200/_bulk" -H
 curl -X GET "localhost:9200/apache-http-logs/_count" | jq '.'
 ```
 
-## Example Sigma Rules for HTTP Logs
+## Tested and Validated Sigma Rules
 
-### Web Vulnerability Scanning Detection
+The following official Sigma rules from `ecs_fields_info/sigma-master` work **directly** with the PPL backend (no manual query modifications needed, just change the source index):
 
-```yaml
-title: Web Vulnerability Scanner Detection
-logsource:
-  category: webserver
-detection:
-  selection:
-    cs-User-Agent|contains:
-      - 'nikto'
-      - 'sqlmap'
-      - 'nmap'
-      - 'masscan'
-  condition: selection
+### 1. Path Traversal Exploitation Attempt
+
+**Rule File**: `ecs_fields_info/sigma-master/rules/web/webserver_generic/web_path_traversal_exploitation_attempt.yml`
+
+**Convert Sigma Rule to PPL**:
+```bash
+./cli/sigma-ppl ecs_fields_info/sigma-master/rules/web/webserver_generic/web_path_traversal_exploitation_attempt.yml
 ```
 
-### SQL Injection Attack Detection
-
-```yaml
-title: SQL Injection in URL Parameters
-logsource:
-  category: webserver
-detection:
-  selection:
-    cs-uri-query|contains:
-      - "' OR '"
-      - "UNION SELECT"
-      - "DROP TABLE"
-      - "'; DROP"
-  condition: selection
+**Generated PPL Query** (Backend Output):
+```ppl
+source=webserver-* | where LIKE(`cs-uri-query`, "%../../../../../lib/password%") OR LIKE(`cs-uri-query`, "%../../../../windows/%") OR LIKE(`cs-uri-query`, "%../../../etc/%") OR LIKE(`cs-uri-query`, "%..\%252f..\%252f..\%252fetc\%252f%") OR LIKE(`cs-uri-query`, "%..\%c0\%af..\%c0\%af..\%c0\%afetc\%c0\%af%") OR LIKE(`cs-uri-query`, "%\%252e\%252e\%252fetc\%252f%")
 ```
 
-### Cross-Site Scripting (XSS) Detection
-
-```yaml
-title: XSS Attack in HTTP Request
-logsource:
-  category: webserver
-detection:
-  selection:
-    cs-uri-query|contains:
-      - '<script>'
-      - 'javascript:'
-      - 'onerror='
-      - '<img src='
-  condition: selection
+**Test Query** (only change: `source=apache-http-logs`):
+```bash
+curl -X POST "localhost:9200/_plugins/_ppl" -H 'Content-Type: application/json' -d '{
+  "query": "source=apache-http-logs | where LIKE(`cs-uri-query`, \"%../../../../../lib/password%\") OR LIKE(`cs-uri-query`, \"%../../../../windows/%\") OR LIKE(`cs-uri-query`, \"%../../../etc/%\") | head 5"
+}' | jq '.'
 ```
 
-## Next Steps
+---
 
-1. **Download the dataset**: Clone the apache-http-logs repository
-2. **Generate NDJSON**: Run `python apache_to_opensearch.py` to convert logs
-3. **Import to OpenSearch**: Use the bulk import command above
-4. **Test Sigma rules**: Convert web-focused Sigma rules to PPL and query the dataset
-5. **Analyze results**: Review detected attacks and validate rule effectiveness
+### 2. Suspicious Windows Paths in URI
+
+**Rule File**: `ecs_fields_info/sigma-master/rules/web/webserver_generic/web_susp_windows_path_uri.yml`
+
+**Convert Sigma Rule to PPL**:
+```bash
+./cli/sigma-ppl ecs_fields_info/sigma-master/rules/web/webserver_generic/web_susp_windows_path_uri.yml
+```
+
+**Generated PPL Query** (Backend Output):
+```ppl
+source=webserver-* | where LIKE(`cs-uri-query`, "%=C:/Users%") OR LIKE(`cs-uri-query`, "%=C:/Program\%20Files%") OR LIKE(`cs-uri-query`, "%=C:/Windows%") OR LIKE(`cs-uri-query`, "%=C\%3A\%5CUsers%") OR LIKE(`cs-uri-query`, "%=C\%3A\%5CProgram\%20Files%") OR LIKE(`cs-uri-query`, "%=C\%3A\%5CWindows%")
+```
+
+**Test Query** (only change: `source=apache-http-logs`):
+```bash
+curl -X POST "localhost:9200/_plugins/_ppl" -H 'Content-Type: application/json' -d '{
+  "query": "source=apache-http-logs | where LIKE(`cs-uri-query`, \"%=C:/Users%\") OR LIKE(`cs-uri-query`, \"%=C:/Windows%\") | head 5"
+}' | jq '.'
+```
+
+---
+
+### 3. Webshell ReGeorg Detection
+
+**Rule File**: `ecs_fields_info/sigma-master/rules/web/webserver_generic/web_webshell_regeorg.yml`
+
+**Convert Sigma Rule to PPL**:
+```bash
+./cli/sigma-ppl ecs_fields_info/sigma-master/rules/web/webserver_generic/web_webshell_regeorg.yml
+```
+
+**Generated PPL Query** (Backend Output):
+```ppl
+source=webserver-* | where (LIKE(`cs-uri-query`, "%cmd=read%") OR LIKE(`cs-uri-query`, "%connect&target%") OR LIKE(`cs-uri-query`, "%cmd=connect%") OR LIKE(`cs-uri-query`, "%cmd=disconnect%") OR LIKE(`cs-uri-query`, "%cmd=forward%")) AND isnull(`cs-referer`) AND isnull(`cs-user-agent`) AND `cs-method`="POST"
+```
+
+**Test Query** (only change: `source=apache-http-logs`):
+```bash
+curl -X POST "localhost:9200/_plugins/_ppl" -H 'Content-Type: application/json' -d '{
+  "query": "source=apache-http-logs | where (LIKE(`cs-uri-query`, \"%cmd=read%\") OR LIKE(`cs-uri-query`, \"%cmd=connect%\")) AND `cs-method`=\"POST\" | head 5"
+}' | jq '.'
+```

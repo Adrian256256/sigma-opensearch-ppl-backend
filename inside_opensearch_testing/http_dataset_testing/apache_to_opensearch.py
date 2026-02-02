@@ -164,6 +164,11 @@ def parse_apache_log_line(line):
     Returns:
         dict: ECS-compatible document or None if parsing fails
     """
+    # Remove surrounding quotes if present
+    line = line.strip()
+    if line.startswith('"') and line.endswith('"'):
+        line = line[1:-1]
+    
     match = APACHE_LOG_PATTERN.match(line.strip())
     if not match:
         return None
@@ -284,7 +289,7 @@ def convert_apache_logs(input_file, output_file):
     print(f"✓ Successfully parsed: {parsed_logs}")
     print(f"✓ Failed to parse: {total_logs - parsed_logs}")
     
-    print(f"\n📊 Attacks detected:")
+    print(f"\nAttacks detected:")
     total_attacks = sum(attacks_detected.values())
     print(f"  Total attacks: {total_attacks}")
     for attack_type, count in attacks_detected.items():

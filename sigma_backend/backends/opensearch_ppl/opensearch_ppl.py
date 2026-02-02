@@ -130,8 +130,9 @@ class OpenSearchPPLBackend(TextQueryBackend):
     or_in_operator: ClassVar[str] = "in"
     list_separator: ClassVar[str] = ", "
     
-    # Value expressions (for unbound values - not typical in Sigma)
-    unbound_value_str_expression: ClassVar[str] = '"{value}"'
+    # Value expressions (for unbound values - used in keywords)
+    # Note: Don't add quotes here - pySigma adds them automatically via str_quote
+    unbound_value_str_expression: ClassVar[str] = '{value}'
     unbound_value_num_expression: ClassVar[str] = '{value}'
     
     # Query expression template - just the condition, we add source in finish_query
