@@ -145,5 +145,11 @@ tests/automated_tests/out/*
 ecs_fields_info/sigma-master/
 
 # Dataset json
-real_dataset_testing/evtx_attack_samples_bulk.ndjson
-real_dataset_testing/EVTX-ATTACK-SAMPLES
+inside_opensearch_testing/windows_dataset_testing/evtx_attack_samples_bulk.ndjson
+inside_opensearch_testing/windows_dataset_testing/EVTX-ATTACK-SAMPLES/
+# HTTP dataset testing
+inside_opensearch_testing/http_dataset_testing/apache-http-logs/
+inside_opensearch_testing/http_dataset_testing/apache_http_logs_bulk.ndjson
+
+# Log generator output
+inside_opensearch_testing/log_generator/bulk_ready.ndjson

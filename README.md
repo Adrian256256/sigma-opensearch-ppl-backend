@@ -75,15 +75,22 @@ sigma-opensearch-ppl-backend/
 │   ├── sigma_fields_frequency.csv        # Field usage frequency
 │   ├── sigma-master/                     # Sigma rules repository
 │   └── README.md                         # ECS checker documentation
-├── log_generator/
-│   ├── generate_logs.py                  # Synthetic log generator
-│   ├── bulk_ready.ndjson                 # Generated bulk logs
-│   ├── TESTING_QUERIES.md                # Example test queries
-│   └── README.md                         # Log generator documentation
-├── real_dataset_testing/
-│   ├── evtx_to_opensearch.py             # EVTX to OpenSearch converter
-│   ├── evtx_attack_samples_bulk.ndjson   # Converted EVTX dataset
-│   └── README.md                         # Dataset testing documentation
+├── inside_opensearch_testing/
+│   ├── windows_dataset_testing/
+│   │   ├── evtx_to_opensearch.py         # EVTX to OpenSearch converter
+│   │   ├── evtx_attack_samples_bulk.ndjson # Converted EVTX dataset
+│   │   ├── EVTX-ATTACK-SAMPLES/          # Windows event logs dataset
+│   │   └── README.md                     # Windows dataset testing documentation
+│   ├── http_dataset_testing/
+│   │   ├── apache_to_opensearch.py       # Apache logs to OpenSearch converter
+│   │   ├── apache_http_logs_bulk.ndjson  # Converted Apache logs dataset
+│   │   ├── apache-http-logs/             # Apache HTTP logs dataset (XSS, SQLI, scans)
+│   │   └── README.md                     # HTTP dataset testing documentation
+│   └── log_generator/
+│       ├── generate_logs.py              # Synthetic log generator
+│       ├── bulk_ready.ndjson             # Generated bulk logs
+│       ├── TESTING_QUERIES.md            # Example test queries
+│       └── README.md                     # Log generator documentation
 ├── tables/
 │   ├── custom_modifiers.csv              # Custom modifiers reference
 │   ├── detection_rules.csv               # Detection rules catalog
@@ -149,20 +156,32 @@ Tools for extracting and verifying Sigma fields against ECS.
 - [`sigma_fields_frequency.csv`](./ecs_fields_info/sigma_fields_frequency.csv) - Field usage frequency
 - [`README.md`](./ecs_fields_info/README.md) - ECS checker documentation
 
-#### [`log_generator/`](./log_generator/)
+#### [`inside_opensearch_testing/`](./inside_opensearch_testing/)
+Real-world dataset testing and synthetic log generation for validating Sigma rules in OpenSearch.
+
+##### [`windows_dataset_testing/`](./inside_opensearch_testing/windows_dataset_testing/)
+Windows event logs testing with EVTX-ATTACK-SAMPLES dataset (~31,911 Windows events mapped to MITRE ATT&CK).
+
+- [`evtx_to_opensearch.py`](./inside_opensearch_testing/windows_dataset_testing/evtx_to_opensearch.py) - EVTX to OpenSearch converter
+- [`evtx_attack_samples_bulk.ndjson`](./inside_opensearch_testing/windows_dataset_testing/evtx_attack_samples_bulk.ndjson) - Converted EVTX dataset
+- [`EVTX-ATTACK-SAMPLES/`](./inside_opensearch_testing/windows_dataset_testing/EVTX-ATTACK-SAMPLES/) - Windows event logs dataset
+- [`README.md`](./inside_opensearch_testing/windows_dataset_testing/README.md) - Windows dataset testing documentation with validated Sigma rules
+
+##### [`http_dataset_testing/`](./inside_opensearch_testing/http_dataset_testing/)
+HTTP/web server logs testing with apache-http-logs dataset (XSS, SQL injection, vulnerability scans).
+
+- [`apache_to_opensearch.py`](./inside_opensearch_testing/http_dataset_testing/apache_to_opensearch.py) - Apache logs to OpenSearch converter
+- [`apache_http_logs_bulk.ndjson`](./inside_opensearch_testing/http_dataset_testing/apache_http_logs_bulk.ndjson) - Converted Apache logs
+- [`apache-http-logs/`](./inside_opensearch_testing/http_dataset_testing/apache-http-logs/) - Apache HTTP logs dataset
+- [`README.md`](./inside_opensearch_testing/http_dataset_testing/README.md) - HTTP dataset testing documentation with example Sigma web rules
+
+##### [`log_generator/`](./inside_opensearch_testing/log_generator/)
 Synthetic log generation for testing detection rules.
 
-- [`generate_logs.py`](./log_generator/generate_logs.py) - Synthetic log generator
-- [`bulk_ready.ndjson`](./log_generator/bulk_ready.ndjson) - Generated bulk logs
-- [`TESTING_QUERIES.md`](./log_generator/TESTING_QUERIES.md) - Example test queries
-- [`README.md`](./log_generator/README.md) - Log generator documentation
-
-#### [`real_dataset_testing/`](./real_dataset_testing/)
-Real-world dataset testing with EVTX-ATTACK-SAMPLES (31,911 Windows events).
-
-- [`evtx_to_opensearch.py`](./real_dataset_testing/evtx_to_opensearch.py) - EVTX to OpenSearch converter
-- [`evtx_attack_samples_bulk.ndjson`](./real_dataset_testing/evtx_attack_samples_bulk.ndjson) - Converted EVTX dataset
-- [`README.md`](./real_dataset_testing/README.md) - Dataset testing documentation with 5 validated Sigma rules
+- [`generate_logs.py`](./inside_opensearch_testing/log_generator/generate_logs.py) - Synthetic log generator
+- [`bulk_ready.ndjson`](./inside_opensearch_testing/log_generator/bulk_ready.ndjson) - Generated bulk logs
+- [`TESTING_QUERIES.md`](./inside_opensearch_testing/log_generator/TESTING_QUERIES.md) - Example test queries
+- [`README.md`](./inside_opensearch_testing/log_generator/README.md) - Log generator documentation
 
 #### [`tables/`](./tables/)
 Reference tables for modifiers, operations, and detection rules.
