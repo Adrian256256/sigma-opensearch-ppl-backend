@@ -173,34 +173,28 @@ def convert_evtx_directory(input_dir, output_file, max_files=None):
                     total_events += 1
                 
                 processed_files += 1
-                print(f"  → Extracted {file_events} events")
+                print(f"Extracted {file_events} events")
                 
             except Exception as e:
-                print(f"  → Error processing file: {e}", file=sys.stderr)
+                print(f"Error processing file: {e}", file=sys.stderr)
                 continue
     
-    print(f"\n✓ Successfully processed {processed_files}/{len(evtx_files)} files")
-    print(f"✓ Total events extracted: {total_events}")
-    print(f"✓ Output saved to: {output_file}")
+    print(f"\nSuccessfully processed {processed_files}/{len(evtx_files)} files")
+    print(f"Total events extracted: {total_events}")
+    print(f"Output saved to: {output_file}")
     
 
 if __name__ == "__main__":
     input_directory = "EVTX-ATTACK-SAMPLES"
     output_file = "evtx_attack_samples_bulk.ndjson"
-    
-    # Process first 20 EVTX files for testing (remove limit to process all)
     max_files = 20
     
     if not os.path.exists(input_directory):
         print(f"Error: Directory '{input_directory}' not found!", file=sys.stderr)
         sys.exit(1)
     
-    print("=" * 60)
     print("EVTX to OpenSearch Converter")
     print("=" * 60)
     
     convert_evtx_directory(input_directory, output_file, max_files)
-    
-    print("\nNext steps:")
-    print(f"1. Index to OpenSearch: tail -n +2 {output_file} | curl -X POST 'localhost:9200/_bulk' -H 'Content-Type: application/json' --data-binary @-")
-    print(f"2. Verify: curl 'localhost:9200/evtx-attack-samples/_count'")
+
