@@ -81,11 +81,6 @@ sigma-opensearch-ppl-backend/
 │   │   ├── evtx_attack_samples_bulk.ndjson # Converted EVTX dataset
 │   │   ├── EVTX-ATTACK-SAMPLES/          # Windows event logs dataset
 │   │   └── README.md                     # Windows dataset testing documentation
-│   ├── http_dataset_testing/
-│   │   ├── apache_to_opensearch.py       # Apache logs to OpenSearch converter
-│   │   ├── apache_http_logs_bulk.ndjson  # Converted Apache logs dataset
-│   │   ├── apache-http-logs/             # Apache HTTP logs dataset (XSS, SQLI, scans)
-│   │   └── README.md                     # HTTP dataset testing documentation
 │   └── log_generator/
 │       ├── generate_logs.py              # Synthetic log generator
 │       ├── bulk_ready.ndjson             # Generated bulk logs
