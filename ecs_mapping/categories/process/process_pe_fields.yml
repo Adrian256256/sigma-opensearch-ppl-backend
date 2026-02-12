@@ -1,0 +1,13 @@
+# =========================================================================
+# PROCESS PE FIELDS - Windows Portable Executable metadata
+# =========================================================================
+- id: process_pe_field_mapping
+  type: field_name_mapping
+  mapping:
+    # PE file metadata
+    OriginalFileName: process.pe.original_file_name
+    Company: process.pe.company
+    Product: process.pe.product
+    Description: process.pe.description
+    FileVersion: process.pe.file_version
+    Imphash: process.pe.imphash

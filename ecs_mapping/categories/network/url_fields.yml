@@ -1,0 +1,22 @@
+# =========================================================================
+# URL FIELDS - URL components
+# =========================================================================
+- id: url_field_mapping
+  type: field_name_mapping
+  mapping:
+    # URL path
+    c-uri: url.path
+    cs-uri-stem: url.path
+    RequestUri: url.path
+    
+    # URL query string
+    cs-uri-query: url.query
+    QueryString: url.query
+    
+    # Full URL
+    URL: url.full
+    Url: url.full
+    
+    # URL domain
+    cs-host: url.domain
+    Host: url.domain

@@ -1,0 +1,9 @@
+# =========================================================================
+# USER AGENT FIELDS - Browser user agent information
+# =========================================================================
+- id: user_agent_field_mapping
+  type: field_name_mapping
+  mapping:
+    # User agent string
+    cs-user-agent: user_agent.original
+    UserAgent: user_agent.original

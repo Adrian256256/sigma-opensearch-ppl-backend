@@ -1,0 +1,10 @@
+# =========================================================================
+# FILE DELETE FIELDS - File deletion events (Sysmon EID 23, 26)
+# =========================================================================
+- id: file_delete_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Deleted file details
+    TargetFilename: file.path
+    IsExecutable: file.pe.original_file_name
+    Archived: winlog.event_data.Archived

@@ -1,0 +1,21 @@
+# =========================================================================
+# PROXY FIELDS - Web proxy logs (W3C format)
+# =========================================================================
+- id: proxy_field_mapping
+  type: field_name_mapping
+  mapping:
+    # URI components
+    c-uri: url.full
+    c-uri-extension: file.extension
+    c-uri-query: url.query
+    c-uri-stem: url.path
+    
+    # User agent
+    c-useragent: user_agent.original
+    
+    # Cookies
+    cs-cookie: http.request.cookies
+    
+    # Referrer
+    cs-referrer: http.request.referrer
+    r-dns: url.domain

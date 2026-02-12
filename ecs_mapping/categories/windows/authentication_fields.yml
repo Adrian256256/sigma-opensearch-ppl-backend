@@ -1,0 +1,26 @@
+# =========================================================================
+# AUTHENTICATION FIELDS - Windows authentication events (EID 4624, 4625, etc.)
+# =========================================================================
+- id: authentication_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Logon/authentication details
+    LogonType: winlog.event_data.LogonType
+    AuthenticationPackageName: winlog.event_data.AuthenticationPackageName
+    LmPackageName: winlog.event_data.LmPackageName
+    KeyLength: winlog.event_data.KeyLength
+    
+    # Source network information
+    IpAddress: source.ip
+    IpPort: source.port
+    WorkstationName: source.domain
+    
+    # Logon process details
+    LogonProcessName: winlog.event_data.LogonProcessName
+    
+    # Status codes
+    Status: event.outcome
+    SubStatus: winlog.event_data.SubStatus
+    
+    # Failure information
+    FailureReason: event.reason

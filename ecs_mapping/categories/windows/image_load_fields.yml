@@ -1,0 +1,13 @@
+# =========================================================================
+# IMAGE LOAD FIELDS - DLL/Image loading events (Sysmon EID 7)
+# =========================================================================
+- id: image_load_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Loaded image path
+    ImageLoaded: file.path
+    
+    # Image signature status
+    Signed: file.code_signature.signed
+    Signature: file.code_signature.subject_name
+    SignatureStatus: file.code_signature.status

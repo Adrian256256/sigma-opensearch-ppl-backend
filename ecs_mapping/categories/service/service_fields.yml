@@ -1,0 +1,18 @@
+# =========================================================================
+# SERVICE FIELDS - Service information
+# =========================================================================
+- id: service_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Service name
+    ServiceName: service.name
+    
+    # Service executable
+    ServiceFileName: service.executable
+    ImagePath: service.executable
+    
+    # Service type
+    ServiceType: service.type
+    
+    # Service state
+    State: service.state

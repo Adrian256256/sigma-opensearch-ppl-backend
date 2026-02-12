@@ -1,0 +1,19 @@
+# =========================================================================
+# SOURCE FIELDS - Source side of network connection
+# =========================================================================
+- id: source_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Source IP address
+    SourceIp: source.ip
+    src_ip: source.ip
+    SourceAddress: source.ip
+    c-ip: source.ip
+    
+    # Source port
+    SourcePort: source.port
+    src_port: source.port
+    
+    # Source hostname/domain
+    SourceHostname: source.domain
+    SourceHost: source.domain

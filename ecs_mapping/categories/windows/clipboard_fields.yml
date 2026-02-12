@@ -1,0 +1,8 @@
+# =========================================================================
+# CLIPBOARD FIELDS - Clipboard capture (Sysmon EID 24)
+# =========================================================================
+- id: clipboard_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Client information
+    ClientInfo: winlog.event_data.ClientInfo

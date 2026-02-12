@@ -1,0 +1,46 @@
+# =========================================================================
+# FILE FIELDS - File operations and attributes
+# =========================================================================
+- id: file_field_mapping
+  type: field_name_mapping
+  mapping:
+    # File name
+    FileName: file.name
+    
+    # File path (full path including name)
+    TargetFilename: file.path
+    TargetFileName: file.path
+    FilePath: file.path
+    FullPath: file.path
+    
+    # File directory
+    Directory: file.directory
+    
+    # File extension
+    FileExtension: file.extension
+    Extension: file.extension
+    
+    # File size
+    FileSize: file.size
+    Size: file.size
+    
+    # File attributes
+    FileAttributes: file.attributes
+    Attributes: file.attributes
+    
+    # File creation time
+    CreationUtcTime: file.created
+    CreationTime: file.created
+    
+    # File modification time
+    ModificationTime: file.mtime
+    PreviousCreationUtcTime: file.mtime
+    
+    # File access time
+    AccessTime: file.accessed
+    
+    # File owner
+    Owner: file.owner
+    
+    # File group
+    Group: file.group

@@ -1,0 +1,13 @@
+# =========================================================================
+# GROUP FIELDS - Group information
+# =========================================================================
+- id: group_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Group name
+    GroupName: group.name
+    TargetGroupName: group.name
+    
+    # Group ID/SID
+    GroupSid: group.id
+    TargetGroupSid: group.id

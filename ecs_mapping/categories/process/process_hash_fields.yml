@@ -1,0 +1,17 @@
+# =========================================================================
+# PROCESS HASH FIELDS - Process file hashes
+# =========================================================================
+- id: process_hash_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Individual hash types
+    md5: process.hash.md5
+    MD5: process.hash.md5
+    sha1: process.hash.sha1
+    SHA1: process.hash.sha1
+    sha256: process.hash.sha256
+    SHA256: process.hash.sha256
+    IMPHASH: process.hash.imphash
+    
+    # Combined hashes field (contains multiple hash types)
+    Hashes: related.hash

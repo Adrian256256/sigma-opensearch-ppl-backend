@@ -1,0 +1,17 @@
+# =========================================================================
+# FILE HASH FIELDS - File hashes
+# =========================================================================
+- id: file_hash_field_mapping
+  type: field_name_mapping
+  mapping:
+    # File hash (generic)
+    Hash: file.hash.sha256
+    
+    # File hash MD5
+    MD5: file.hash.md5
+    
+    # File hash SHA1
+    SHA1: file.hash.sha1
+    
+    # File hash SHA256
+    SHA256: file.hash.sha256

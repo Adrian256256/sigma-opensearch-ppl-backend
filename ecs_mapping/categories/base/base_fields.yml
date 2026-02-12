@@ -1,0 +1,14 @@
+# =========================================================================
+# BASE FIELDS - Fields at the root of events
+# =========================================================================
+- id: base_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Timestamp
+    UtcTime: "@timestamp"
+    TimeCreated: "@timestamp"
+    Timestamp: "@timestamp"
+    
+    # Message and labels
+    Message: message
+    Tags: tags

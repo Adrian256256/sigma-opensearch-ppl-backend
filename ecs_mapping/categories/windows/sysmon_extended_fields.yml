@@ -1,0 +1,18 @@
+# =========================================================================
+# SYSMON EXTENDED FIELDS - Additional Sysmon-specific fields
+# =========================================================================
+- id: sysmon_extended_field_mapping
+  type: field_name_mapping
+  mapping:
+    # File stream hash (Sysmon EID 15)
+    Contents: file.hash.sha256
+    Hash: file.hash.sha256
+    
+    # DNS query (Sysmon EID 22)
+    QueryName: dns.question.name
+    QueryStatus: dns.response_code
+    QueryResults: dns.answers.data
+    
+    # Sysmon configuration
+    Configuration: winlog.event_data.Configuration
+    ConfigurationFileHash: winlog.event_data.ConfigurationFileHash

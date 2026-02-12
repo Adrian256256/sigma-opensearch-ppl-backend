@@ -1,0 +1,11 @@
+# =========================================================================
+# LOG FIELDS - Log-specific information
+# =========================================================================
+- id: log_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Log level
+    Level: log.level
+    
+    # Log logger name
+    Logger: log.logger

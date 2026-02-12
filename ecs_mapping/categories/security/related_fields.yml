@@ -1,0 +1,14 @@
+# =========================================================================
+# RELATED FIELDS - Fields for pivoting and correlation
+# =========================================================================
+- id: related_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Related IP addresses (array)
+    RelatedIPs: related.ip
+    
+    # Related users (array)
+    RelatedUsers: related.user
+    
+    # Related hosts (array)
+    RelatedHosts: related.hosts

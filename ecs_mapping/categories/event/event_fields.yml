@@ -1,0 +1,26 @@
+# =========================================================================
+# EVENT FIELDS - Event categorization and metadata
+# =========================================================================
+- id: event_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Event ID/Code
+    EventID: event.code
+    EventId: event.code
+    event_id: event.code
+    
+    # Event type
+    EventType: event.type
+    Type: event.type
+    
+    # Event action
+    Action: event.action
+    
+    # Event outcome
+    Outcome: event.outcome
+    
+    # Event category
+    Category: event.category
+    
+    # Event severity
+    Severity: event.severity

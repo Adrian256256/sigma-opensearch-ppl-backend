@@ -1,0 +1,44 @@
+# =========================================================================
+# WINLOG FIELDS - Windows-specific logging fields
+# Windows Event Log specific fields (not part of standard ECS)
+# =========================================================================
+- id: winlog_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Windows Event Log channel
+    Channel: winlog.channel
+    
+    # Provider name
+    Provider_Name: winlog.provider_name
+    ProviderName: winlog.provider_name
+    
+    # Provider GUID
+    ProviderGuid: winlog.provider_guid
+    
+    # Task
+    Task: winlog.task
+    
+    # Opcode
+    Opcode: winlog.opcode
+    
+    # Keywords
+    Keywords: winlog.keywords
+    
+    # Record ID
+    RecordId: winlog.record_id
+    RecordNumber: winlog.record_id
+    
+    # Computer name (in Windows context)
+    SystemComputerName: winlog.computer_name
+    
+    # Logon type (Windows-specific)
+    LogonType: winlog.event_data.LogonType
+    
+    # Authentication package
+    AuthenticationPackageName: winlog.event_data.AuthenticationPackageName
+    
+    # Process name (in Windows event data)
+    ProcessName: winlog.event_data.ProcessName
+    
+    # New process name (for process creation)
+    NewProcessName: winlog.event_data.NewProcessName

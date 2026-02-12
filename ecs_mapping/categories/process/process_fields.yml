@@ -1,0 +1,39 @@
+# =========================================================================
+# PROCESS FIELDS - Process execution and creation events
+# =========================================================================
+- id: process_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Process command line
+    CommandLine: process.command_line
+    ParentCommandLine: process.parent.command_line
+    ProcessCommandLine: process.command_line
+    
+    # Process executable and name
+    Image: process.executable
+    ProcessName: process.name
+    ParentImage: process.parent.executable
+    ParentProcessName: process.parent.name
+    
+    # Process ID and GUID
+    ProcessId: process.pid
+    ParentProcessId: process.parent.pid
+    ProcessGuid: process.entity_id
+    ParentProcessGuid: process.parent.entity_id
+    
+    # Process working directory
+    CurrentDirectory: process.working_directory
+    WorkingDirectory: process.working_directory
+    
+    # Process title
+    Title: process.title
+    
+    # Process user context
+    IntegrityLevel: process.user.name
+    User: process.user.name
+    LogonId: process.user.id
+    LogonGuid: winlog.event_data.LogonGuid
+    TerminalSessionId: winlog.event_data.TerminalSessionId
+    
+    # Parent process user
+    ParentUser: process.parent.user.name

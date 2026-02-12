@@ -1,0 +1,23 @@
+# =========================================================================
+# HTTP FIELDS - HTTP request and response details
+# =========================================================================
+- id: http_field_mapping
+  type: field_name_mapping
+  mapping:
+    # HTTP request method
+    cs-method: http.request.method
+    RequestMethod: http.request.method
+    Method: http.request.method
+    
+    # HTTP request body
+    cs-bytes: http.request.bytes
+    RequestBytes: http.request.bytes
+    
+    # HTTP response status
+    sc-status: http.response.status_code
+    ResponseStatus: http.response.status_code
+    StatusCode: http.response.status_code
+    
+    # HTTP response body
+    sc-bytes: http.response.bytes
+    ResponseBytes: http.response.bytes

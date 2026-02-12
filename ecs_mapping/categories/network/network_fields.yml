@@ -1,0 +1,20 @@
+# =========================================================================
+# NETWORK FIELDS - Network communication details
+# =========================================================================
+- id: network_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Network protocol
+    Protocol: network.protocol
+    NetworkProtocol: network.protocol
+    proto: network.protocol
+    
+    # Transport protocol
+    Transport: network.transport
+    
+    # Network direction
+    Direction: network.direction
+    Initiated: network.direction
+    
+    # Network application
+    Application: network.application

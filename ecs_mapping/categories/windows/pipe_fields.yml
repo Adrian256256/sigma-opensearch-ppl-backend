@@ -1,0 +1,8 @@
+# =========================================================================
+# PIPE FIELDS - Named pipe events (Sysmon EID 17, 18)
+# =========================================================================
+- id: pipe_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Pipe name
+    PipeName: file.name

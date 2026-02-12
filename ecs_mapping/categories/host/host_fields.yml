@@ -1,0 +1,24 @@
+# =========================================================================
+# HOST FIELDS - Host/computer information
+# =========================================================================
+- id: host_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Host name
+    ComputerName: host.name
+    Computer: host.name
+    Hostname: host.name
+    Workstation: host.name
+    WorkstationName: host.name
+    SourceWorkstation: host.name
+    
+    # Host IP address
+    IpAddress: host.ip
+    HostIp: host.ip
+    
+    # Host domain
+    HostDomain: host.domain
+    
+    # Host OS
+    OperatingSystem: host.os.name
+    OSVersion: host.os.version

@@ -1,0 +1,8 @@
+# =========================================================================
+# RAW ACCESS READ FIELDS - Raw disk access (Sysmon EID 9)
+# =========================================================================
+- id: raw_access_read_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Device being accessed
+    Device: file.device

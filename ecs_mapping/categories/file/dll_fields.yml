@@ -1,0 +1,14 @@
+# =========================================================================
+# DLL FIELDS - Dynamic Link Library information
+# =========================================================================
+- id: dll_field_mapping
+  type: field_name_mapping
+  mapping:
+    # DLL path
+    ImageLoaded: dll.path
+    
+    # DLL name
+    LoadedImage: dll.name
+    
+    # DLL hash
+    ImageLoadedHash: dll.hash.sha256

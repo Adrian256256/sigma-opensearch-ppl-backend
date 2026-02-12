@@ -1,0 +1,21 @@
+# =========================================================================
+# WEBSERVER FIELDS - Web server access logs
+# =========================================================================
+- id: webserver_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Client IP
+    c-ip: source.ip
+    
+    # Server IP
+    s-ip: destination.ip
+    
+    # Server name/site
+    s-sitename: service.name
+    s-computername: host.name
+    
+    # Timing
+    time-taken: event.duration
+    
+    # Username
+    cs-username: user.name

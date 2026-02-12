@@ -1,0 +1,18 @@
+# =========================================================================
+# TASK SCHEDULER FIELDS - Windows Task Scheduler events
+# =========================================================================
+- id: task_scheduler_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Task name
+    TaskName: winlog.event_data.TaskName
+    
+    # Task content (XML)
+    TaskContent: winlog.event_data.TaskContent
+    TaskContentNew: winlog.event_data.TaskContentNew
+    
+    # User context
+    UserContext: user.name
+    
+    # Action details
+    ActionName: winlog.event_data.ActionName

@@ -1,0 +1,21 @@
+# =========================================================================
+# DNS FIELDS - DNS queries and answers
+# =========================================================================
+- id: dns_field_mapping
+  type: field_name_mapping
+  mapping:
+    # DNS question
+    QueryName: dns.question.name
+    query: dns.question.name
+    question.name: dns.question.name
+    
+    # DNS question type
+    QueryType: dns.question.type
+    question.type: dns.question.type
+    
+    # DNS answer
+    QueryResults: dns.answers.data
+    answer: dns.answers.data
+    
+    # DNS response code
+    QueryStatus: dns.response_code

@@ -1,0 +1,28 @@
+# =========================================================================
+# WMI FIELDS - Windows Management Instrumentation
+# Windows-specific WMI event data
+# =========================================================================
+- id: wmi_field_mapping
+  type: field_name_mapping
+  mapping:
+    # WMI operation
+    Operation: winlog.event_data.Operation
+    
+    # WMI namespace
+    EventNamespace: winlog.event_data.EventNamespace
+    Namespace: winlog.event_data.Namespace
+    
+    # WMI query
+    Query: winlog.event_data.Query
+    
+    # WMI consumer
+    Consumer: winlog.event_data.Consumer
+    
+    # WMI filter
+    Filter: winlog.event_data.Filter
+    
+    # WMI destination
+    Destination: winlog.event_data.Destination
+    
+    # WMI type
+    Type: winlog.event_data.Type

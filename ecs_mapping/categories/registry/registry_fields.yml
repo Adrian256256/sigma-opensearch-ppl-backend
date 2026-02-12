@@ -1,0 +1,28 @@
+# =========================================================================
+# REGISTRY FIELDS - Windows Registry operations
+# =========================================================================
+- id: registry_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Registry path (full path including hive, key, and value)
+    TargetObject: registry.path
+    
+    # Registry key (without hive)
+    RegistryKey: registry.key
+    
+    # Registry value name
+    RegistryValueName: registry.value
+    ValueName: registry.value
+    
+    # Registry value data
+    RegistryValueData: registry.data.strings
+    Details: registry.data.strings
+    
+    # Registry hive
+    Hive: registry.hive
+    
+    # Registry data type
+    ValueType: registry.data.type
+    
+    # Registry event type (Sysmon)
+    EventType: registry.action

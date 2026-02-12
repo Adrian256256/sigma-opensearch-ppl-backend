@@ -1,0 +1,21 @@
+# =========================================================================
+# DESTINATION FIELDS - Destination side of network connection
+# =========================================================================
+- id: destination_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Destination IP address
+    DestinationIp: destination.ip
+    dst_ip: destination.ip
+    DestinationAddress: destination.ip
+    DestinationIsIpv6: destination.ip
+    s-ip: destination.ip
+    
+    # Destination port
+    DestinationPort: destination.port
+    dst_port: destination.port
+    s-port: destination.port
+    
+    # Destination hostname/domain
+    DestinationHostname: destination.domain
+    DestinationHost: destination.domain

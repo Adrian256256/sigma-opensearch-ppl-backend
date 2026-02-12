@@ -1,0 +1,13 @@
+# =========================================================================
+# DRIVER LOAD FIELDS - Driver loading events (Sysmon EID 6)
+# =========================================================================
+- id: driver_load_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Driver image path
+    ImageLoaded: driver.name
+    
+    # Driver signature
+    Signed: file.code_signature.signed
+    Signature: file.code_signature.subject_name
+    SignatureStatus: file.code_signature.status

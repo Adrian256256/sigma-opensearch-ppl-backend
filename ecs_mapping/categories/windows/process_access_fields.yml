@@ -1,0 +1,19 @@
+# =========================================================================
+# PROCESS ACCESS FIELDS - Process memory access (Sysmon EID 10)
+# =========================================================================
+- id: process_access_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Source process (accessing memory)
+    SourceImage: process.executable
+    SourceProcessId: process.pid
+    SourceProcessGuid: process.entity_id
+    
+    # Target process (being accessed)
+    TargetImage: process.target.executable
+    TargetProcessId: process.target.pid
+    TargetProcessGuid: process.target.entity_id
+    
+    # Access details
+    GrantedAccess: winlog.event_data.GrantedAccess
+    CallTrace: winlog.event_data.CallTrace

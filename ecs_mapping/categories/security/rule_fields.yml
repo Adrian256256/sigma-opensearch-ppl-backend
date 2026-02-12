@@ -1,0 +1,14 @@
+# =========================================================================
+# RULE FIELDS - Detection rule information
+# =========================================================================
+- id: rule_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Rule name (Sysmon)
+    RuleName: rule.name
+    
+    # Rule ID
+    RuleId: rule.id
+    
+    # Rule description
+    RuleDescription: rule.description

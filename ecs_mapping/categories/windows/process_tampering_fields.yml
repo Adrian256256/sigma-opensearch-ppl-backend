@@ -1,0 +1,8 @@
+# =========================================================================
+# PROCESS TAMPERING FIELDS - Process tampering (Sysmon EID 25)
+# =========================================================================
+- id: process_tampering_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Tampering type
+    Type: event.action

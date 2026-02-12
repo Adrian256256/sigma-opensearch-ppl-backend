@@ -1,0 +1,22 @@
+# =========================================================================
+# CLOUD FIELDS - Cloud provider events (AWS, Azure, GCP, etc.)
+# =========================================================================
+- id: cloud_field_mapping
+  type: field_name_mapping
+  mapping:
+    # AWS CloudTrail
+    eventName: event.action
+    eventSource: event.provider
+    eventType: event.type
+    awsRegion: cloud.region
+    userIdentity.userName: user.name
+    sourceIPAddress: source.ip
+    
+    # Azure
+    operationName: event.action
+    resourceId: cloud.instance.id
+    location: cloud.region
+    
+    # GCP
+    protoPayload.methodName: event.action
+    resource.type: cloud.service.name

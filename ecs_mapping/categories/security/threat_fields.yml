@@ -1,0 +1,13 @@
+# =========================================================================
+# THREAT FIELDS - Threat intelligence information
+# =========================================================================
+- id: threat_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Threat technique (MITRE ATT&CK)
+    Technique: threat.technique.name
+    TechniqueId: threat.technique.id
+    
+    # Threat tactic
+    Tactic: threat.tactic.name
+    TacticId: threat.tactic.id

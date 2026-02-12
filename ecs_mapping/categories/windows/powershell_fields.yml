@@ -1,0 +1,27 @@
+# =========================================================================
+# POWERSHELL FIELDS - PowerShell script logging (EID 4103, 4104, etc.)
+# =========================================================================
+- id: powershell_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Script block text
+    ScriptBlockText: powershell.file.script_block_text
+    
+    # Script block ID
+    ScriptBlockId: powershell.file.script_block_id
+    
+    # Script path
+    Path: file.path
+    ScriptName: file.name
+    
+    # Host application
+    HostApplication: process.command_line
+    
+    # Engine version
+    EngineVersion: powershell.engine.version
+    
+    # Command details
+    CommandInvocation: powershell.command.invocation_details
+    CommandName: powershell.command.name
+    CommandType: powershell.command.type
+    CommandPath: powershell.command.path

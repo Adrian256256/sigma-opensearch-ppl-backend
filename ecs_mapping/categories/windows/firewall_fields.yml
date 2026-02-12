@@ -1,0 +1,15 @@
+# =========================================================================
+# FIREWALL FIELDS - Network firewall events
+# =========================================================================
+- id: firewall_field_mapping
+  type: field_name_mapping
+  mapping:
+    # Firewall rule
+    RuleName: rule.name
+    RuleId: rule.id
+    
+    # Action taken
+    Action: event.action
+    
+    # Direction
+    Direction: network.direction
