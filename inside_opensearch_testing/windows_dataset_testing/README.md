@@ -136,7 +136,7 @@ source=evtx-attack-samples | where (match(CommandLine, '\w+`(\w+|-|.)`[\w+|\s]')
 
 **Generated PPL Query**:
 ```ppl
-source=evtx-attack-samples | where (LIKE(Image, "%\\certutil.exe") OR OriginalFileName="CertUtil.exe") AND (LIKE(CommandLine, "%urlcache %") OR LIKE(CommandLine, "%verifyctl %") OR LIKE(CommandLine, "%URL %")) AND LIKE(CommandLine, "%http%")
+source=windows-process_creation-* | where (LIKE(Image, "%certutil.exe") OR OriginalFileName="CertUtil.exe") AND (LIKE(CommandLine, "%urlcache %") OR LIKE(CommandLine, "%verifyctl %") OR LIKE(CommandLine, "%URL %")) AND LIKE(CommandLine, "%http%")
 ```
 
 ---
@@ -152,7 +152,7 @@ source=evtx-attack-samples | where (LIKE(Image, "%\\certutil.exe") OR OriginalFi
 
 **Generated PPL Query**:
 ```ppl
-source=evtx-attack-samples | where (LIKE(Image, "%\\bitsadmin.exe") OR OriginalFileName="bitsadmin.exe") AND (LIKE(CommandLine, "% /transfer %") OR (LIKE(CommandLine, "% /create %") OR LIKE(CommandLine, "% /addfile %")) AND LIKE(CommandLine, "%http%"))
+source=windows-process_creation-* | where (LIKE(Image, "%bitsadmin.exe") OR OriginalFileName="bitsadmin.exe") AND (LIKE(CommandLine, "% /transfer %") OR (LIKE(CommandLine, "% /create %") OR LIKE(CommandLine, "% /addfile %")) AND LIKE(CommandLine, "%http%"))
 ```
 
 ---
@@ -168,15 +168,8 @@ source=evtx-attack-samples | where (LIKE(Image, "%\\bitsadmin.exe") OR OriginalF
 
 **Generated PPL Query** (Original - has escaping issues):
 ```ppl
-source=evtx-attack-samples | where (LIKE(CommandLine, "%\\calc.exe %") OR LIKE(Image, "%\\calc.exe")) AND NOT (LIKE(Image, "%:\\Windows\\System32\\%") OR LIKE(Image, "%:\\Windows\\SysWOW64\\%") OR LIKE(Image, "%:\\Windows\\WinSxS\\%"))
+source=windows-process_creation-* | where LIKE(CommandLine, "%calc.exe %") OR LIKE(Image, "%calc.exe") AND NOT (LIKE(Image, "%:WindowsSystem32%") OR LIKE(Image, "%:WindowsSysWOW64%") OR LIKE(Image, "%:WindowsWinSxS%"))
 ```
-
-**Working PPL Query** (LIKE doesn't support backslash escaping, use simplified wildcards):
-```ppl
-source=evtx-attack-samples | where (LIKE(CommandLine, "%calc.exe%") OR LIKE(Image, "%calc.exe")) AND NOT (LIKE(Image, "%Windows%System32%") OR LIKE(Image, "%Windows%SysWOW64%") OR LIKE(Image, "%Windows%WinSxS%"))
-```
-
-**Note**: PPL's LIKE operator doesn't support backslash escape sequences. Backslashes in LIKE patterns cause "Invalid escape sequence" errors. The working query uses wildcards without backslashes, which is less precise but functional.
 
 ---
 
@@ -191,7 +184,7 @@ source=evtx-attack-samples | where (LIKE(CommandLine, "%calc.exe%") OR LIKE(Imag
 
 **Generated PPL Query**:
 ```ppl
-source=evtx-attack-samples | where (LIKE(Image, "%\\mshta.exe") OR OriginalFileName="MSHTA.EXE") AND (LIKE(ParentImage, "%\\cmd.exe") OR LIKE(ParentImage, "%\\cscript.exe") OR LIKE(ParentImage, "%\\powershell.exe") OR LIKE(ParentImage, "%\\pwsh.exe") OR LIKE(ParentImage, "%\\regsvr32.exe") OR LIKE(ParentImage, "%\\rundll32.exe") OR LIKE(ParentImage, "%\\wscript.exe")) AND (LIKE(CommandLine, "%\\AppData\\Local\\%") OR LIKE(CommandLine, "%C:\\ProgramData\\%") OR LIKE(CommandLine, "%C:\\Users\\Public\\%") OR LIKE(CommandLine, "%C:\\Windows\\Temp\\%")) OR (LIKE(Image, "%\\mshta.exe") OR OriginalFileName="MSHTA.EXE") AND NOT (LIKE(Image, "C:\\Windows\\System32\\%") OR LIKE(Image, "C:\\Windows\\SysWOW64\\%") OR LIKE(CommandLine, "%.htm%") OR LIKE(CommandLine, "%.hta%") OR LIKE(CommandLine, "%mshta.exe") OR LIKE(CommandLine, "%mshta"))
+source=windows-process_creation-* | where (LIKE(Image, "%mshta.exe") OR OriginalFileName="MSHTA.EXE") AND (LIKE(ParentImage, "%cmd.exe") OR LIKE(ParentImage, "%cscript.exe") OR LIKE(ParentImage, "%powershell.exe") OR LIKE(ParentImage, "%pwsh.exe") OR LIKE(ParentImage, "%regsvr32.exe") OR LIKE(ParentImage, "%rundll32.exe") OR LIKE(ParentImage, "%wscript.exe")) AND (LIKE(CommandLine, "%AppDataLocal%") OR LIKE(CommandLine, "%C:ProgramData%") OR LIKE(CommandLine, "%C:UsersPublic%") OR LIKE(CommandLine, "%C:WindowsTemp%")) OR (LIKE(Image, "%mshta.exe") OR OriginalFileName="MSHTA.EXE") AND NOT (LIKE(Image, "C:WindowsSystem32%") OR LIKE(Image, "C:WindowsSysWOW64%") OR LIKE(CommandLine, "%.htm%") OR LIKE(CommandLine, "%.hta%") OR LIKE(CommandLine, "%mshta.exe") OR LIKE(CommandLine, "%mshta"))
 ```
 
 ---
@@ -208,5 +201,5 @@ source=evtx-attack-samples | where (LIKE(Image, "%\\mshta.exe") OR OriginalFileN
 
 **Generated PPL Query**:
 ```ppl
-source=windows-process_creation-* | where ((EventID=1 AND LIKE(Image, "%\\regsvr32.exe")) OR (EventID=3 AND LIKE(Image, "%\\regsvr32.exe"))) | stats dc(EventID) as unique_rules by span(@timestamp, 5m), host.name | where unique_rules >= 2
+source=windows-process_creation-* | where ((EventID=1 AND LIKE(Image, "%regsvr32.exe")) OR (EventID=3 AND LIKE(Image, "%regsvr32.exe"))) | stats dc(EventID) as unique_rules by span(@timestamp, 5m), host.name | where unique_rules >= 2
 ```

@@ -77,6 +77,7 @@ sigma-opensearch-ppl-backend/
 │   └── README.md                         # ECS checker documentation
 ├── inside_opensearch_testing/
 │   ├── windows_dataset_testing/
+│   │   ├── correlation_rules             # correlation rules used for testing
 │   │   ├── evtx_to_opensearch.py         # EVTX to OpenSearch converter
 │   │   ├── evtx_attack_samples_bulk.ndjson # Converted EVTX dataset
 │   │   ├── EVTX-ATTACK-SAMPLES/          # Windows event logs dataset
