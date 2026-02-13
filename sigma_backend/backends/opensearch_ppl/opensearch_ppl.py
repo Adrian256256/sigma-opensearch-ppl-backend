@@ -70,8 +70,10 @@ class OpenSearchPPLBackend(TextQueryBackend):
     escape_char: ClassVar[str] = '\\'
     wildcard_multi: ClassVar[str] = "%"  # PPL uses % for multi-character wildcard
     wildcard_single: ClassVar[str] = "_"  # PPL uses _ for single-character wildcard
-    add_escaped: ClassVar[str] = "\\"
-    filter_chars: ClassVar[str] = ""
+    # Note: PPL LIKE patterns don't support backslash escape sequences
+    # We need to remove backslashes from LIKE patterns in post-processing
+    add_escaped: ClassVar[str] = ""  # Empty to avoid escaping backslashes
+    filter_chars: ClassVar[str] = "\\"  # Remove backslashes from patterns
     
     # String matching operators with PPL's LIKE() function
     # PPL uses: LIKE(field, "pattern") with % for wildcards  

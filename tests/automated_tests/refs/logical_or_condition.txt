@@ -1,1 +1,1 @@
-source=windows-process_creation-* | where LIKE(Image, "%\\cmd.exe") OR LIKE(Image, "%\\powershell.exe") OR LIKE(Image, "%\\wscript.exe")
+source=windows-process_creation-* | where LIKE(Image, "%cmd.exe") OR LIKE(Image, "%powershell.exe") OR LIKE(Image, "%wscript.exe")

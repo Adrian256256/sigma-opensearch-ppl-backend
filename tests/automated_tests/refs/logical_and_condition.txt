@@ -1,1 +1,1 @@
-source=windows-process_creation-* | where EventID=1 AND LIKE(Image, "%\\cmd.exe") AND LIKE(CommandLine, "%/c%")
+source=windows-process_creation-* | where EventID=1 AND LIKE(Image, "%cmd.exe") AND LIKE(CommandLine, "%/c%")

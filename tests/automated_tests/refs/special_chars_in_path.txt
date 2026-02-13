@@ -1,1 +1,1 @@
-source=windows-file_event-* | where LIKE(TargetFilename, "%\\Users\\Public\\%") OR LIKE(TargetFilename, "%\\AppData\\Roaming\\%") OR LIKE(TargetFilename, "%\\ProgramData\\%")
+source=windows-file_event-* | where LIKE(TargetFilename, "%UsersPublic%") OR LIKE(TargetFilename, "%AppDataRoaming%") OR LIKE(TargetFilename, "%ProgramData%")

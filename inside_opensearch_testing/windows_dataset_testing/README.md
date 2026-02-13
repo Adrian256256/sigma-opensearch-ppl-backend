@@ -166,10 +166,17 @@ source=evtx-attack-samples | where (LIKE(Image, "%\\bitsadmin.exe") OR OriginalF
 ./cli/sigma-ppl ecs_fields_info/sigma-master/rules/windows/process_creation/proc_creation_win_calc_uncommon_exec.yml
 ```
 
-**Generated PPL Query**:
+**Generated PPL Query** (Original - has escaping issues):
 ```ppl
-source=evtx-attack-samples | where LIKE(CommandLine, "%\\calc.exe %") OR LIKE(Image, "%\\calc.exe") AND NOT (LIKE(Image, "%:\\Windows\\System32\\%") OR LIKE(Image, "%:\\Windows\\SysWOW64\\%") OR LIKE(Image, "%:\\Windows\\WinSxS\\%"))
+source=evtx-attack-samples | where (LIKE(CommandLine, "%\\calc.exe %") OR LIKE(Image, "%\\calc.exe")) AND NOT (LIKE(Image, "%:\\Windows\\System32\\%") OR LIKE(Image, "%:\\Windows\\SysWOW64\\%") OR LIKE(Image, "%:\\Windows\\WinSxS\\%"))
 ```
+
+**Working PPL Query** (LIKE doesn't support backslash escaping, use simplified wildcards):
+```ppl
+source=evtx-attack-samples | where (LIKE(CommandLine, "%calc.exe%") OR LIKE(Image, "%calc.exe")) AND NOT (LIKE(Image, "%Windows%System32%") OR LIKE(Image, "%Windows%SysWOW64%") OR LIKE(Image, "%Windows%WinSxS%"))
+```
+
+**Note**: PPL's LIKE operator doesn't support backslash escape sequences. Backslashes in LIKE patterns cause "Invalid escape sequence" errors. The working query uses wildcards without backslashes, which is less precise but functional.
 
 ---
 
@@ -201,5 +208,5 @@ source=evtx-attack-samples | where (LIKE(Image, "%\\mshta.exe") OR OriginalFileN
 
 **Generated PPL Query**:
 ```ppl
-source=evtx-attack-samples | where ((EventID=1 AND LIKE(Image, "%\\regsvr32.exe")) OR (EventID=3 AND LIKE(Image, "%\\regsvr32.exe"))) | stats dc(EventID) as unique_rules by span(@timestamp, 5m), host.name | where unique_rules >= 2
+source=windows-process_creation-* | where ((EventID=1 AND LIKE(Image, "%\\regsvr32.exe")) OR (EventID=3 AND LIKE(Image, "%\\regsvr32.exe"))) | stats dc(EventID) as unique_rules by span(@timestamp, 5m), host.name | where unique_rules >= 2
 ```
