@@ -75,13 +75,3 @@ Windows-specific event data:
 
 ### Cloud Fields (`cloud/`)
 - **cloud_fields.yml** - Cloud provider events (AWS, Azure, GCP)
-
-## Usage
-
-Each category file contains field mappings in YAML format that can be loaded and combined as needed by the backend pipeline. The mappings follow the ECS (Elastic Common Schema) specification where applicable, with extensions for Windows-specific and other vendor-specific fields.
-
-## References
-
-- [Elastic Common Schema Documentation](https://www.elastic.co/docs/reference/ecs)
-- [Sysmon Event IDs](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
-- [Windows Event Log Reference](https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/security-auditing-overview)
