@@ -174,9 +174,6 @@ class OpenSearchPPLBackend(TextQueryBackend):
         "default": "dc({field}) as value_count by {groupby}"
     }
     
-    # Convert timespan to seconds for PPL (False = use original format like 5m, 30m)
-    timespan_seconds: ClassVar[bool] = False
-    
     # Group-by expression templates
     groupby_expression: ClassVar[Dict[str, str]] = {"default": "{fields}"}
     groupby_field_expression: ClassVar[Dict[str, str]] = {"default": "{field}"}
@@ -360,8 +357,8 @@ class OpenSearchPPLBackend(TextQueryBackend):
         Returns:
             List of generated PPL queries
         """
-        # Check if this is a correlation rule
-        if hasattr(rule, 'type') and hasattr(rule, 'rules') and hasattr(rule, 'timespan'):
+        # Check if this is a correlation rule using isinstance
+        if isinstance(rule, SigmaCorrelationRule):
             return self.convert_correlation_rule(rule, method="default")
         else:
             return super().convert_rule(rule, output_format, callback)
@@ -445,8 +442,6 @@ class OpenSearchPPLBackend(TextQueryBackend):
         Returns:
             Combined search expression
         """
-        timespan = self._format_timespan(rule.timespan)
-        
         # Extract source patterns and where conditions from all referred rules
         sources = []
         where_conditions = []
