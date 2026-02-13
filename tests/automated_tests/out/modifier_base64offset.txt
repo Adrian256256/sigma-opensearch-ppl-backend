@@ -1,1 +1,0 @@
-source=proxy-web-* | where LIKE(`c-uri`, "%L2Jpbi9iYXNo%") OR LIKE(`c-uri`, "%9iaW4vYmFza%") OR LIKE(`c-uri`, "%vYmluL2Jhc2%") OR LIKE(`c-uri`, "%L2Jpbi9za%") OR LIKE(`c-uri`, "%9iaW4vc2%") OR LIKE(`c-uri`, "%vYmluL3No%") OR LIKE(`c-uri`, "%L2Jpbi96c2%") OR LIKE(`c-uri`, "%9iaW4venNo%") OR LIKE(`c-uri`, "%vYmluL3pza%")

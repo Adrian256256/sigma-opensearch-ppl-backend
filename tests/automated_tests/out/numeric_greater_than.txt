@@ -1,1 +1,0 @@
-source=windows-process_creation-* | where EventID=1 AND ProcessId>1000
