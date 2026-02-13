@@ -13,6 +13,148 @@ from pathlib import Path
 import Evtx.Evtx as evtx
 import Evtx.Views as e_views
 import xmltodict
+import requests
+from requests.auth import HTTPBasicAuth
+import urllib3
+
+# Disable SSL warnings for self-signed certificates
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# OpenSearch configuration
+OPENSEARCH_URL = "http://localhost:9200"
+OPENSEARCH_USER = "admin"
+OPENSEARCH_PASS = "admin"
+
+
+def create_index_with_mapping(index_name):
+    """
+    Create an OpenSearch index with proper mapping for timestamp and other fields.
+    
+    Args:
+        index_name: Name of the index to create
+    """
+    mapping = {
+        "mappings": {
+            "properties": {
+                "@timestamp": {
+                    "type": "date",
+                    "format": "strict_date_optional_time||epoch_millis||yyyy-MM-dd HH:mm:ss.SSSSSSZ||yyyy-MM-dd HH:mm:ss.SSSSSSXXX"
+                },
+                "EventID": {
+                    "type": "long"
+                },
+                "event": {
+                    "properties": {
+                        "code": {"type": "keyword"},
+                        "provider": {"type": "keyword"},
+                        "category": {"type": "keyword"}
+                    }
+                },
+                "host": {
+                    "properties": {
+                        "name": {"type": "keyword"}
+                    }
+                },
+                "Image": {"type": "text", "fields": {"keyword": {"type": "keyword"}}},
+                "CommandLine": {"type": "text"},
+                "ParentImage": {"type": "text", "fields": {"keyword": {"type": "keyword"}}},
+                "ParentCommandLine": {"type": "text"},
+                "User": {"type": "keyword"},
+                "DestinationIp": {"type": "ip"},
+                "DestinationPort": {"type": "keyword"},
+                "SourceIp": {"type": "ip"},
+                "SourcePort": {"type": "keyword"}
+            }
+        }
+    }
+    
+    try:
+        # Check if index exists
+        response = requests.head(
+            f"{OPENSEARCH_URL}/{index_name}",
+            auth=HTTPBasicAuth(OPENSEARCH_USER, OPENSEARCH_PASS),
+            verify=False
+        )
+        
+        if response.status_code == 200:
+            print(f"Index '{index_name}' already exists. Deleting it...")
+            # Delete existing index
+            response = requests.delete(
+                f"{OPENSEARCH_URL}/{index_name}",
+                auth=HTTPBasicAuth(OPENSEARCH_USER, OPENSEARCH_PASS),
+                verify=False
+            )
+            if response.status_code not in [200, 404]:
+                print(f"Warning: Could not delete index: {response.text}")
+        
+        # Create new index with mapping
+        response = requests.put(
+            f"{OPENSEARCH_URL}/{index_name}",
+            auth=HTTPBasicAuth(OPENSEARCH_USER, OPENSEARCH_PASS),
+            headers={"Content-Type": "application/json"},
+            json=mapping,
+            verify=False
+        )
+        
+        if response.status_code == 200:
+            print(f"✓ Index '{index_name}' created successfully with proper mapping")
+            return True
+        else:
+            print(f"✗ Error creating index: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"✗ Error managing index: {e}")
+        return False
+
+
+def index_documents_to_opensearch(documents, index_name):
+    """
+    Index documents directly to OpenSearch using the bulk API.
+    
+    Args:
+        documents: List of document dictionaries
+        index_name: Name of the index
+    """
+    if not documents:
+        return
+    
+    # Build bulk request body
+    bulk_body = ""
+    for doc in documents:
+        # Index action
+        bulk_body += json.dumps({"index": {"_index": index_name}}) + "\n"
+        # Document
+        bulk_body += json.dumps(doc) + "\n"
+    
+    try:
+        response = requests.post(
+            f"{OPENSEARCH_URL}/_bulk",
+            auth=HTTPBasicAuth(OPENSEARCH_USER, OPENSEARCH_PASS),
+            headers={"Content-Type": "application/x-ndjson"},
+            data=bulk_body,
+            verify=False
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            if result.get('errors'):
+                print(f"✗ Some documents failed to index")
+                # Print first error for debugging
+                for item in result.get('items', []):
+                    if 'error' in item.get('index', {}):
+                        print(f"  Error: {item['index']['error']}")
+                        break
+            else:
+                print(f"✓ Indexed {len(documents)} documents")
+            return True
+        else:
+            print(f"✗ Bulk indexing failed: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"✗ Error indexing documents: {e}")
+        return False
 
 
 def parse_evtx_to_json(evtx_file_path):
@@ -133,14 +275,15 @@ def parse_evtx_to_json(evtx_file_path):
         print(f"Error opening EVTX file {evtx_file_path}: {e}", file=sys.stderr)
 
 
-def convert_evtx_directory(input_dir, output_file, max_files=None):
+def convert_evtx_directory(input_dir, index_name="evtx-attack-samples", max_files=None, batch_size=500):
     """
-    Convert all EVTX files in a directory to OpenSearch bulk format.
+    Convert all EVTX files in a directory and index directly to OpenSearch.
     
     Args:
         input_dir: Directory containing EVTX files
-        output_file: Output NDJSON file for bulk indexing
+        index_name: Name of the OpenSearch index
         max_files: Maximum number of EVTX files to process (None for all)
+        batch_size: Number of documents to index in each batch
     """
     evtx_files = list(Path(input_dir).rglob('*.evtx'))
     
@@ -149,44 +292,49 @@ def convert_evtx_directory(input_dir, output_file, max_files=None):
     
     print(f"Found {len(evtx_files)} EVTX files to process")
     
+    # Create index with proper mapping
+    if not create_index_with_mapping(index_name):
+        print("Failed to create index. Exiting.")
+        return
+    
     total_events = 0
     processed_files = 0
+    batch = []
     
-    with open(output_file, 'w') as f:
-        # Write the bulk POST header
-        f.write('POST _bulk\n')
+    for evtx_file in evtx_files:
+        print(f"Processing: {evtx_file}")
+        file_events = 0
         
-        for evtx_file in evtx_files:
-            print(f"Processing: {evtx_file}")
-            file_events = 0
+        try:
+            for event in parse_evtx_to_json(str(evtx_file)):
+                batch.append(event)
+                file_events += 1
+                total_events += 1
+                
+                # Index in batches
+                if len(batch) >= batch_size:
+                    index_documents_to_opensearch(batch, index_name)
+                    batch = []
             
-            try:
-                for event in parse_evtx_to_json(str(evtx_file)):
-                    # Write the index action
-                    index_action = {"index": {"_index": "evtx-attack-samples"}}
-                    f.write(json.dumps(index_action) + '\n')
-                    
-                    # Write the document
-                    f.write(json.dumps(event) + '\n')
-                    
-                    file_events += 1
-                    total_events += 1
-                
-                processed_files += 1
-                print(f"Extracted {file_events} events")
-                
-            except Exception as e:
-                print(f"Error processing file: {e}", file=sys.stderr)
-                continue
+            processed_files += 1
+            print(f"Extracted {file_events} events")
+            
+        except Exception as e:
+            print(f"Error processing file: {e}", file=sys.stderr)
+            continue
+    
+    # Index remaining documents
+    if batch:
+        index_documents_to_opensearch(batch, index_name)
     
     print(f"\nSuccessfully processed {processed_files}/{len(evtx_files)} files")
-    print(f"Total events extracted: {total_events}")
-    print(f"Output saved to: {output_file}")
+    print(f"Total events indexed: {total_events}")
+    print(f"Index: {index_name}")
     
 
 if __name__ == "__main__":
     input_directory = "EVTX-ATTACK-SAMPLES"
-    output_file = "evtx_attack_samples_bulk.ndjson"
+    index_name = "evtx-attack-samples"
     max_files = 20
     
     if not os.path.exists(input_directory):
@@ -196,5 +344,5 @@ if __name__ == "__main__":
     print("EVTX to OpenSearch Converter")
     print("=" * 60)
     
-    convert_evtx_directory(input_directory, output_file, max_files)
+    convert_evtx_directory(input_directory, index_name, max_files)
 

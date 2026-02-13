@@ -1,1 +1,1 @@
-source=windows-security-* | where EventID=4799 AND CallerProcessId=0 AND (TargetUserName in ("Administrators", "Remote Desktop Users", "Remote Management Users", "Distributed COM Users")) AND @timestamp >= now() - 15m | stats dc(TargetUserName) as value_count by SubjectUserName | where value_count >= 4
+source=windows-security-* | where ((EventID=4799 AND CallerProcessId=0 AND (TargetUserName in ("Administrators", "Remote Desktop Users", "Remote Management Users", "Distributed COM Users")))) | stats dc(TargetUserName) as value_count by SubjectUserName | where value_count >= 4

@@ -1,1 +1,1 @@
-| multisearch [search source=windows-security-* | where EventID=4625 AND @timestamp >= now() - 10m] [search source=windows-security-* | where EventID=4624 AND LogonType=3 AND @timestamp >= now() - 10m] | stats count() as event_count by IpAddress, TargetUserName | where event_count >= 2
+source=windows-security-* | where ((EventID=4625) OR (EventID=4624 AND LogonType=3)) | stats dc(EventID) as unique_rules by span(@timestamp, 10m), IpAddress, TargetUserName | where unique_rules >= 2

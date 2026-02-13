@@ -189,3 +189,17 @@ source=evtx-attack-samples | where (LIKE(Image, "%\\mshta.exe") OR OriginalFileN
 
 ---
 
+### 6. Correlation Rule
+
+**Rule File**: `inside_opensearch_testing/windows_dataset_testing/correlation_rules/correlation_rule.yml`
+
+
+**Convert Correlation Rule to PPL**:
+```bash
+./cli/sigma-ppl inside_opensearch_testing/windows_dataset_testing/correlation_rules/correlation_rule.yml
+```
+
+**Generated PPL Query**:
+```ppl
+source=evtx-attack-samples | where ((EventID=1 AND LIKE(Image, "%\\regsvr32.exe")) OR (EventID=3 AND LIKE(Image, "%\\regsvr32.exe"))) | stats dc(EventID) as unique_rules by span(@timestamp, 5m), host.name | where unique_rules >= 2
+```

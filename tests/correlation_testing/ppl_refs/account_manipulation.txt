@@ -1,1 +1,1 @@
-| multisearch [search source=windows-security-* | where EventID=4720 AND @timestamp >= now() - 5m] [search source=windows-security-* | where EventID=4732 AND (TargetUserName in ("Administrators", "Domain Admins", "Enterprise Admins")) AND @timestamp >= now() - 5m] | stats count() as event_count by user | where event_count >= 2
+source=windows-security-* | where ((EventID=4720) OR (EventID=4732 AND (TargetUserName in ("Administrators", "Domain Admins", "Enterprise Admins")))) | stats dc(EventID) as unique_rules by span(@timestamp, 5m), user | where unique_rules >= 2

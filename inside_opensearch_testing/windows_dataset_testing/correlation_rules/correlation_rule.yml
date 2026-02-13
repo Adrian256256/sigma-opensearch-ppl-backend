@@ -1,0 +1,48 @@
+title: Regsvr32 Process Execution
+name: regsvr32_process_execution
+status: test
+description: Detects execution of regsvr32.exe which may be used for malicious purposes
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    EventID: 1
+    Image|endswith: '\regsvr32.exe'
+  condition: selection
+---
+title: Regsvr32 Network Connection
+name: regsvr32_network_connection
+status: test
+description: Detects network connections initiated by regsvr32.exe indicating potential Squiblydoo attack
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection:
+    EventID: 3
+    Image|endswith: '\regsvr32.exe'
+  condition: selection
+---
+title: Suspicious Regsvr32 with Network Activity (Squiblydoo Attack)
+status: test
+description: Detects regsvr32.exe execution followed by network connections within 5 minutes, indicating potential Squiblydoo (T1218.010) attack where regsvr32 downloads and executes malicious code from remote URLs
+correlation:
+  type: temporal
+  rules:
+    - regsvr32_process_execution
+    - regsvr32_network_connection
+  group-by:
+    - host.name
+  timespan: 5m
+tags:
+  - attack.defense_evasion
+  - attack.t1218.010
+  - attack.execution
+level: high
+falsepositives:
+  - Legitimate software installation using regsvr32
+  - System updates requiring DLL registration
+references:
+  - https://attack.mitre.org/techniques/T1218/010/
+  - https://lolbas-project.github.io/lolbas/Binaries/Regsvr32/

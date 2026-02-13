@@ -160,8 +160,15 @@ class OpenSearchPPLBackend(TextQueryBackend):
     }
     
     event_count_aggregation_expression: ClassVar[Dict[str, str]] = default_aggregation_expression
-    temporal_aggregation_expression: ClassVar[Dict[str, str]] = default_aggregation_expression
-    temporal_ordered_aggregation_expression: ClassVar[Dict[str, str]] = default_aggregation_expression
+    
+    # Temporal correlations need to count distinct EventIDs to verify all rules matched
+    # and use span() for time-based grouping
+    temporal_aggregation_expression: ClassVar[Dict[str, str]] = {
+        "default": "dc(EventID) as unique_rules by span({time_field}, {timespan}), {groupby}"
+    }
+    temporal_ordered_aggregation_expression: ClassVar[Dict[str, str]] = {
+        "default": "dc(EventID) as unique_rules by span({time_field}, {timespan}), {groupby}"
+    }
     
     value_count_aggregation_expression: ClassVar[Dict[str, str]] = {
         "default": "dc({field}) as value_count by {groupby}"
@@ -181,8 +188,14 @@ class OpenSearchPPLBackend(TextQueryBackend):
     }
     
     event_count_condition_expression: ClassVar[Dict[str, str]] = default_condition_expression
-    temporal_condition_expression: ClassVar[Dict[str, str]] = default_condition_expression
-    temporal_ordered_condition_expression: ClassVar[Dict[str, str]] = default_condition_expression
+    
+    # Temporal correlations check that all rules matched (distinct EventIDs)
+    temporal_condition_expression: ClassVar[Dict[str, str]] = {
+        "default": "unique_rules >= {rule_count}"
+    }
+    temporal_ordered_condition_expression: ClassVar[Dict[str, str]] = {
+        "default": "unique_rules >= {rule_count}"
+    }
     
     value_count_condition_expression: ClassVar[Dict[str, str]] = {
         "default": "value_count {op} {count}",
@@ -354,19 +367,23 @@ class OpenSearchPPLBackend(TextQueryBackend):
             return super().convert_rule(rule, output_format, callback)
     
     def convert_correlation_rule(
-        self, rule: SigmaCorrelationRule, method: str = "default"
+        self, rule: SigmaCorrelationRule, output_format: str = None, method: str = None, correlation_method: str = None
     ) -> list[str]:
         """
         Convert a Sigma correlation rule to PPL query.
         
         Args:
             rule: The correlation rule to convert
-            method: Correlation method to use (default: "default")
+            output_format: Output format (not used, for compatibility)
+            method: Correlation method (deprecated, use correlation_method)
+            correlation_method: Correlation method to use (default: "default")
             
         Returns:
             List containing the generated PPL query
         """
-        return self.convert_correlation_rule_from_template(rule, rule.type, method)
+        # Support both 'method' and 'correlation_method' for backward compatibility
+        final_method = correlation_method or method or "default"
+        return self.convert_correlation_rule_from_template(rule, rule.type, final_method)
     
     def convert_correlation_rule_from_template(
         self,
@@ -418,8 +435,8 @@ class OpenSearchPPLBackend(TextQueryBackend):
         """
         Convert the search phase of a correlation rule.
         
-        For temporal correlations, uses multisearch: | multisearch [search ...] [search ...]
-        For simple aggregations (event_count, value_count), generates a single source query.
+        For all correlation types, generates a unified source query with combined WHERE conditions.
+        Uses a common source index pattern and combines all conditions with OR.
         
         Args:
             rule: The correlation rule
@@ -429,10 +446,11 @@ class OpenSearchPPLBackend(TextQueryBackend):
             Combined search expression
         """
         timespan = self._format_timespan(rule.timespan)
-        is_temporal = rule.type in [SigmaCorrelationType.TEMPORAL, SigmaCorrelationType.TEMPORAL_ORDERED]
         
-        # Build queries for all referred rules
-        queries = []
+        # Extract source patterns and where conditions from all referred rules
+        sources = []
+        where_conditions = []
+        
         for rule_reference in rule.rules:
             referred_rule = rule_reference.rule
             for query in referred_rule.get_conversion_result():
@@ -445,25 +463,26 @@ class OpenSearchPPLBackend(TextQueryBackend):
                     source_part = query if query.startswith("source=") else "source=*"
                     where_part = None
                 
-                if is_temporal:
-                    # Temporal: build subsearch [search source=... | where ... AND @timestamp >= now() - timespan]
-                    if where_part:
-                        subsearch = f"[search {source_part} | where {where_part} AND {self._time_field} >= now() - {timespan}]"
-                    else:
-                        subsearch = f"[search {source_part} | where {self._time_field} >= now() - {timespan}]"
-                    queries.append(subsearch)
-                else:
-                    # Simple: single query with time filter in WHERE clause
-                    if where_part:
-                        queries.append(f"{source_part} | where {where_part} AND {self._time_field} >= now() - {timespan}")
-                    else:
-                        queries.append(f"{source_part} | where {self._time_field} >= now() - {timespan}")
+                # Extract just the index pattern from "source=pattern"
+                if source_part.startswith("source="):
+                    source_pattern = source_part.replace("source=", "")
+                    sources.append(source_pattern)
+                
+                if where_part:
+                    # Wrap condition in parentheses for proper OR logic
+                    where_conditions.append(f"({where_part})")
         
-        # Return multisearch for temporal, single query for others
-        if is_temporal:
-            return "| multisearch " + " ".join(queries)
+        # Use first source pattern or wildcard if none found
+        # For correlation rules, typically all rules should use similar source patterns
+        source = sources[0] if sources else "*"
+        
+        # Combine all where conditions with OR
+        # Timespan is handled in aggregation using span() function for temporal correlations
+        if where_conditions:
+            combined_where = " OR ".join(where_conditions)
+            return f"source={source} | where ({combined_where})"
         else:
-            return queries[0] if queries else ""
+            return f"source={source}"
     
     def _format_timespan(self, timespan) -> str:
         """Format timespan for PPL query ("5m", "30m", "2h")."""
@@ -498,9 +517,14 @@ class OpenSearchPPLBackend(TextQueryBackend):
             if hasattr(rule.condition, 'fieldref') and rule.condition.fieldref:
                 field = rule.condition.fieldref
         
+        # Format timespan for temporal correlations
+        timespan = self._format_timespan(rule.timespan) if hasattr(rule, 'timespan') else "5m"
+        
         return template.format(
             groupby=self.convert_correlation_aggregation_groupby_from_template(rule.group_by, method),
             field=field,
+            time_field=self._time_field,
+            timespan=timespan
         )
     
     def convert_correlation_aggregation_groupby_from_template(
@@ -529,7 +553,13 @@ class OpenSearchPPLBackend(TextQueryBackend):
         templates = getattr(self, f"{correlation_type}_condition_expression", self.default_condition_expression)
         template = templates[method]
         
-        # Extract operator and count from condition
+        # For temporal correlations, we need to check that all rules matched
+        # So the count should be the number of rules in the correlation
+        if correlation_type in [SigmaCorrelationType.TEMPORAL, SigmaCorrelationType.TEMPORAL_ORDERED, "temporal", "temporal_ordered"]:
+            rule_count = len(rules)
+            return template.format(rule_count=rule_count)
+        
+        # For other correlation types, extract operator and count from condition
         if hasattr(condition, 'op') and hasattr(condition, 'count'):
             op_str = condition.op.name  # Get enum name ('GTE')
             count = condition.count
