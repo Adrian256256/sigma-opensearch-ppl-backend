@@ -120,7 +120,7 @@ The following official Sigma rules from `ecs_fields_info/sigma-master` return re
 
 **Generated PPL Query**:
 ```ppl
-source=evtx-attack-samples | where (match(CommandLine, '\w+`(\w+|-|.)`[\w+|\s]') OR match(CommandLine, '"(\{\d\})+"\s*-f') OR match(CommandLine, '(?i)\$\{`?e`?n`?v`?:`?p`?a`?t`?h`?\}')) AND NOT LIKE(CommandLine, "%${env:path}%")
+source=windows-process_creation-* | where (match(CommandLine, '\w+`(\w+|-|.)`[\w+|\s]') OR match(CommandLine, '"(\{\d\})+"\s*-f') OR match(CommandLine, '(?i)\$\{`?e`?n`?v`?:`?p`?a`?t`?h`?\}')) AND NOT LIKE(CommandLine, "%${env:path}%")
 ```
 
 ---
