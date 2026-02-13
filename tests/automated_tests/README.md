@@ -137,6 +137,33 @@ All modifiers implemented and tested:
 
 ## Running Tests
 
+### Syntax Validation
+
+The `validate_ppl_syntax.py` script validates the syntax of all PPL queries in the `refs/` directory by executing them against a local OpenSearch instance. This verifies that the generated queries are syntactically correct without requiring test data.
+
+**Prerequisites:**
+- OpenSearch running locally on `http://localhost:9200`
+- Default credentials: `admin:admin`
+
+**Usage:**
+
+```bash
+# Activate virtual environment
+source .venv/bin/activate
+
+# Run syntax validation for all reference queries
+python tests/automated_tests/validate_ppl_syntax.py
+```
+
+**Output:**
+- Tests all `.txt` files in `refs/` directory
+- Reports syntax validation status for each query
+- Distinguishes between syntax errors and missing indices (IndexNotFoundException)
+- Summary statistics at the end
+- Exit code 0 if all queries are valid, 1 if any fail
+
+### Rule Testing
+
 ```bash
 # Run all tests
 python tests/test_checker.py
