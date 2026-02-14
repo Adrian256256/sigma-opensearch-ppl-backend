@@ -563,8 +563,8 @@ The backend supports all four Sigma correlation types defined in the specificati
 |------|-------------|----------|-------------------|
 | `event_count` | Count total events in timespan | Frequency-based detection (>10 failed logins) | [`stats count()`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/stats.md) |
 | `value_count` | Count distinct values in timespan | Cardinality detection (password used on >5 accounts) | [`stats dc(field)`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/aggregations.md#distinct_count-dc) |
-| `temporal` | Match multiple rule types in any order | Time-windowed multi-stage attacks | [`multisearch`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/multisearch.md) + aggregation |
-| `temporal_ordered` | Match rules in specific sequence | Sequential attack steps (recon → exploit → exfil) | [`multisearch`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/multisearch.md) with time ordering |
+| `temporal` | Match multiple rule types in any order | Time-windowed multi-stage attacks | Single source query with OR conditions + [`stats dc(EventID)`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/aggregations.md#distinct_count-dc) + time-based grouping |
+| `temporal_ordered` | Match rules in specific sequence | Sequential attack steps (recon → exploit → exfil) | Single source query with OR conditions + [`stats dc(EventID)`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/aggregations.md#distinct_count-dc) + time-based grouping |
 
 ### Transformation Process: Sigma → OpenSearch PPL
 
@@ -675,70 +675,100 @@ correlation:
   timespan: 10m
 ```
 
-**PPL Implementation using `multisearch` command**:
+**PPL Implementation using single source query with OR conditions**:
 
-OpenSearch PPL does **not** support the SQL `UNION` operator. For combining events from multiple rule matches, use the [`multisearch` command](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/multisearch.md) (available since v3.4):
+The backend combines multiple detection rules into a single query using OR conditions, then uses `stats dc(EventID)` to count how many distinct event types occurred. This approach is more efficient than multisearch and works across all OpenSearch versions:
 
 ```ppl
-| multisearch [search source=windows-security-* | where EventID=4625 AND @timestamp >= now() - 10m] [search source=windows-security-* | where EventID=4624 AND LogonType=3 AND @timestamp >= now() - 10m]
-| stats count() as event_count by user
-| where event_count >= 1
+source=windows-security-* | where ((EventID=4625) OR (EventID=4624 AND LogonType=3)) | stats dc(EventID) as unique_rules by span(@timestamp, 10m), user | where unique_rules >= 2
 ```
 
-**Key Points**:
-1. **`UNION` does not exist** in OpenSearch PPL syntax
-2. **`multisearch`** syntax: `| multisearch [search source=... | where ...] [search source=... | where ...]`
-3. Each subsearch must be **enclosed in square brackets `[ ]`** and start with **`search` keyword**
-4. Each sub-query requires **explicit time filters** (`@timestamp >= now() - 10m`)
-5. Time filters must be applied **before** aggregation for correct results
+**How it works**:
+1. **Single source query**: All rules share the same index pattern (`windows-security-*`)
+2. **OR conditions**: Each detection rule's conditions are wrapped in parentheses and combined with OR
+3. **Distinct count aggregation**: `dc(EventID)` counts how many different event types matched
+4. **Time-based grouping**: `span(@timestamp, 10m)` creates 10-minute windows
+5. **Threshold check**: `where unique_rules >= 2` ensures both event types occurred
 
-**Current Implementation Limitation**: The backend may generate queries with `UNION` syntax which is **not valid PPL**. Queries need to be corrected to use `multisearch` instead.
+**Key Advantages**:
+- ✅ Works on all OpenSearch versions (no dependency on multisearch from v3.4+)
+- ✅ Single query execution (more efficient than combining multiple searches)
+- ✅ Automatic time window enforcement via `span()`
+- ✅ Simpler query structure and easier to debug
 
 **PPL Reference**: 
-- [`multisearch` command documentation](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/multisearch.md) - Execute multiple searches and combine results
+- [`span()` function](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/aggregations.md#span) - Creates time-based buckets for grouping
+- [`dc(field)`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/aggregations.md#distinct_count-dc) - Counts distinct values (in this case, distinct EventIDs)
 
 #### Step 4: Time Window Application
 
-The `timespan` parameter defines the time window for correlation. This is a **critical component** that filters events to only those occurring within the specified time range.
+The `timespan` parameter defines the time window for correlation. This is implemented using PPL's **`span()` function** to create time-based buckets for grouping events.
 
 **Sigma Timespan**:
 ```yaml
 timespan: 5m    # 5 minutes
-timespan: 1h    # 1 hour
+timespan: 1h    # 1 hour  
 timespan: 24h   # 24 hours
 ```
 
-**PPL Time Filter Implementation**:
+**PPL Implementation using `span()` function**:
 
-In OpenSearch PPL, time filtering is done using the [`@timestamp`](https://opensearch.org/docs/latest/field-types/supported-field-types/date/) field with the [`now()`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/datetime.md#now) function:
+The backend converts the timespan to a `span()` function call that creates time-based buckets in the aggregation:
 
 ```ppl
-@timestamp >= now() - 15m    # Events from last 15 minutes
-@timestamp >= now() - 1h     # Events from last 1 hour
-@timestamp >= now() - 24h    # Events from last 24 hours
+# 5-minute time windows
+| stats dc(EventID) as unique_rules by span(@timestamp, 5m), host.name
+
+# 1-hour time windows
+| stats dc(EventID) as unique_rules by span(@timestamp, 1h), host.name
+
+# 24-hour time windows
+| stats dc(EventID) as unique_rules by span(@timestamp, 24h), host.name
 ```
+
+**How `span()` Works**:
+
+The [`span()` function](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/aggregations.md#span) divides the time range into equal-sized buckets and groups events that fall within the same bucket:
+
+```ppl
+span(@timestamp, 5m)
+```
+- Creates 5-minute buckets: `[10:00-10:05)`, `[10:05-10:10)`, `[10:10-10:15)`, etc.
+- Events with timestamps in the same bucket are grouped together
+- Correlation is evaluated **within each bucket independently**
 
 **Complete Example**:
 ```yaml
 # Sigma
-timespan: 15m
+correlation:
+  type: temporal
+  rules:
+    - process_creation
+    - network_connection
+  timespan: 10m
+  group-by:
+    - host.name
 ```
 ↓
 ```ppl
-# PPL - time filter added to WHERE clause
-source=security-* | where EventID=4625 AND @timestamp >= now() - 15m
+# PPL - span() creates 10-minute buckets for correlation
+source=windows-process_creation-* 
+| where ((EventID=1) OR (EventID=3)) 
+| stats dc(EventID) as unique_rules by span(@timestamp, 10m), host.name 
+| where unique_rules >= 2
 ```
 
-**Key Components**:
-- **[`@timestamp`](https://opensearch.org/docs/latest/field-types/supported-field-types/date/)**: Built-in OpenSearch field storing event time (ISO 8601 format)
-- **[`now()`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/datetime.md#now)**: PPL function returning current timestamp
-- **Time arithmetic**: `now() - 15m` calculates timestamp 15 minutes ago
-- **Comparison**: `@timestamp >= ...` filters events after that time
+**Key Advantages of `span()` approach**:
+- ✅ **Automatic bucketing**: No need for manual time filtering with `now()`
+- ✅ **Historical analysis**: Works on historical data, not just recent events
+- ✅ **Sliding windows**: Evaluates correlation in every time window across the dataset
+- ✅ **Simpler queries**: Single aggregation operation instead of filtering + aggregation
+- ✅ **Better performance**: OpenSearch optimizes time-based bucketing internally
 
 **Conversion Logic**:
 ```python
 def convert_timespan(self, timespan) -> str:
-    """Convert Sigma timespan to PPL time format."""
+    """Convert Sigma timespan to PPL span format."""
     if hasattr(timespan, 'seconds'):
         seconds = timespan.seconds
     else:
@@ -751,38 +781,38 @@ def convert_timespan(self, timespan) -> str:
     else:
         return f"{seconds}s"
 
-# Then apply in query:
-time_filter = f"@timestamp >= now() - {convert_timespan(timespan)}"
+# Applied in stats aggregation:
+span_clause = f"span(@timestamp, {convert_timespan(timespan)})"
 ```
 
-**Important Notes**:
+**Difference from `now()` filtering**:
 
-1. **Placement**: Time filter must be in the `where` clause **before** aggregation:
-   ```ppl
-   # CORRECT - filter before stats
-   source=logs-* | where @timestamp >= now() - 5m | stats count() by user
-   
-   # INCORRECT - filter after stats (won't work as expected)
-   source=logs-* | stats count() by user | where @timestamp >= now() - 5m
-   ```
+| Approach | Behavior | Use Case |
+|----------|----------|----------|
+| **`span()` (current implementation)** | Creates time buckets across entire dataset | Historical analysis, forensics, threat hunting |
+| **`now()` filtering** | Only analyzes recent events within X minutes from now | Real-time alerting, live monitoring |
 
-2. **Multi-Rule Correlation**: Each rule in a temporal correlation should have the time filter:
-   ```ppl
-   source=security-* | where EventID=4625 AND @timestamp >= now() - 15m
-   UNION
-   (source=security-* | where EventID=4624 AND @timestamp >= now() - 15m)
-   ```
+**Example Comparison**:
 
-3. **Current Implementation Limitation**: The current backend implementation does **not** automatically inject `@timestamp` filters into the generated queries. The timespan is converted but not applied. This means:
-   - Queries will scan all historical data instead of just the time window
-   - Performance will be slower
-   - Results may include events outside the intended time window
-   
-   **Workaround**: Time filtering can be applied at query execution time through OpenSearch Dashboards time picker, or the generated queries can be manually enhanced with timestamp filters.
+```ppl
+# span() approach (current implementation)
+# Finds ALL 10-minute windows where correlation occurred
+source=logs-* 
+| where ((EventID=1) OR (EventID=3))
+| stats dc(EventID) as unique_rules by span(@timestamp, 10m), host.name
+| where unique_rules >= 2
+
+# now() approach (not implemented)
+# Only finds correlations in the LAST 10 minutes
+source=logs-* 
+| where ((EventID=1) OR (EventID=3)) AND @timestamp >= now() - 10m
+| stats dc(EventID) as unique_rules by host.name
+| where unique_rules >= 2
+```
 
 **PPL Reference**: 
-- [Date and Time Functions - `now()`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/datetime.md)
-- [Time-based filtering examples](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/where.md)
+- [`span()` function documentation](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/aggregations.md#span) - Time-based bucketing for aggregations
+- [`stats` with span example](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/stats.md#example-9-calculate-the-count-by-a-gender-and-span)
 
 #### Step 5: Condition Evaluation
 
@@ -1155,12 +1185,10 @@ correlation:
 
 **Generated PPL Query**:
 ```ppl
-| multisearch [search source=auth-* | where event_type="login_failed" AND @timestamp >= now() - 10m] [search source=auth-* | where event_type="login_success" AND @timestamp >= now() - 10m]
-| stats count() as event_count by user 
-| where event_count >= 1
+source=auth-* | where ((event_type="login_failed") OR (event_type="login_success")) | stats dc(event_type) as unique_rules by span(@timestamp, 10m), user | where unique_rules >= 2
 ```
 
-**Explanation**: Correlates failed and successful login events for the same user within 10 minutes, indicating a successful brute force attack.
+**Explanation**: Correlates failed and successful login events for the same user within 10-minute time windows. The `dc(event_type)` counts distinct event types, and `unique_rules >= 2` ensures both event types occurred in the same time window for the same user.
 
 #### Temporal Ordered - Lateral Movement
 
@@ -1181,12 +1209,10 @@ correlation:
 
 **Generated PPL Query**:
 ```ppl
-| multisearch [search source=security-* | where event_id=4624 AND @timestamp >= now() - 15m] [search source=security-* | where event_id IN (4688, 592) AND @timestamp >= now() - 15m]
-| stats count() as event_count by user 
-| where event_count >= 1
+source=security-* | where ((event_id=4624) OR (event_id IN (4688, 592))) | stats dc(event_id) as unique_rules by span(@timestamp, 15m), user | where unique_rules >= 2
 ```
 
-**Explanation**: Detects when authentication is followed by remote execution within 15 minutes (lateral movement indicator).
+**Explanation**: Detects when authentication (EventID 4624) and remote execution (EventIDs 4688 or 592) occur for the same user within 15-minute time windows. The query groups events into 15-minute buckets and checks if at least 2 distinct event IDs appear, indicating lateral movement behavior.
 
 ### Backend Usage
 
@@ -1326,7 +1352,7 @@ for rule in collection.rules:
 
 # Output:
 # Rule: Successful Brute Force Detection
-# Query: | multisearch [search source=windows-security-* | where EventID=4625 AND @timestamp >= now() - 10m] [search source=windows-security-* | where EventID=4624 AND @timestamp >= now() - 10m] | stats count() as event_count by IpAddress, TargetUserName | where event_count >= 2
+# Query: source=windows-security-* | where ((EventID=4625) OR (EventID=4624)) | stats dc(EventID) as unique_rules by span(@timestamp, 10m), IpAddress, TargetUserName | where unique_rules >= 2
 ```
 
 **Key points for correlation rules:**
@@ -1335,6 +1361,8 @@ for rule in collection.rules:
 - Backend detects rule type automatically (no need to call different methods)
 - Base rules are converted internally; only correlation rules return PPL queries
 - Supports all correlation types: `event_count`, `value_count`, `temporal`, `temporal_ordered`
+- **Temporal correlations use single-source queries with OR conditions** (not multisearch)
+- Time windows are enforced using `span(@timestamp, timespan)` for automatic bucketing
 
 ### With Processing Pipeline
 
