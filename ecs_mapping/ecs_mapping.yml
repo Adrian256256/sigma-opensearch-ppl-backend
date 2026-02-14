@@ -3,7 +3,6 @@ priority: 10
 transformations:
   # =========================================================================
   # BASE FIELDS - Fields at the root of events
-  # https://www.elastic.co/docs/reference/ecs/ecs-base
   # =========================================================================
   - id: base_field_mapping
     type: field_name_mapping
@@ -19,7 +18,6 @@ transformations:
       
   # =========================================================================
   # PROCESS FIELDS - Process execution and creation events
-  # https://www.elastic.co/docs/reference/ecs/ecs-process
   # =========================================================================
   - id: process_field_mapping
     type: field_name_mapping
@@ -60,7 +58,6 @@ transformations:
       
   # =========================================================================
   # PROCESS PE FIELDS - Windows Portable Executable metadata
-  # https://www.elastic.co/docs/reference/ecs/ecs-pe
   # =========================================================================
   - id: process_pe_field_mapping
     type: field_name_mapping
@@ -75,7 +72,6 @@ transformations:
       
   # =========================================================================
   # PROCESS HASH FIELDS - Process file hashes
-  # https://www.elastic.co/docs/reference/ecs/ecs-hash
   # =========================================================================
   - id: process_hash_field_mapping
     type: field_name_mapping
@@ -94,7 +90,6 @@ transformations:
   
   # =========================================================================
   # USER FIELDS - User information relevant to the event
-  # https://www.elastic.co/docs/reference/ecs/ecs-user
   # =========================================================================
   - id: user_field_mapping
     type: field_name_mapping
@@ -130,7 +125,6 @@ transformations:
       
   # =========================================================================
   # GROUP FIELDS - Group information
-  # https://www.elastic.co/docs/reference/ecs/ecs-group
   # =========================================================================
   - id: group_field_mapping
     type: field_name_mapping
@@ -145,7 +139,6 @@ transformations:
       
   # =========================================================================
   # SOURCE FIELDS - Source side of network connection
-  # https://www.elastic.co/docs/reference/ecs/ecs-source
   # =========================================================================
   - id: source_field_mapping
     type: field_name_mapping
@@ -166,7 +159,6 @@ transformations:
       
   # =========================================================================
   # DESTINATION FIELDS - Destination side of network connection
-  # https://www.elastic.co/docs/reference/ecs/ecs-destination
   # =========================================================================
   - id: destination_field_mapping
     type: field_name_mapping
@@ -189,7 +181,6 @@ transformations:
       
   # =========================================================================
   # NETWORK FIELDS - Network communication details
-  # https://www.elastic.co/docs/reference/ecs/ecs-network
   # =========================================================================
   - id: network_field_mapping
     type: field_name_mapping
@@ -211,7 +202,6 @@ transformations:
       
   # =========================================================================
   # DNS FIELDS - DNS queries and answers
-  # https://www.elastic.co/docs/reference/ecs/ecs-dns
   # =========================================================================
   - id: dns_field_mapping
     type: field_name_mapping
@@ -234,7 +224,6 @@ transformations:
       
   # =========================================================================
   # HTTP FIELDS - HTTP request and response details
-  # https://www.elastic.co/docs/reference/ecs/ecs-http
   # =========================================================================
   - id: http_field_mapping
     type: field_name_mapping
@@ -259,7 +248,6 @@ transformations:
       
   # =========================================================================
   # URL FIELDS - URL components
-  # https://www.elastic.co/docs/reference/ecs/ecs-url
   # =========================================================================
   - id: url_field_mapping
     type: field_name_mapping
@@ -283,7 +271,6 @@ transformations:
       
   # =========================================================================
   # USER AGENT FIELDS - Browser user agent information
-  # https://www.elastic.co/docs/reference/ecs/ecs-user_agent
   # =========================================================================
   - id: user_agent_field_mapping
     type: field_name_mapping
@@ -294,7 +281,6 @@ transformations:
       
   # =========================================================================
   # FILE FIELDS - File operations and attributes
-  # https://www.elastic.co/docs/reference/ecs/ecs-file
   # =========================================================================
   - id: file_field_mapping
     type: field_name_mapping
@@ -342,7 +328,6 @@ transformations:
       
   # =========================================================================
   # FILE HASH FIELDS - File hashes
-  # https://www.elastic.co/docs/reference/ecs/ecs-hash
   # =========================================================================
   - id: file_hash_field_mapping
     type: field_name_mapping
@@ -361,7 +346,6 @@ transformations:
       
   # =========================================================================
   # REGISTRY FIELDS - Windows Registry operations
-  # https://www.elastic.co/docs/reference/ecs/ecs-registry
   # =========================================================================
   - id: registry_field_mapping
     type: field_name_mapping
@@ -391,7 +375,6 @@ transformations:
       
   # =========================================================================
   # HOST FIELDS - Host/computer information
-  # https://www.elastic.co/docs/reference/ecs/ecs-host
   # =========================================================================
   - id: host_field_mapping
     type: field_name_mapping
@@ -417,7 +400,6 @@ transformations:
       
   # =========================================================================
   # EVENT FIELDS - Event categorization and metadata
-  # https://www.elastic.co/docs/reference/ecs/ecs-event
   # =========================================================================
   - id: event_field_mapping
     type: field_name_mapping
@@ -445,7 +427,6 @@ transformations:
       
   # =========================================================================
   # LOG FIELDS - Log-specific information
-  # https://www.elastic.co/docs/reference/ecs/ecs-log
   # =========================================================================
   - id: log_field_mapping
     type: field_name_mapping
@@ -503,7 +484,6 @@ transformations:
       
   # =========================================================================
   # SERVICE FIELDS - Service information
-  # https://www.elastic.co/docs/reference/ecs/ecs-service
   # =========================================================================
   - id: service_field_mapping
     type: field_name_mapping
@@ -523,7 +503,6 @@ transformations:
       
   # =========================================================================
   # RULE FIELDS - Detection rule information
-  # https://www.elastic.co/docs/reference/ecs/ecs-rule
   # =========================================================================
   - id: rule_field_mapping
     type: field_name_mapping
@@ -539,7 +518,6 @@ transformations:
       
   # =========================================================================
   # DLL FIELDS - Dynamic Link Library information
-  # https://www.elastic.co/docs/reference/ecs/ecs-dll
   # =========================================================================
   - id: dll_field_mapping
     type: field_name_mapping
@@ -555,7 +533,6 @@ transformations:
       
   # =========================================================================
   # RELATED FIELDS - Fields for pivoting and correlation
-  # https://www.elastic.co/docs/reference/ecs/ecs-related
   # =========================================================================
   - id: related_field_mapping
     type: field_name_mapping
@@ -571,7 +548,6 @@ transformations:
       
   # =========================================================================
   # THREAT FIELDS - Threat intelligence information
-  # https://www.elastic.co/docs/reference/ecs/ecs-threat
   # =========================================================================
   - id: threat_field_mapping
     type: field_name_mapping
@@ -615,7 +591,6 @@ transformations:
       
   # =========================================================================
   # IMAGE LOAD FIELDS - DLL/Image loading events (Sysmon EID 7)
-  # https://www.elastic.co/docs/reference/ecs/ecs-file
   # =========================================================================
   - id: image_load_field_mapping
     type: field_name_mapping
@@ -732,7 +707,6 @@ transformations:
       
   # =========================================================================
   # POWERSHELL FIELDS - PowerShell script logging (EID 4103, 4104, etc.)
-  # https://www.elastic.co/docs/reference/ecs/ecs-powershell
   # =========================================================================
   - id: powershell_field_mapping
     type: field_name_mapping
