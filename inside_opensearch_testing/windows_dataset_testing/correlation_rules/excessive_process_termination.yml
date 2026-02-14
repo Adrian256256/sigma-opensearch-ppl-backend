@@ -1,0 +1,46 @@
+title: Multiple Process Terminations
+name: multiple_process_terminations
+status: test
+description: Detects multiple process termination events (Sysmon EventID 5) which could indicate malware cleanup, process killing, or system instability
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    EventID: 5
+  condition: selection
+---
+title: Excessive Process Termination Activity
+status: test
+description: |
+  Detects 10 or more process termination events within 5 minutes on the same host.
+  This correlation pattern can indicate:
+  - Malware or ransomware killing security processes
+  - Aggressive system cleanup operations
+  - Denial of service attacks
+  - System crashes or instability
+  
+  EventID 5 is the most common event in the dataset (14,607 occurrences), 
+  so this rule is guaranteed to match on hosts with high activity.
+correlation:
+  type: event_count
+  rules:
+    - multiple_process_terminations
+  group-by:
+    - host.name
+  timespan: 5m
+  condition:
+    gte: 10
+tags:
+  - attack.impact
+  - attack.defense_evasion
+  - attack.t1489  # Service Stop
+  - attack.t1562  # Impair Defenses
+level: medium
+falsepositives:
+  - System updates
+  - Software uninstallation
+  - Normal system shutdown procedures
+references:
+  - https://attack.mitre.org/techniques/T1489/
+  - https://attack.mitre.org/techniques/T1562/

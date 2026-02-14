@@ -1,0 +1,53 @@
+title: Suspicious Process Creation
+name: suspicious_process_creation
+status: test
+description: Detects creation of any process (Sysmon Event ID 1)
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    EventID: 1
+  condition: selection
+---
+title: Network Connection Established
+name: network_connection_established
+status: test
+description: Detects any network connection (Sysmon Event ID 3)
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection:
+    EventID: 3
+  condition: selection
+---
+title: Suspicious Process with Network Activity
+status: test
+description: |
+  Detects process creation followed by network connections within 10 minutes on the same host.
+  This correlation can indicate:
+  - Malware execution establishing C2 communication
+  - Malicious scripts downloading additional payloads
+  - Data exfiltration attempts
+  - Living-off-the-land binaries (LOLBins) making unexpected network connections
+correlation:
+  type: temporal
+  rules:
+    - suspicious_process_creation
+    - network_connection_established
+  group-by:
+    - host.name
+  timespan: 10m
+tags:
+  - attack.execution
+  - attack.command_and_control
+  - attack.exfiltration
+level: medium
+falsepositives:
+  - Legitimate software installations
+  - System updates
+  - Browser process creating network connections
+references:
+  - https://attack.mitre.org/tactics/TA0011/
+  - https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/

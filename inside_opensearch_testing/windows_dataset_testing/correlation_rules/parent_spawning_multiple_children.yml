@@ -1,0 +1,50 @@
+title: Process Creation Event
+name: process_creation_event
+status: test
+description: Detects process creation events (Sysmon EventID 1)
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    EventID: 1
+  condition: selection
+---
+title: Suspicious Parent Process Spawning Multiple Children
+status: test
+description: |
+  Detects when a single parent process spawns 5 or more different child processes within 10 minutes.
+  This correlation pattern can indicate:
+  - Malicious scripts or macros creating multiple processes
+  - Command and control frameworks spawning multiple tools
+  - Lateral movement tools like PsExec
+  - Process injection or hollowing techniques
+  - Suspicious PowerShell or CMD execution patterns
+  
+  Uses value_count to track distinct child processes from the same parent,
+  grouped by host and parent process image.
+correlation:
+  type: value_count
+  rules:
+    - process_creation_event
+  group-by:
+    - host.name
+    - ParentImage
+  timespan: 10m
+  condition:
+    gte: 5
+    field: Image
+tags:
+  - attack.execution
+  - attack.defense_evasion
+  - attack.t1059  # Command and Scripting Interpreter
+  - attack.t1106  # Native API
+level: medium
+falsepositives:
+  - Build systems and development tools
+  - Batch scripts and automation tools
+  - System management utilities
+  - Installer packages
+references:
+  - https://attack.mitre.org/techniques/T1059/
+  - https://attack.mitre.org/techniques/T1106/

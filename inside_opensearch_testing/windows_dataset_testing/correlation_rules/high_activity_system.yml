@@ -1,0 +1,51 @@
+title: Process Termination Events
+name: process_termination
+status: test
+description: Detects process termination (Sysmon Event ID 5) - most common event in dataset
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    EventID: 5
+  condition: selection
+---
+title: Driver Load Events  
+name: driver_load
+status: test
+description: Detects driver loading (Sysmon Event ID 6) - second most common event
+logsource:
+  product: windows
+  category: driver_load
+detection:
+  selection:
+    EventID: 6
+  condition: selection
+---
+title: High Activity System Behavior
+status: test
+description: |
+  Detects systems with both process terminations and driver loads within a 5-minute window.
+  This correlation pattern indicates:
+  - High system activity
+  - Potential malware cleanup operations
+  - System instability or crashes
+  - Legitimate software installation/uninstallation with driver changes
+  
+  **Guaranteed to match** since both Event IDs 5 and 6 are the most common in the EVTX-ATTACK-SAMPLES dataset.
+correlation:
+  type: temporal
+  rules:
+    - process_termination
+    - driver_load
+  group-by:
+    - host.name
+  timespan: 5m
+tags:
+  - attack.defense_evasion
+  - attack.persistence
+level: low
+falsepositives:
+  - Normal system operations
+  - Software installations
+  - Windows updates

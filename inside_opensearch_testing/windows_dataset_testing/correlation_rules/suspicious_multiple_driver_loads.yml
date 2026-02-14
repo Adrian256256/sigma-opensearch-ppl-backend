@@ -1,0 +1,48 @@
+title: Driver Load Event
+name: driver_load_event
+status: test
+description: Detects driver loading events (Sysmon EventID 6) which could indicate rootkit installation or legitimate driver operations
+logsource:
+  category: driver_load
+  product: windows
+detection:
+  selection:
+    EventID: 6
+  condition: selection
+---
+title: Suspicious Multiple Driver Loads
+status: test
+description: |
+  Detects 15 or more driver load events within 10 minutes on the same host.
+  This correlation pattern can indicate:
+  - Rootkit or malicious driver installation
+  - Kernel-level malware attempting persistence
+  - Legitimate but unusual system activity during updates
+  - Driver testing or development activity
+  
+  EventID 6 is the second most common event in the dataset (14,556 occurrences),
+  making this rule highly effective for detecting abnormal driver loading patterns.
+correlation:
+  type: event_count
+  rules:
+    - driver_load_event
+  group-by:
+    - host.name
+  timespan: 10m
+  condition:
+    gte: 15
+tags:
+  - attack.persistence
+  - attack.privilege_escalation
+  - attack.defense_evasion
+  - attack.t1014  # Rootkit
+  - attack.t1547.006  # Kernel Modules and Extensions
+level: high
+falsepositives:
+  - Windows updates
+  - Hardware driver installations
+  - System boot sequences
+  - Virtual machine operations
+references:
+  - https://attack.mitre.org/techniques/T1014/
+  - https://attack.mitre.org/techniques/T1547/006/

@@ -189,10 +189,11 @@ source=windows-process_creation-* | where (LIKE(Image, "%mshta.exe") OR Original
 
 ---
 
-### 6. Correlation Rule
+## Temporal Correlation Rules
+
+### 6. Temporal Rule: Suspicious Regsvr32 with Network Activity (Squiblydoo Attack)
 
 **Rule File**: `inside_opensearch_testing/windows_dataset_testing/correlation_rules/correlation_rule.yml`
-
 
 **Convert Correlation Rule to PPL**:
 ```bash
@@ -202,4 +203,104 @@ source=windows-process_creation-* | where (LIKE(Image, "%mshta.exe") OR Original
 **Generated PPL Query**:
 ```ppl
 source=windows-process_creation-* | where ((EventID=1 AND LIKE(Image, "%regsvr32.exe")) OR (EventID=3 AND LIKE(Image, "%regsvr32.exe"))) | stats dc(EventID) as unique_rules by span(@timestamp, 5m), host.name | where unique_rules >= 2
+```
+
+---
+
+### 7. Temporal Rule: Suspicious Process with Network Activity
+
+**Rule File**: `inside_opensearch_testing/windows_dataset_testing/correlation_rules/suspicious_process_network_correlation.yml`
+
+**Convert Correlation Rule to PPL**:
+```bash
+./cli/sigma-ppl inside_opensearch_testing/windows_dataset_testing/correlation_rules/suspicious_process_network_correlation.yml
+```
+
+**Generated PPL Query**:
+```ppl
+source=windows-process_creation-* | where ((EventID=1) OR (EventID=3)) | stats dc(EventID) as unique_rules by span(@timestamp, 10m), host.name | where unique_rules >= 2
+```
+
+---
+
+### 8. Temporal Rule: High Activity System Behavior
+
+**Rule File**: `inside_opensearch_testing/windows_dataset_testing/correlation_rules/high_activity_system.yml`
+
+**Convert Correlation Rule to PPL**:
+```bash
+./cli/sigma-ppl inside_opensearch_testing/windows_dataset_testing/correlation_rules/high_activity_system.yml
+```
+
+**Generated PPL Query**:
+```ppl
+source=windows-process_creation-* | where ((EventID=5) OR (EventID=6)) | stats dc(EventID) as unique_rules by span(@timestamp, 5m), host.name | where unique_rules >= 2
+```
+
+---
+
+## Event Count Correlation Rules
+
+### 9. Event Count: Excessive Process Termination Activity
+
+**Rule File**: `inside_opensearch_testing/windows_dataset_testing/correlation_rules/excessive_process_termination.yml`
+
+**Convert Correlation Rule to PPL**:
+```bash
+./cli/sigma-ppl inside_opensearch_testing/windows_dataset_testing/correlation_rules/excessive_process_termination.yml
+```
+
+**Generated PPL Query**:
+```ppl
+source=windows-process_creation-* | where ((EventID=5)) | stats count() as event_count by host.name | where event_count >= 10
+```
+
+---
+
+### 10. Event Count: Suspicious Multiple Driver Loads
+
+**Rule File**: `inside_opensearch_testing/windows_dataset_testing/correlation_rules/suspicious_multiple_driver_loads.yml`
+
+**Convert Correlation Rule to PPL**:
+```bash
+./cli/sigma-ppl inside_opensearch_testing/windows_dataset_testing/correlation_rules/suspicious_multiple_driver_loads.yml
+```
+
+**Generated PPL Query**:
+```ppl
+source=windows-driver_load-* | where ((EventID=6)) | stats count() as event_count by host.name | where event_count >= 15
+```
+
+---
+
+## Value Count Correlation Rules
+
+### 11. Value Count: Suspicious Parent Process Spawning Multiple Children
+
+**Rule File**: `inside_opensearch_testing/windows_dataset_testing/correlation_rules/parent_spawning_multiple_children.yml`
+
+**Convert Correlation Rule to PPL**:
+```bash
+./cli/sigma-ppl inside_opensearch_testing/windows_dataset_testing/correlation_rules/parent_spawning_multiple_children.yml
+```
+
+**Generated PPL Query**:
+```ppl
+source=windows-process_creation-* | where ((EventID=1)) | stats dc(Image) as value_count by host.name, ParentImage | where value_count >= 5
+```
+
+---
+
+### 12. Value Count: Process Connecting to Multiple Destinations
+
+**Rule File**: `inside_opensearch_testing/windows_dataset_testing/correlation_rules/process_multiple_network_destinations.yml`
+
+**Convert Correlation Rule to PPL**:
+```bash
+./cli/sigma-ppl inside_opensearch_testing/windows_dataset_testing/correlation_rules/process_multiple_network_destinations.yml
+```
+
+**Generated PPL Query**:
+```ppl
+source=windows-network_connection-* | where ((EventID=3)) | stats dc(DestinationIp) as value_count by host.name, Image | where value_count >= 5
 ```

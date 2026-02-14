@@ -1,0 +1,53 @@
+title: Network Connection Event
+name: network_connection_event
+status: test
+description: Detects network connection events (Sysmon EventID 3)
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection:
+    EventID: 3
+  condition: selection
+---
+title: Process Connecting to Multiple Destinations
+status: test
+description: |
+  Detects when a single process connects to 5 or more different destination IP addresses within 15 minutes.
+  This correlation pattern can indicate:
+  - Port scanning or network reconnaissance
+  - Malware C2 beaconing with multiple fallback servers
+  - Data exfiltration to multiple destinations
+  - Worm propagation or lateral movement attempts
+  - DNS tunneling or covert channels
+  
+  Uses value_count to track distinct destination IPs from the same process,
+  grouped by host and process image.
+correlation:
+  type: value_count
+  rules:
+    - network_connection_event
+  group-by:
+    - host.name
+    - Image
+  timespan: 15m
+  condition:
+    gte: 5
+    field: DestinationIp
+tags:
+  - attack.discovery
+  - attack.command_and_control
+  - attack.exfiltration
+  - attack.t1046  # Network Service Discovery
+  - attack.t1071  # Application Layer Protocol
+  - attack.t1041  # Exfiltration Over C2 Channel
+level: high
+falsepositives:
+  - Web browsers with multiple tabs
+  - Update services checking multiple mirrors
+  - P2P applications
+  - Content delivery network (CDN) usage
+references:
+  - https://attack.mitre.org/techniques/T1046/
+  - https://attack.mitre.org/techniques/T1071/
+  - https://attack.mitre.org/techniques/T1041/
