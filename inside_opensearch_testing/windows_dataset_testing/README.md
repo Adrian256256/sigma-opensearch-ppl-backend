@@ -83,8 +83,8 @@ Python script that converts Windows Event Log files (EVTX) to OpenSearch bulk-re
 8. **Bulk NDJSON Generation**
    - Creates `evtx_attack_samples_bulk.ndjson` with OpenSearch bulk API format
    - Each event generates **two lines**:
-     - Line 1: Index action → `{"index": {"_index": "evtx-attack-samples"}}`
-     - Line 2: Document JSON → the complete event document
+     - Line 1: Index action - `{"index": {"_index": "evtx-attack-samples"}}`
+     - Line 2: Document JSON - the complete event document
    - First line of file contains `POST _bulk` header (removed during import)
 
 ## Dataset Import/Re-import Commands

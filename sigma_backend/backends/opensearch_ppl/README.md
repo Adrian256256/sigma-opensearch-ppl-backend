@@ -16,14 +16,14 @@ A production-ready pySigma backend for converting Sigma detection rules into PPL
    - [UTF-16 Modifiers](#utf-16-modifiers)
    - [How UTF-16 Encoding Works](#how-utf-16-encoding-works)
    - [Why `.encode()` and `.decode()`?](#why-encode-and-decode)
-5. [Sigma → PPL Conversion](#sigma--ppl-conversion)
+5. [Sigma - PPL Conversion](#sigma--ppl-conversion)
    - [Syntax Mapping](#syntax-mapping)
    - [Conversion Examples](#conversion-examples)
 6. [PPL Functions Used](#ppl-functions-used)
 7. [Correlation Rules Support](#correlation-rules-support)
    - [Overview](#overview-1)
    - [Supported Correlation Types](#supported-correlation-types)
-   - [Transformation Process: Sigma → OpenSearch PPL](#transformation-process-sigma--opensearch-ppl)
+   - [Transformation Process: Sigma - OpenSearch PPL](#transformation-process-sigma--opensearch-ppl)
      - [Step 1: Rule Detection and Parsing](#step-1-rule-detection-and-parsing)
      - [Step 2: Detection Rules Conversion](#step-2-detection-rules-conversion)
      - [Step 3: Aggregation Construction](#step-3-aggregation-construction)
@@ -74,8 +74,8 @@ The backend follows pySigma's best practices by leveraging configuration-based d
 - Value modifiers: `all` (for matching all values in a list)
 
 **Wildcard Conversion**
-- Sigma `*` → PPL `%` (any sequence)
-- Sigma `?` → PPL `_` (single character)
+- Sigma `*` - PPL `%` (any sequence)
+- Sigma `?` - PPL `_` (single character)
 - Automatic escape handling for special characters
 
 **Advanced Features**
@@ -88,7 +88,7 @@ The backend follows pySigma's best practices by leveraging configuration-based d
 - **Multisearch command**: Cross-index correlation for rules with different logsources (OpenSearch 3.4+)
 
 **Index Management**
-- Automatic logsource → index pattern mapping
+- Automatic logsource - index pattern mapping
 - Support for product, category, service combinations
 - Flexible index naming conventions
 - **Consistent `multisearch` usage**: All correlation rules use multisearch command
@@ -234,15 +234,15 @@ class SigmaBase64OffsetModifier(SigmaValueModifier[SigmaString, SigmaExpansion])
     end_offsets = (None, -3, -2)
 ```
 
-**Why offsets?** Base64 encodes 3 bytes → 4 characters. A substring might start at different positions within these 3-byte blocks:
+**Why offsets?** Base64 encodes 3 bytes - 4 characters. A substring might start at different positions within these 3-byte blocks:
 
 ```
 Original: "XYZtest123"
          ---^^^---- "test" starts at offset 0 in this 3-byte block
          
-Base64 offset 0: b64encode("test")       → "dGVzdA=="
-Base64 offset 1: b64encode(" test")      → "IHRlc3Q="  (padded with 1 space)
-Base64 offset 2: b64encode("  test")     → "ICB0ZXN0"  (padded with 2 spaces)
+Base64 offset 0: b64encode("test")       - "dGVzdA=="
+Base64 offset 1: b64encode(" test")      - "IHRlc3Q="  (padded with 1 space)
+Base64 offset 2: b64encode("  test")     - "ICB0ZXN0"  (padded with 2 spaces)
 ```
 
 **Example**:
@@ -313,14 +313,14 @@ detection:
 
 **UTF-16LE (Little Endian)** - Null byte **after** each character:
 ```
-"test" → 't\x00e\x00s\x00t\x00'
-ASCII: 74 65 73 74 → UTF-16LE: 74 00 65 00 73 00 74 00
+"test" - 't\x00e\x00s\x00t\x00'
+ASCII: 74 65 73 74 - UTF-16LE: 74 00 65 00 73 00 74 00
 ```
 
 **UTF-16BE (Big Endian)** - Null byte **before** each character:
 ```
-"test" → '\x00t\x00e\x00s\x00t'
-ASCII: 74 65 73 74 → UTF-16BE: 00 74 00 65 00 73 00 74
+"test" - '\x00t\x00e\x00s\x00t'
+ASCII: 74 65 73 74 - UTF-16BE: 00 74 00 65 00 73 00 74
 ```
 
 **Encoding Process**:
@@ -332,7 +332,7 @@ ASCII: 74 65 73 74 → UTF-16BE: 00 74 00 65 00 73 00 74
 
 ### Why `.encode()` and `.decode()`?
 
-**`.encode(encoding)`** - Converts Python string → bytes:
+**`.encode(encoding)`** - Converts Python string - bytes:
 ```python
 "test".encode("utf-16le")  # Returns: b't\x00e\x00s\x00t\x00' (bytes object)
 ```
@@ -340,7 +340,7 @@ ASCII: 74 65 73 74 → UTF-16BE: 00 74 00 65 00 73 00 74
 - Required because UTF-16 represents characters as 2-byte sequences
 - Creates a **bytes object** (not directly usable as string)
 
-**`.decode(encoding)`** - Converts bytes → Python string:
+**`.decode(encoding)`** - Converts bytes - Python string:
 ```python
 b't\x00e\x00s\x00t\x00'.decode("utf-8")  # Returns: 't\x00e\x00s\x00t\x00' (string)
 ```
@@ -413,11 +413,11 @@ def _get_index_pattern(self, rule: SigmaRule) -> str:
     
     Example (auto-generated):
         product='windows', category='process_creation', service='sysmon'
-        → 'windows-process_creation-sysmon-*'
+        - 'windows-process_creation-sysmon-*'
     
     Example (with custom_logsource):
         backend = OpenSearchPPLBackend(custom_logsource="my-logs-*")
-        → 'my-logs-*'
+        - 'my-logs-*'
     """
     # Check for custom logsource override first
     if self._custom_logsource:
@@ -485,7 +485,7 @@ def finalize_output_default(self, queries: list[str]) -> list[str]:
 
 ---
 
-## Sigma → PPL Conversion
+## Sigma - PPL Conversion
 
 ### Syntax Mapping
 
@@ -598,9 +598,9 @@ The backend supports all four Sigma correlation types defined in the specificati
 | `event_count` | Count total events in timespan | Frequency-based detection (>10 failed logins) | [`stats count()`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/stats.md) |
 | `value_count` | Count distinct values in timespan | Cardinality detection (password used on >5 accounts) | [`stats dc(field)`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/aggregations.md#distinct_count-dc) |
 | `temporal` | Match multiple rule types in any order | Time-windowed multi-stage attacks | Single source query with OR conditions + [`stats dc(EventID)`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/aggregations.md#distinct_count-dc) + time-based grouping |
-| `temporal_ordered` | Match rules in specific sequence | Sequential attack steps (recon → exploit → exfil) | Single source query with OR conditions + [`stats dc(EventID)`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/aggregations.md#distinct_count-dc) + time-based grouping |
+| `temporal_ordered` | Match rules in specific sequence | Sequential attack steps (recon - exploit - exfil) | Single source query with OR conditions + [`stats dc(EventID)`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/aggregations.md#distinct_count-dc) + time-based grouping |
 
-### Transformation Process: Sigma → OpenSearch PPL
+### Transformation Process: Sigma - OpenSearch PPL
 
 The conversion from Sigma correlation rules to OpenSearch PPL follows a structured pipeline that maps Sigma constructs to PPL equivalents.
 
@@ -1007,8 +1007,8 @@ def convert_rule(self, rule: SigmaRule, output_format: str = "default", callback
     Convert a Sigma rule (regular or correlation) to PPL query.
     
     Automatically detects rule type and routes to appropriate conversion:
-    - If rule has type/rules/timespan attributes → correlation conversion
-    - Otherwise → regular rule conversion
+    - If rule has type/rules/timespan attributes - correlation conversion
+    - Otherwise - regular rule conversion
     """
     # Check if this is a correlation rule
     if hasattr(rule, 'type') and hasattr(rule, 'rules') and hasattr(rule, 'timespan'):
@@ -1074,7 +1074,7 @@ def convert_rule(self, rule: SigmaRule, output_format: str = "default", callback
 ┌─────────────────────────────────────────────────────────────┐
 │ 3. pySigma AUTO-CONVERTS each detection rule                │
 │    backend.convert_rule(failed_login)                       │
-│    → 'source=windows | where EventID=4625'                  │
+│    - 'source=windows | where EventID=4625'                  │
 │    SAVES to: failed_login._conversion_result                │
 └────────────────────┬────────────────────────────────────────┘
                      │
