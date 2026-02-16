@@ -209,6 +209,8 @@ class OpenSearchPPLBackend(TextQueryBackend):
         self,
         processing_pipeline: Optional[ProcessingPipeline] = None,
         collect_errors: bool = False,
+        min_time: Optional[str] = None,
+        max_time: Optional[str] = None,
         **backend_options: Dict,
     ):
         """
@@ -217,12 +219,16 @@ class OpenSearchPPLBackend(TextQueryBackend):
         Args:
             processing_pipeline: Optional processing pipeline for rule transformation
             collect_errors: If True, collect errors instead of raising them
+            min_time: Minimum time filter (earliest). Examples: "-30d", "-7d", "2024-01-01T00:00:00"
+            max_time: Maximum time filter (latest). Examples: "now", "2024-12-31T23:59:59"
             **backend_options: Additional backend options:
                 - custom_logsource: Custom index pattern to override logsource-based pattern (default: None)
         """
         super().__init__(processing_pipeline, collect_errors=collect_errors, **backend_options)
         self._custom_logsource: Optional[str] = backend_options.get("custom_logsource", None)
         self._time_field: str = "@timestamp"  # Default timestamp field for correlation rules
+        self._min_time: Optional[str] = min_time
+        self._max_time: Optional[str] = max_time
     
     ### Regular rule conversion methods ###
     
@@ -344,10 +350,50 @@ class OpenSearchPPLBackend(TextQueryBackend):
         
         query = re.sub(r'(%?)"([^"]*)\"(%?)', fix_wildcards, query)
         
+        # Build time filter conditions
+        time_conditions = []
+        if self._min_time:
+            time_conditions.append(f"{self._time_field} >= {self._format_time_value(self._min_time)}")
+        if self._max_time:
+            time_conditions.append(f"{self._time_field} <= {self._format_time_value(self._max_time)}")
+        
+        # Combine detection logic with time filters
+        if time_conditions:
+            time_filter = " AND ".join(time_conditions)
+            query = f"({query}) AND ({time_filter})"
+        
         # Build complete PPL query with source command
         ppl_query = f"source={index_pattern} | where {query}"
         
         return ppl_query
+    
+    def _format_time_value(self, time_str: str) -> str:
+        """
+        Format time value for PPL queries.
+        
+        Args:
+            time_str: Time string like "-30d", "now", "2024-01-01T00:00:00"
+            
+        Returns:
+            Formatted time expression for PPL
+        """
+        # Handle "now"
+        if time_str.lower() == "now":
+            return "now()"
+        
+        # Handle relative time like "-30d", "-7d", "-1h"
+        if time_str.startswith("-"):
+            # Extract number and unit
+            import re
+            match = re.match(r'-(\d+)([dhms])', time_str)
+            if match:
+                value = match.group(1)
+                unit = match.group(2)
+                # Map Splunk-style units to PPL
+                return f"now() - {value}{unit}"
+        
+        # Handle absolute timestamps - wrap in quotes
+        return f'"{time_str}"'
     
     ### Correlation rule conversion methods ###
     

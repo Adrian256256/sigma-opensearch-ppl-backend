@@ -379,6 +379,8 @@ def __init__(
     self,
     processing_pipeline: Optional[ProcessingPipeline] = None,
     collect_errors: bool = False,
+    min_time: Optional[str] = None,
+    max_time: Optional[str] = None,
     **backend_options: Dict,
 ):
     """
@@ -387,8 +389,9 @@ def __init__(
     Args:
         processing_pipeline: Optional processing pipeline for rule transformation
         collect_errors: If True, collect errors instead of raising them
+        min_time: Minimum time filter (earliest). Examples: "-30d", "-7d", "2024-01-01T00:00:00"
+        max_time: Maximum time filter (latest). Examples: "now", "2024-12-31T23:59:59"
         **backend_options: Additional backend options:
-            - time_field: Name of the timestamp field (default: "@timestamp")
             - custom_logsource: Custom index pattern to override logsource-based pattern (default: None)
     """
 ```
@@ -400,6 +403,145 @@ def __init__(
   - **Default**: `None` (auto-generate from logsource)
   - **Use case**: Non-standard index naming, multi-tenant deployments, testing
   - **Example**: `backend = OpenSearchPPLBackend(custom_logsource="my-custom-logs-*")`
+
+- **`min_time`**: Minimum time filter (earliest time)
+  - **Type**: `str` or `None`
+  - **Default**: `None` (no time filter)
+  - **Formats**: 
+    - Relative: `"-30d"` (30 days ago), `"-7d"`, `"-24h"`, `"-1h"`
+    - Absolute: `"2024-01-01T00:00:00"` (ISO 8601 timestamp)
+  - **Use case**: Historical analysis, incident response time windows, performance optimization
+  - **Example**: `backend = OpenSearchPPLBackend(min_time="-30d")`
+
+- **`max_time`**: Maximum time filter (latest time)
+  - **Type**: `str` or `None`
+  - **Default**: `None` (no time filter)
+  - **Formats**:
+    - Current time: `"now"`
+    - Absolute: `"2024-12-31T23:59:59"` (ISO 8601 timestamp)
+  - **Use case**: Time-bounded searches, compliance reporting, testing
+  - **Example**: `backend = OpenSearchPPLBackend(max_time="now")`
+
+**Combined Usage Example:**
+```python
+# Historical analysis for specific time period with custom index
+backend = OpenSearchPPLBackend(
+    custom_logsource="security-logs-*",
+    min_time="-7d",
+    max_time="now"
+)
+```
+
+**Query Output Examples:**
+
+*Without time filters (default):*
+```ppl
+source=windows-* | where CommandLine="evil.exe"
+```
+
+*With time filters:*
+```ppl
+source=windows-* | where (CommandLine="evil.exe") AND (@timestamp >= now() - 30d AND @timestamp <= now())
+```
+
+### Implementation Details
+
+#### How Backend Options Work
+
+1. **Initialization:** Backend options are passed to `__init__()` as keyword arguments
+   ```python
+   def __init__(self, processing_pipeline=None, collect_errors=False, 
+                min_time=None, max_time=None, **backend_options):
+       super().__init__(processing_pipeline, collect_errors=collect_errors, **backend_options)
+       self._custom_logsource = backend_options.get("custom_logsource", None)
+       self._min_time = min_time
+       self._max_time = max_time
+       self._time_field = "@timestamp"  # Default timestamp field
+   ```
+
+2. **Index Pattern Generation:** The `_get_index_pattern()` method checks for custom logsource first
+   ```python
+   def _get_index_pattern(self, rule):
+       # Check if custom logsource provided
+       if self._custom_logsource:
+           return self._custom_logsource
+       
+       # Otherwise generate from logsource
+       logsource = rule.logsource
+       product = getattr(logsource, 'product', None)
+       category = getattr(logsource, 'category', None)
+       service = getattr(logsource, 'service', None)
+       
+       index_parts = []
+       if product:
+           index_parts.append(product)
+       if category:
+           index_parts.append(category)
+       if service:
+           index_parts.append(service)
+       
+       return '-'.join(index_parts) + '-*' if index_parts else '*'
+   ```
+
+3. **Time Filter Application:** The `finish_query()` method adds time filters if provided
+   ```python
+   def finish_query(self, rule, query, state):
+       # Get index pattern
+       index_pattern = self._get_index_pattern(rule)
+       
+       # Handle deferred expressions
+       query = super().finish_query(rule, query, state)
+       
+       # Fix LIKE expressions wildcards
+       query = re.sub(r'(%?)"([^"]*)\"(%?)', fix_wildcards, query)
+       
+       # Build time filter conditions
+       time_conditions = []
+       if self._min_time:
+           time_conditions.append(
+               f"{self._time_field} >= {self._format_time_value(self._min_time)}"
+           )
+       if self._max_time:
+           time_conditions.append(
+               f"{self._time_field} <= {self._format_time_value(self._max_time)}"
+           )
+       
+       # Combine detection logic with time filters
+       if time_conditions:
+           time_filter = " AND ".join(time_conditions)
+           query = f"({query}) AND ({time_filter})"
+       
+       # Build complete PPL query
+       return f"source={index_pattern} | where {query}"
+   ```
+
+4. **Time Format Conversion:** The `_format_time_value()` method converts time strings to PPL format
+   ```python
+   def _format_time_value(self, time_str: str) -> str:
+       """
+       Format time value for PPL queries.
+       
+       Converts Splunk-style time strings to PPL format:
+       - "now" → "now()"
+       - "-30d" → "now() - 30d"
+       - "2024-01-01T00:00:00" → '"2024-01-01T00:00:00"'
+       """
+       if time_str.lower() == "now":
+           return "now()"
+       
+       if time_str.startswith("-"):
+           # Extract number and unit: "-30d" → "now() - 30d"
+           match = re.match(r'-(\d+)([dhms])', time_str)
+           if match:
+               value = match.group(1)
+               unit = match.group(2)
+               return f"now() - {value}{unit}"
+       
+       # Absolute timestamp - wrap in quotes
+       return f'"{time_str}"'
+   ```
+
+5. **Result:** Both custom index pattern and time filters are seamlessly integrated into the final PPL query
 
 #### `_get_index_pattern()`
 

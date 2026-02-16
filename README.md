@@ -286,25 +286,70 @@ Customize query generation with backend-specific options (similar to Splunk's `-
 ```python
 # Custom index pattern (override auto-generated logsource)
 backend = OpenSearchPPLBackend(custom_logsource="my-custom-logs-*")
+
+# Time filters - relative (e.g., last 30 days)
+backend = OpenSearchPPLBackend(min_time="-30d", max_time="now")
+
+# Time filters - absolute timestamps
+backend = OpenSearchPPLBackend(
+    min_time="2024-01-01T00:00:00",
+    max_time="2024-12-31T23:59:59"
+)
+
+# Combined options
+backend = OpenSearchPPLBackend(
+    custom_logsource="security-logs-*",
+    min_time="-7d",
+    max_time="now"
+)
 ```
 
 **Available Options:**
 - `custom_logsource`: Override auto-generated index pattern
+- `min_time`: Minimum time filter (earliest). Examples: `"-30d"`, `"-7d"`, `"-24h"`, `"2024-01-01T00:00:00"`
+- `max_time`: Maximum time filter (latest). Examples: `"now"`, `"2024-12-31T23:59:59"`
+
+**Time Filter Formats:**
+- **Relative time**: `-30d` (30 days ago), `-7d` (7 days ago), `-24h` (24 hours ago), `-1h` (1 hour ago)
+- **Absolute time**: `"2024-01-01T00:00:00"` (ISO 8601 timestamp)
+- **Current time**: `"now"` (current timestamp)
+
+**Query Output Examples:**
+
+*Without time filters (default):*
+```ppl
+source=windows-* | where CommandLine="evil.exe"
+```
+
+*With time filters:*
+```ppl
+source=windows-* | where (CommandLine="evil.exe") AND (@timestamp >= now() - 30d AND @timestamp <= now())
+```
 
 **Use Cases:**
-- Non-standard index naming conventions
-- Multi-tenant deployments
-- ECS schema compatibility
-- Testing against specific indices
+- **Custom logsource**: Non-standard index naming, multi-tenant deployments, ECS compatibility
+- **Time filters**: Historical analysis, incident response time windows, performance optimization, compliance reporting
 
 **CLI Usage (when registered with sigma):**
 ```bash
 # With backend options
 sigma convert -t opensearch-ppl -O custom_logsource=my-logs-* rule.yml
 
+# With time filters
+sigma convert -t opensearch-ppl -O min_time=-30d -O max_time=now rule.yml
+
+# Combined options
+sigma convert -t opensearch-ppl \
+    -O custom_logsource=security-* \
+    -O min_time=-7d \
+    -O max_time=now \
+    rule.yml
+
 # Convert entire directory
 sigma convert -t opensearch-ppl \
     -O custom_logsource=security-* \
+    -O min_time=-24h \
+    -O max_time=now \
     -o output/ \
     rules/
 ```
