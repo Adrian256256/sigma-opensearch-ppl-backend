@@ -58,6 +58,25 @@ python tests/manual_test/test_textquery_backend.py
 python tests/manual_test/test_ecs_pipeline.py
 ```
 
+### `option_testing/`
+**Backend options testing** for customizable query generation.
+
+- **Purpose**: Test and demonstrate backend-specific options (similar to Splunk's `-O` flag)
+- **Test Script**: `test_backend_options.py` - Comprehensive backend options test suite
+- **Features Tested**:
+  - `custom_logsource` - Override auto-generated index patterns
+- **Use Cases**:
+  - Custom index naming conventions
+  - Non-standard timestamp fields
+  - Multi-tenancy scenarios
+
+**Running option tests**:
+```bash
+python tests/option_testing/test_backend_options.py
+```
+
+**See [option_testing/README.md](option_testing/README.md) for detailed documentation.**
+
 ## Running Tests
 
 ### Run all automated tests:

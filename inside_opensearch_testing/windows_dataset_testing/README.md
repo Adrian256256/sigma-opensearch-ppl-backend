@@ -193,16 +193,16 @@ source=windows-process_creation-* | where (LIKE(Image, "%mshta.exe") OR Original
 
 ### 6. Temporal Rule: Suspicious Regsvr32 with Network Activity (Squiblydoo Attack)
 
-**Rule File**: `inside_opensearch_testing/windows_dataset_testing/correlation_rules/correlation_rule.yml`
+**Rule File**: `inside_opensearch_testing/windows_dataset_testing/correlation_rules/squiblydoo_attack.yml`
 
 **Convert Correlation Rule to PPL**:
 ```bash
-./cli/sigma-ppl inside_opensearch_testing/windows_dataset_testing/correlation_rules/correlation_rule.yml
+./cli/sigma-ppl inside_opensearch_testing/windows_dataset_testing/correlation_rules/squiblydoo_attack.yml
 ```
 
 **Generated PPL Query**:
 ```ppl
-source=windows-process_creation-* | where ((EventID=1 AND LIKE(Image, "%regsvr32.exe")) OR (EventID=3 AND LIKE(Image, "%regsvr32.exe"))) | stats dc(EventID) as unique_rules by span(@timestamp, 5m), host.name | where unique_rules >= 2
+| multisearch [search source=windows-process_creation-* | where EventID=1 AND LIKE(Image, "%regsvr32.exe")] [search source=windows-network_connection-* | where EventID=3 AND LIKE(Image, "%regsvr32.exe")] | stats dc(EventID) as unique_rules by span(@timestamp, 5m), host.name | where unique_rules >= 2
 ```
 
 ---
@@ -218,7 +218,7 @@ source=windows-process_creation-* | where ((EventID=1 AND LIKE(Image, "%regsvr32
 
 **Generated PPL Query**:
 ```ppl
-source=windows-process_creation-* | where ((EventID=1) OR (EventID=3)) | stats dc(EventID) as unique_rules by span(@timestamp, 10m), host.name | where unique_rules >= 2
+| multisearch [search source=windows-process_creation-* | where EventID=1] [search source=windows-network_connection-* | where EventID=3] | stats dc(EventID) as unique_rules by span(@timestamp, 10m), host.name | where unique_rules >= 2
 ```
 
 ---
@@ -234,7 +234,7 @@ source=windows-process_creation-* | where ((EventID=1) OR (EventID=3)) | stats d
 
 **Generated PPL Query**:
 ```ppl
-source=windows-process_creation-* | where ((EventID=5) OR (EventID=6)) | stats dc(EventID) as unique_rules by span(@timestamp, 5m), host.name | where unique_rules >= 2
+| multisearch [search source=windows-process_creation-* | where EventID=5] [search source=windows-driver_load-* | where EventID=6] | stats dc(EventID) as unique_rules by span(@timestamp, 5m), host.name | where unique_rules >= 2
 ```
 
 ---
@@ -252,7 +252,7 @@ source=windows-process_creation-* | where ((EventID=5) OR (EventID=6)) | stats d
 
 **Generated PPL Query**:
 ```ppl
-source=windows-process_creation-* | where ((EventID=5)) | stats count() as event_count by host.name | where event_count >= 10
+| search source=windows-process_creation-* | where EventID=5 | stats count() as event_count by host.name | where event_count >= 10
 ```
 
 ---
@@ -268,7 +268,7 @@ source=windows-process_creation-* | where ((EventID=5)) | stats count() as event
 
 **Generated PPL Query**:
 ```ppl
-source=windows-driver_load-* | where ((EventID=6)) | stats count() as event_count by host.name | where event_count >= 15
+| search source=windows-driver_load-* | where EventID=6 | stats count() as event_count by host.name | where event_count >= 15
 ```
 
 ---
@@ -286,7 +286,7 @@ source=windows-driver_load-* | where ((EventID=6)) | stats count() as event_coun
 
 **Generated PPL Query**:
 ```ppl
-source=windows-process_creation-* | where ((EventID=1)) | stats dc(Image) as value_count by host.name, ParentImage | where value_count >= 5
+| search source=windows-process_creation-* | where EventID=1 | stats dc(Image) as value_count by host.name, ParentImage | where value_count >= 5
 ```
 
 ---
@@ -302,5 +302,47 @@ source=windows-process_creation-* | where ((EventID=1)) | stats dc(Image) as val
 
 **Generated PPL Query**:
 ```ppl
-source=windows-network_connection-* | where ((EventID=3)) | stats dc(DestinationIp) as value_count by host.name, Image | where value_count >= 5
+| search source=windows-network_connection-* | where EventID=3 | stats dc(DestinationIp) as value_count by host.name, Image | where value_count >= 5
 ```
+
+---
+
+## OpenSearch 3.4.0 Bug: Multisearch with span()
+
+OpenSearch 3.4.0 has a critical bug where using `multisearch` combined with `span()` for time-based aggregation causes internal server errors. The query planner fails when trying to apply the `SPAN()` function across the `LogicalUnion` operation created by `multisearch`.
+
+### Working Queries
+
+**Simple source with IN operator (no span)**:
+```ppl
+source=evtx-attack-samples | where EventID in (5, 6) | stats dc(EventID) as unique_rules by host.name | where unique_rules >= 2 | head 5
+```
+Result: Returns 2 results successfully.
+
+**Simple source with IN operator and span()**:
+```ppl
+source=evtx-attack-samples | where EventID in (5, 6) | stats dc(EventID) as unique_rules by span(@timestamp, 5m), host.name | where unique_rules >= 2 | head 5
+```
+Result: Returns 3 results with time buckets successfully.
+
+**Multisearch without span()**:
+```ppl
+| multisearch [search source=evtx-attack-samples | where EventID=5] [search source=evtx-attack-samples | where EventID=6] | stats dc(EventID) as unique_rules by host.name | where unique_rules >= 2 | head 5
+```
+Result: Returns 2 results successfully.
+
+### Failing Queries
+
+**Multisearch with span() - all variants fail**:
+```ppl
+| multisearch [search source=evtx-attack-samples | where EventID=5] [search source=evtx-attack-samples | where EventID=6] | stats dc(EventID) as unique_rules by span(@timestamp, 5m), host.name | where unique_rules >= 2
+```
+Error: Internal server error - "There was internal problem at backend"
+
+**Attempted workarounds that also fail**:
+- Using `span(5m)` without explicit `@timestamp` parameter
+- Removing `host.name` from GROUP BY clause
+- Adding `head` limit at the end
+- Changing GROUP BY field order to `by host.name, span(@timestamp, 5m)`
+
+All variations produce the same internal error when `multisearch` is combined with any `span()` function in the aggregation.

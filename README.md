@@ -279,6 +279,38 @@ print(ppl_query)
 # Output: ['source = windows-process_creation-* | where EventID=1 AND LIKE(Image, "%\\\\powershell.exe")']
 ```
 
+### Backend Options
+
+Customize query generation with backend-specific options (similar to Splunk's `-O` flag):
+
+```python
+# Custom index pattern (override auto-generated logsource)
+backend = OpenSearchPPLBackend(custom_logsource="my-custom-logs-*")
+```
+
+**Available Options:**
+- `custom_logsource`: Override auto-generated index pattern
+
+**Use Cases:**
+- Non-standard index naming conventions
+- Multi-tenant deployments
+- ECS schema compatibility
+- Testing against specific indices
+
+**CLI Usage (when registered with sigma):**
+```bash
+# With backend options
+sigma convert -t opensearch-ppl -O custom_logsource=my-logs-* rule.yml
+
+# Convert entire directory
+sigma convert -t opensearch-ppl \
+    -O custom_logsource=security-* \
+    -o output/ \
+    rules/
+```
+
+**Full documentation: [tests/option_testing/README.md](tests/option_testing/README.md)**
+
 ### Example Sigma Rule
 
 ```yaml
@@ -325,10 +357,10 @@ ppl_query = backend.convert(collection)
 ```
 
 **Field Mapping Example:**
-- `CommandLine` → `process.command_line`
-- `ProcessName` → `process.name`
-- `User` → `user.name`
-- `DestinationIp` → `destination.ip`
+- `CommandLine` - `process.command_line`
+- `ProcessName` - `process.name`
+- `User` - `user.name`
+- `DestinationIp` - `destination.ip`
 
 **For detailed ECS mapping documentation, see [ecs_mapping/README.md](ecs_mapping/README.md)**
 

@@ -19,29 +19,29 @@ Each rule file in `rules/` has a corresponding PPL query in `refs/` with the sam
 - **`linux_suspicious_bash_commands.yml`** - Linux bash command detection
 
 ### Wildcard & Modifier Tests
-- **`wildcard_pattern_match.yml`** - Wildcard patterns (`*` → `%`, `?` → `_`)
-- **`modifier_startswith.yml`** - StartsWith modifier → `LIKE(field, "value%")`
-- **`modifier_endswith.yml`** - EndsWith modifier → `LIKE(field, "%value")`
+- **`wildcard_pattern_match.yml`** - Wildcard patterns (`*` - `%`, `?` - `_`)
+- **`modifier_startswith.yml`** - StartsWith modifier - `LIKE(field, "value%")`
+- **`modifier_endswith.yml`** - EndsWith modifier - `LIKE(field, "%value")`
 - **`modifier_contains_all.yml`** - Contains|all modifier requiring all values match
 - **`case_insensitive_match.yml`** - Case insensitive matching (default behavior)
 
 ### String Modifiers
-- **`modifier_cased.yml`** - Case-sensitive matching → `LIKE(field, "%value%", true)`
+- **`modifier_cased.yml`** - Case-sensitive matching - `LIKE(field, "%value%", true)`
 - **`modifier_base64.yml`** - Base64 encoding for values
 - **`modifier_base64offset.yml`** - Base64 encoding with 3 offset variations
 - **`modifier_wide_base64offset.yml`** - UTF-16LE encoding + base64offset (wide modifier)
 - **`modifier_windash.yml`** - Windows dash variations (`-`, `/`, `–`, `—`, `―`)
 
 ### Field Operations
-- **`modifier_exists_true.yml`** - Field existence check → `isnotnull(field)`
-- **`modifier_exists_false.yml`** - Field non-existence check → `isnull(field)`
-- **`modifier_fieldref.yml`** - Field-to-field comparison → `field1=field2`
+- **`modifier_exists_true.yml`** - Field existence check - `isnotnull(field)`
+- **`modifier_exists_false.yml`** - Field non-existence check - `isnull(field)`
+- **`modifier_fieldref.yml`** - Field-to-field comparison - `field1=field2`
 
 ### Numeric Modifiers
-- **`modifier_gt.yml`** - Greater than → `field>value`
-- **`modifier_gte.yml`** - Greater than or equal → `field>=value`
-- **`modifier_lt.yml`** - Less than → `field<value`
-- **`modifier_lte.yml`** - Less than or equal → `field<=value`
+- **`modifier_gt.yml`** - Greater than - `field>value`
+- **`modifier_gte.yml`** - Greater than or equal - `field>=value`
+- **`modifier_lt.yml`** - Less than - `field<value`
+- **`modifier_lte.yml`** - Less than or equal - `field<=value`
 
 ### Logical Operators
 - **`logical_and_condition.yml`** - AND logic between multiple conditions
@@ -97,11 +97,11 @@ Each rule file in `rules/` has a corresponding PPL query in `refs/` with the sam
 
 ### Important Differences from Sigma
 
-- Sigma `*` wildcard → PPL `%` in LIKE function
-- Sigma `?` wildcard → PPL `_` in LIKE function
-- Sigma `contains:` → PPL `LIKE(field, "%value%")`
-- Sigma `startswith:` → PPL `LIKE(field, "value%")`
-- Sigma `endswith:` → PPL `LIKE(field, "%value")`
+- Sigma `*` wildcard - PPL `%` in LIKE function
+- Sigma `?` wildcard - PPL `_` in LIKE function
+- Sigma `contains:` - PPL `LIKE(field, "%value%")`
+- Sigma `startswith:` - PPL `LIKE(field, "value%")`
+- Sigma `endswith:` - PPL `LIKE(field, "%value")`
 - Backslashes in strings must be escaped: `\\`
 
 ## Sigma Modifiers Support

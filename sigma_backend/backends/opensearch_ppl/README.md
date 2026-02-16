@@ -54,10 +54,11 @@ The backend follows pySigma's best practices by leveraging configuration-based d
 
 **Rule Support**
 - **Regular Sigma Detection Rules**: Standard single-event detection patterns
-- **Correlation Rules**: Multi-event pattern detection with time windows
+- **Correlation Rules**: Multi-event pattern detection with time windows (OpenSearch 3.4+)
   - Event count correlations
   - Value count correlations
   - Temporal correlations (ordered and unordered)
+  - **Always uses `multisearch` command when more than 2 rules given**: Consistent approach for all correlation rules
 
 **Logical Operators**
 - Full support for AND, OR, NOT with correct precedence
@@ -84,11 +85,13 @@ The backend follows pySigma's best practices by leveraging configuration-based d
 - Field-to-field comparisons
 - IN operator for value lists
 - Numeric and string comparisons
+- **Multisearch command**: Cross-index correlation for rules with different logsources (OpenSearch 3.4+)
 
 **Index Management**
 - Automatic logsource → index pattern mapping
 - Support for product, category, service combinations
 - Flexible index naming conventions
+- **Consistent `multisearch` usage**: All correlation rules use multisearch command
 
 ---
 
@@ -369,26 +372,57 @@ These modifiers extend pySigma's built-in encoding capabilities and are automati
 
 #### `__init__()`
 
-Initializes the backend with an optional processing pipeline:
+Initializes the backend with an optional processing pipeline and backend-specific options:
 
 ```python
-def __init__(self, processing_pipeline: Optional[object] = None, **kwargs):
-    super().__init__(processing_pipeline, **kwargs)
+def __init__(
+    self,
+    processing_pipeline: Optional[ProcessingPipeline] = None,
+    collect_errors: bool = False,
+    **backend_options: Dict,
+):
+    """
+    Initialize the OpenSearch PPL backend.
+    
+    Args:
+        processing_pipeline: Optional processing pipeline for rule transformation
+        collect_errors: If True, collect errors instead of raising them
+        **backend_options: Additional backend options:
+            - time_field: Name of the timestamp field (default: "@timestamp")
+            - custom_logsource: Custom index pattern to override logsource-based pattern (default: None)
+    """
 ```
+
+**Available Backend Options:**
+
+- **`custom_logsource`**: Override the auto-generated index pattern
+  - **Type**: `str` or `None`
+  - **Default**: `None` (auto-generate from logsource)
+  - **Use case**: Non-standard index naming, multi-tenant deployments, testing
+  - **Example**: `backend = OpenSearchPPLBackend(custom_logsource="my-custom-logs-*")`
 
 #### `_get_index_pattern()`
 
-Extracts and constructs the index pattern from the Sigma rule's logsource:
+Extracts and constructs the index pattern from the Sigma rule's logsource, with optional override via `custom_logsource`:
 
 ```python
 def _get_index_pattern(self, rule: SigmaRule) -> str:
     """
     Maps Sigma logsource (product, category, service) to OpenSearch index patterns.
+    Can be overridden with custom_logsource backend option.
     
-    Example:
+    Example (auto-generated):
         product='windows', category='process_creation', service='sysmon'
         → 'windows-process_creation-sysmon-*'
+    
+    Example (with custom_logsource):
+        backend = OpenSearchPPLBackend(custom_logsource="my-logs-*")
+        → 'my-logs-*'
     """
+    # Check for custom logsource override first
+    if self._custom_logsource:
+        return self._custom_logsource
+    
     logsource = rule.logsource
     product = getattr(logsource, 'product', None)
     category = getattr(logsource, 'category', None)
@@ -675,30 +709,72 @@ correlation:
   timespan: 10m
 ```
 
-**PPL Implementation using single source query with OR conditions**:
+**PPL Implementation using OpenSearch 3.4+ `multisearch` command**:
 
-The backend combines multiple detection rules into a single query using OR conditions, then uses `stats dc(EventID)` to count how many distinct event types occurred. This approach is more efficient than multisearch and works across all OpenSearch versions:
+The backend **always uses** the official [`multisearch` command](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/multisearch.md) for all correlation rules, providing a consistent and predictable query format:
 
 ```ppl
-source=windows-security-* | where ((EventID=4625) OR (EventID=4624 AND LogonType=3)) | stats dc(EventID) as unique_rules by span(@timestamp, 10m), user | where unique_rules >= 2
+# Same index pattern - consistent multisearch syntax
+| multisearch [search source=windows-security-* | where EventID=4625] [search source=windows-security-* | where EventID=4624 AND LogonType=3] | stats dc(EventID) as unique_rules by span(@timestamp, 10m), user | where unique_rules >= 2
+
+# Different index patterns - same multisearch approach
+| multisearch [search source=windows-security-* | where EventID=4625] [search source=windows-process_creation-* | where EventID=1 AND Image LIKE "%powershell.exe"] | stats dc(EventID) as unique_rules by span(@timestamp, 10m), user | where unique_rules >= 2
 ```
 
 **How it works**:
-1. **Single source query**: All rules share the same index pattern (`windows-security-*`)
-2. **OR conditions**: Each detection rule's conditions are wrapped in parentheses and combined with OR
-3. **Distinct count aggregation**: `dc(EventID)` counts how many different event types matched
-4. **Time-based grouping**: `span(@timestamp, 10m)` creates 10-minute windows
-5. **Threshold check**: `where unique_rules >= 2` ensures both event types occurred
+1. **Consistent `multisearch` usage**: All correlation rules use multisearch regardless of index patterns
+2. **Multisearch format**: Each detection rule becomes a separate subsearch: `[search source=index | where ...]`
+3. **Distinct count aggregation**: `dc(EventID)` counts how many different event types matched across all subsearches
+4. **Time-based grouping**: `span(@timestamp, 10m)` creates 10-minute windows for correlation
+5. **Threshold check**: `where unique_rules >= 2` ensures multiple event types occurred in same time window
+
+**Example with Same Index**:
+
+```yaml
+# Sigma - Multiple rules, same logsource
+correlation:
+  type: temporal
+  rules:
+    - failed_login         # EventID 4625
+    - successful_login     # EventID 4624
+  timespan: 10m
+```
+↓
+```ppl
+# PPL - Multisearch with same index
+| multisearch [search source=windows-security-* | where EventID=4625] [search source=windows-security-* | where EventID=4624 AND LogonType=3] | stats dc(EventID) as unique_rules by span(@timestamp, 10m), IpAddress, TargetUserName | where unique_rules >= 2
+```
+
+**Example with Different Indices**:
+
+```yaml
+# Sigma - Rules with different logsources
+correlation:
+  type: temporal
+  rules:
+    - suspicious_process      # logsource: windows/process_creation
+    - network_connection      # logsource: windows/network_connection
+  timespan: 5m
+```
+↓
+```ppl
+# PPL - Multisearch across different indices
+| multisearch [search source=windows-process_creation-* | where Image LIKE "%powershell.exe"] [search source=windows-network_connection-* | where DestinationPort=4444] | stats dc(EventID) as unique_rules by span(@timestamp, 5m), host.name | where unique_rules >= 2
+```
 
 **Key Advantages**:
-- ✅ Works on all OpenSearch versions (no dependency on multisearch from v3.4+)
-- ✅ Single query execution (more efficient than combining multiple searches)
-- ✅ Automatic time window enforcement via `span()`
-- ✅ Simpler query structure and easier to debug
+- ✅ **Consistent syntax**: Same approach for all correlation rules, easier to understand and debug
+- ✅ **Official OpenSearch feature**: Uses native `multisearch` command (OpenSearch 3.4+)
+- ✅ **Preserves individual filters**: Each detection rule maintains its own WHERE conditions
+- ✅ **Cross-index support**: Works seamlessly with same or different indices
+- ✅ **Field schema handling**: OpenSearch automatically handles missing fields with null values
+- ✅ **Time window enforcement**: Automatic via `span()` function in aggregation
+- ✅ **Clear subsearch boundaries**: Each `[search ...]` block represents one detection rule
 
 **PPL Reference**: 
+- [`multisearch` command](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/multisearch.md) - Execute multiple searches and merge results (OpenSearch 3.4+)
 - [`span()` function](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/aggregations.md#span) - Creates time-based buckets for grouping
-- [`dc(field)`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/aggregations.md#distinct_count-dc) - Counts distinct values (in this case, distinct EventIDs)
+- [`dc(field)`](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/functions/aggregations.md#distinct_count-dc) - Counts distinct values (event types)
 
 #### Step 4: Time Window Application
 

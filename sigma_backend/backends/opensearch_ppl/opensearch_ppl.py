@@ -217,11 +217,12 @@ class OpenSearchPPLBackend(TextQueryBackend):
         Args:
             processing_pipeline: Optional processing pipeline for rule transformation
             collect_errors: If True, collect errors instead of raising them
-            time_field: Name of the timestamp field (default: "@timestamp")
-            **backend_options: Additional backend options
+            **backend_options: Additional backend options:
+                - custom_logsource: Custom index pattern to override logsource-based pattern (default: None)
         """
         super().__init__(processing_pipeline, collect_errors=collect_errors, **backend_options)
-        self._time_field: str = backend_options.get("time_field", "@timestamp")
+        self._custom_logsource: Optional[str] = backend_options.get("custom_logsource", None)
+        self._time_field: str = "@timestamp"  # Default timestamp field for correlation rules
     
     ### Regular rule conversion methods ###
     
@@ -274,15 +275,18 @@ class OpenSearchPPLBackend(TextQueryBackend):
         Extract OpenSearch index pattern from Sigma logsource.
         
         Maps Sigma logsource (product, category, service) to OpenSearch
-        index patterns. This is a simple implementation that can be
-        extended with configurable mappings.
+        index patterns. Can be overridden with custom_logsource backend option.
         
         Args:
             rule: Sigma rule containing logsource information
             
         Returns:
-            OpenSearch index pattern ("windows-process_creation-*")
+            OpenSearch index pattern (e.g., "windows-process_creation-*" or custom pattern)
         """
+        # If custom logsource is provided via backend option, use it
+        if self._custom_logsource:
+            return self._custom_logsource
+        
         logsource = rule.logsource
         product = getattr(logsource, 'product', None)
         category = getattr(logsource, 'category', None)
@@ -434,52 +438,43 @@ class OpenSearchPPLBackend(TextQueryBackend):
         """
         Convert the search phase of a correlation rule.
         
-        For all correlation types, generates a unified source query with combined WHERE conditions.
-        Uses a common source index pattern and combines all conditions with OR.
+        Uses OpenSearch 3.4+ multisearch command for correlation rules with multiple
+        subsearches, or a single search command if only one rule is referenced.
         
         Args:
             rule: The correlation rule
             **kwargs: Additional arguments
             
         Returns:
-            Combined search expression
+            Multisearch expression combining all referred detection rules, or a
+            single search query if only one rule is referenced
         """
-        # Extract source patterns and where conditions from all referred rules
-        sources = []
-        where_conditions = []
+        # Collect complete queries from all referred rules
+        subsearches = []
         
         for rule_reference in rule.rules:
             referred_rule = rule_reference.rule
             for query in referred_rule.get_conversion_result():
-                # Extract source and where parts
-                if " | where " in query:
-                    parts = query.split(" | where ", 1)
-                    source_part = parts[0]
-                    where_part = parts[1]
-                else:
-                    source_part = query if query.startswith("source=") else "source=*"
-                    where_part = None
-                
-                # Extract just the index pattern from "source=pattern"
-                if source_part.startswith("source="):
-                    source_pattern = source_part.replace("source=", "")
-                    sources.append(source_pattern)
-                
-                if where_part:
-                    # Wrap condition in parentheses for proper OR logic
-                    where_conditions.append(f"({where_part})")
+                # Store complete query for multisearch
+                subsearches.append(query)
         
-        # Use first source pattern or wildcard if none found
-        # For correlation rules, typically all rules should use similar source patterns
-        source = sources[0] if sources else "*"
+        # If only one subsearch, return it directly (multisearch requires at least 2)
+        if len(subsearches) == 1:
+            query = subsearches[0]
+            if not query.startswith("search "):
+                query = f"search {query}"
+            return f"| {query}"
         
-        # Combine all where conditions with OR
-        # Timespan is handled in aggregation using span() function for temporal correlations
-        if where_conditions:
-            combined_where = " OR ".join(where_conditions)
-            return f"source={source} | where ({combined_where})"
-        else:
-            return f"source={source}"
+        # Use multisearch command for multiple subsearches
+        # Format: | multisearch [search source=index1 | where ...] [search source=index2 | where ...]
+        formatted_subsearches = []
+        for query in subsearches:
+            # Wrap each query in square brackets and ensure it starts with 'search'
+            if not query.startswith("search "):
+                query = f"search {query}"
+            formatted_subsearches.append(f"[{query}]")
+        
+        return "| multisearch " + " ".join(formatted_subsearches)
     
     def _format_timespan(self, timespan) -> str:
         """Format timespan for PPL query ("5m", "30m", "2h")."""

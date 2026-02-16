@@ -19,7 +19,7 @@ A Python script that extracts all field names from Sigma rules in the official [
 2. **Parses** the `detection` section of each rule
 3. **Extracts** field names, including:
    - Plain field names (`CommandLine`, `Image`)
-   - Fields with modifiers (`CommandLine|contains` → extracts `CommandLine`)
+   - Fields with modifiers (`CommandLine|contains` - extracts `CommandLine`)
    - Nested fields from complex detection logic
 4. **Tracks** which rule each field was extracted from
 5. **Generates GitHub links** to each rule in the official Sigma repository
@@ -58,9 +58,9 @@ Updates `ecs_verification_results.csv` in-place with ECS documentation links poi
 - `https://www.elastic.co/guide/en/ecs/current/ecs-{field_set}.html`
 
 ##### Examples:
-- `process.command_line` → `https://www.elastic.co/guide/en/ecs/current/ecs-process.html`
-- `file.path` → `https://www.elastic.co/guide/en/ecs/current/ecs-file.html`
-- `event.action` → `https://www.elastic.co/guide/en/ecs/current/ecs-event.html`
+- `process.command_line` - `https://www.elastic.co/guide/en/ecs/current/ecs-process.html`
+- `file.path` - `https://www.elastic.co/guide/en/ecs/current/ecs-file.html`
+- `event.action` - `https://www.elastic.co/guide/en/ecs/current/ecs-event.html`
 
 ---
 
