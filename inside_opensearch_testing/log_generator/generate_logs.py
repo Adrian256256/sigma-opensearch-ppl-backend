@@ -435,10 +435,10 @@ def main():
             # Write document
             f.write(json.dumps(log) + '\n')
     
-    print(f"✓ Successfully generated {len(logs)} logs")
+    print(f"Successfully generated {len(logs)} logs")
     print(f"  - Malicious: {int(len(logs) * args.malicious_ratio)}")
     print(f"  - Benign: {len(logs) - int(len(logs) * args.malicious_ratio)}")
-    print(f"\n✓ Ready to copy-paste directly into OpenSearch Dashboard Dev Tools Console!")
+    print(f"\nReady to copy-paste directly into OpenSearch Dashboard Dev Tools Console!")
     print(f"  Or use: curl -X POST 'localhost:9200/_bulk' -H 'Content-Type: application/x-ndjson' --data-binary '@{args.output}'")
 
 

@@ -97,14 +97,14 @@ def create_index_with_mapping(index_name):
         )
         
         if response.status_code == 200:
-            print(f"✓ Index '{index_name}' created successfully with proper mapping")
+            print(f"Index '{index_name}' created successfully with proper mapping")
             return True
         else:
-            print(f"✗ Error creating index: {response.text}")
+            print(f"Error creating index: {response.text}")
             return False
             
     except Exception as e:
-        print(f"✗ Error managing index: {e}")
+        print(f"Error managing index: {e}")
         return False
 
 
@@ -139,21 +139,21 @@ def index_documents_to_opensearch(documents, index_name):
         if response.status_code == 200:
             result = response.json()
             if result.get('errors'):
-                print(f"✗ Some documents failed to index")
+                print(f"Some documents failed to index")
                 # Print first error for debugging
                 for item in result.get('items', []):
                     if 'error' in item.get('index', {}):
                         print(f"  Error: {item['index']['error']}")
                         break
             else:
-                print(f"✓ Indexed {len(documents)} documents")
+                print(f"Indexed {len(documents)} documents")
             return True
         else:
-            print(f"✗ Bulk indexing failed: {response.text}")
+            print(f"Bulk indexing failed: {response.text}")
             return False
             
     except Exception as e:
-        print(f"✗ Error indexing documents: {e}")
+        print(f"Error indexing documents: {e}")
         return False
 
 

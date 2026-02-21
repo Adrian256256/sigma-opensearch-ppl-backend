@@ -37,7 +37,7 @@ if len(args) >= 3 and args[1] == '-o':
     with open(args[2], 'w') as f:
         for query in ppl_query:
             f.write(query + '\n')
-    print(f'✓ Converted to: {args[2]}')
+    print(f'Converted to: {args[2]}')
 else:
     # Print each query on its own line (not as a list representation)
     for query in ppl_query:

@@ -11,6 +11,7 @@ Supports:
 """
 from typing import ClassVar, Optional, Pattern, Dict, Union, Any
 import re
+from enum import Enum
 
 from sigma.conversion.base import TextQueryBackend
 from sigma.conversion.state import ConversionState
@@ -24,6 +25,24 @@ from sigma.processing.pipeline import ProcessingPipeline
 from sigma.rule import SigmaRule
 from sigma.types import SigmaCompareExpression
 from sigma.conditions import ConditionItem, ConditionAND, ConditionOR, ConditionNOT
+
+
+class OpenSearchPPLCustomAttributes(Enum):
+    """
+    Custom attributes that can be set in Sigma rules to configure OpenSearch PPL backend behavior.
+    
+    These can be used in a Sigma rule YAML like:
+    
+    custom:
+      opensearch_ppl_index: "my-custom-index-*"
+      opensearch_ppl_time_field: "event_timestamp"
+      opensearch_ppl_min_time: "-7d"
+      opensearch_ppl_max_time: "now"
+    """
+    INDEX = "opensearch_ppl_index"
+    TIME_FIELD = "opensearch_ppl_time_field"
+    MIN_TIME = "opensearch_ppl_min_time"
+    MAX_TIME = "opensearch_ppl_max_time"
 
 
 class OpenSearchPPLBackend(TextQueryBackend):
@@ -281,7 +300,13 @@ class OpenSearchPPLBackend(TextQueryBackend):
         Extract OpenSearch index pattern from Sigma logsource.
         
         Maps Sigma logsource (product, category, service) to OpenSearch
-        index patterns. Can be overridden with custom_logsource backend option.
+        index patterns. Can be overridden with custom_logsource backend option
+        or via custom attribute in the rule YAML.
+        
+        Priority:
+        1. Custom attribute in rule YAML (opensearch_ppl_index)
+        2. Backend option (custom_logsource)
+        3. Logsource-based mapping
         
         Args:
             rule: Sigma rule containing logsource information
@@ -289,10 +314,17 @@ class OpenSearchPPLBackend(TextQueryBackend):
         Returns:
             OpenSearch index pattern (e.g., "windows-process_creation-*" or custom pattern)
         """
-        # If custom logsource is provided via backend option, use it
+        # Priority 1: Check for custom attribute in rule YAML
+        # Custom attributes are nested under 'custom' key
+        if ('custom' in rule.custom_attributes and 
+            OpenSearchPPLCustomAttributes.INDEX.value in rule.custom_attributes['custom']):
+            return rule.custom_attributes['custom'][OpenSearchPPLCustomAttributes.INDEX.value]
+        
+        # Priority 2: If custom logsource is provided via backend option, use it
         if self._custom_logsource:
             return self._custom_logsource
         
+        # Priority 3: Map logsource to index pattern
         logsource = rule.logsource
         product = getattr(logsource, 'product', None)
         category = getattr(logsource, 'category', None)
@@ -350,12 +382,16 @@ class OpenSearchPPLBackend(TextQueryBackend):
         
         query = re.sub(r'(%?)"([^"]*)\"(%?)', fix_wildcards, query)
         
-        # Build time filter conditions
+        # Build time filter conditions using custom attributes or backend options
+        time_field = self._get_time_field(rule)
+        min_time = self._get_min_time(rule)
+        max_time = self._get_max_time(rule)
+        
         time_conditions = []
-        if self._min_time:
-            time_conditions.append(f"{self._time_field} >= {self._format_time_value(self._min_time)}")
-        if self._max_time:
-            time_conditions.append(f"{self._time_field} <= {self._format_time_value(self._max_time)}")
+        if min_time:
+            time_conditions.append(f"{time_field} >= {self._format_time_value(min_time)}")
+        if max_time:
+            time_conditions.append(f"{time_field} <= {self._format_time_value(max_time)}")
         
         # Combine detection logic with time filters
         if time_conditions:
@@ -366,6 +402,63 @@ class OpenSearchPPLBackend(TextQueryBackend):
         ppl_query = f"source={index_pattern} | where {query}"
         
         return ppl_query
+    
+    def _get_time_field(self, rule: SigmaRule) -> str:
+        """
+        Get the time field for the query.
+        
+        Priority:
+        1. Custom attribute in rule YAML (opensearch_ppl_time_field)
+        2. Backend default (@timestamp)
+        
+        Args:
+            rule: Sigma rule
+            
+        Returns:
+            Time field name
+        """
+        if ('custom' in rule.custom_attributes and 
+            OpenSearchPPLCustomAttributes.TIME_FIELD.value in rule.custom_attributes['custom']):
+            return rule.custom_attributes['custom'][OpenSearchPPLCustomAttributes.TIME_FIELD.value]
+        return self._time_field
+    
+    def _get_min_time(self, rule: SigmaRule) -> Optional[str]:
+        """
+        Get the minimum time filter.
+        
+        Priority:
+        1. Custom attribute in rule YAML (opensearch_ppl_min_time)
+        2. Backend option (min_time)
+        
+        Args:
+            rule: Sigma rule
+            
+        Returns:
+            Minimum time value or None
+        """
+        if ('custom' in rule.custom_attributes and 
+            OpenSearchPPLCustomAttributes.MIN_TIME.value in rule.custom_attributes['custom']):
+            return rule.custom_attributes['custom'][OpenSearchPPLCustomAttributes.MIN_TIME.value]
+        return self._min_time
+    
+    def _get_max_time(self, rule: SigmaRule) -> Optional[str]:
+        """
+        Get the maximum time filter.
+        
+        Priority:
+        1. Custom attribute in rule YAML (opensearch_ppl_max_time)
+        2. Backend option (max_time)
+        
+        Args:
+            rule: Sigma rule
+            
+        Returns:
+            Maximum time value or None
+        """
+        if ('custom' in rule.custom_attributes and 
+            OpenSearchPPLCustomAttributes.MAX_TIME.value in rule.custom_attributes['custom']):
+            return rule.custom_attributes['custom'][OpenSearchPPLCustomAttributes.MAX_TIME.value]
+        return self._max_time
     
     def _format_time_value(self, time_str: str) -> str:
         """

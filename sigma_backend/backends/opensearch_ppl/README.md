@@ -905,13 +905,13 @@ correlation:
 ```
 
 **Key Advantages**:
-- ✅ **Consistent syntax**: Same approach for all correlation rules, easier to understand and debug
-- ✅ **Official OpenSearch feature**: Uses native `multisearch` command (OpenSearch 3.4+)
-- ✅ **Preserves individual filters**: Each detection rule maintains its own WHERE conditions
-- ✅ **Cross-index support**: Works seamlessly with same or different indices
-- ✅ **Field schema handling**: OpenSearch automatically handles missing fields with null values
-- ✅ **Time window enforcement**: Automatic via `span()` function in aggregation
-- ✅ **Clear subsearch boundaries**: Each `[search ...]` block represents one detection rule
+- **Consistent syntax**: Same approach for all correlation rules, easier to understand and debug
+- **Official OpenSearch feature**: Uses native `multisearch` command (OpenSearch 3.4+)
+- **Preserves individual filters**: Each detection rule maintains its own WHERE conditions
+- **Cross-index support**: Works seamlessly with same or different indices
+- **Field schema handling**: OpenSearch automatically handles missing fields with null values
+- **Time window enforcement**: Automatic via `span()` function in aggregation
+- **Clear subsearch boundaries**: Each `[search ...]` block represents one detection rule
 
 **PPL Reference**: 
 - [`multisearch` command](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/multisearch.md) - Execute multiple searches and merge results (OpenSearch 3.4+)
@@ -977,11 +977,11 @@ source=windows-process_creation-*
 ```
 
 **Key Advantages of `span()` approach**:
-- ✅ **Automatic bucketing**: No need for manual time filtering with `now()`
-- ✅ **Historical analysis**: Works on historical data, not just recent events
-- ✅ **Sliding windows**: Evaluates correlation in every time window across the dataset
-- ✅ **Simpler queries**: Single aggregation operation instead of filtering + aggregation
-- ✅ **Better performance**: OpenSearch optimizes time-based bucketing internally
+- **Automatic bucketing**: No need for manual time filtering with `now()`
+- **Historical analysis**: Works on historical data, not just recent events
+- **Sliding windows**: Evaluates correlation in every time window across the dataset
+- **Simpler queries**: Single aggregation operation instead of filtering + aggregation
+- **Better performance**: OpenSearch optimizes time-based bucketing internally
 
 **Conversion Logic**:
 ```python
@@ -1654,6 +1654,56 @@ sigma_backend/backends/opensearch_ppl/
 
 ---
 
+## Custom Attributes
+
+The backend supports **custom attributes** in Sigma rule YAML files to configure backend behavior on a per-rule basis. This allows you to override default settings directly in the rule without CLI options.
+
+### Supported Custom Attributes
+
+| Attribute | Description | Example Values |
+|-----------|-------------|----------------|
+| `opensearch_ppl_index` | Override index pattern | `"custom-logs-*"`, `"security-events-*"` |
+| `opensearch_ppl_time_field` | Specify timestamp field | `"event.created"`, `"@timestamp"` |
+| `opensearch_ppl_min_time` | Minimum time filter | `"-7d"`, `"-30d"`, `"2024-01-01T00:00:00"` |
+| `opensearch_ppl_max_time` | Maximum time filter | `"now"`, `"2024-12-31T23:59:59"` |
+
+### Usage Example
+
+```yaml
+title: Suspicious PowerShell Activity
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '\powershell.exe'
+    CommandLine|contains: '-enc'
+  condition: selection
+level: high
+
+# Custom backend configuration
+custom:
+  opensearch_ppl_index: "windows-security-*"
+  opensearch_ppl_time_field: "event.created"
+  opensearch_ppl_min_time: "-7d"
+  opensearch_ppl_max_time: "now"
+```
+
+**Generated Query:**
+```
+source=windows-security-* | where (LIKE(Image, %\powershell.exe) AND LIKE(CommandLine, %-enc%)) AND (event.created >= now() - 7d AND event.created <= now())
+```
+
+### Priority System
+
+Settings are resolved in this order (highest to lowest priority):
+
+1. **Custom attributes** in rule YAML (`custom:` section)
+2. **Backend options** (CLI parameters or API options)
+3. **Default values** (logsource-based for index, `@timestamp` for time field)
+
+---
+
 ## References
 
 ### OpenSearch PPL
@@ -1672,6 +1722,9 @@ sigma_backend/backends/opensearch_ppl/
 - **pySigma Documentation**: [pySigma Docs](https://sigmahq-pysigma.readthedocs.io/)
 - **TextQueryBackend Guide**: [pySigma TextQueryBackend](https://sigmahq-pysigma.readthedocs.io/en/latest/Backends.html)
 - **TextQueryBackend Source Code**: [base.py](https://github.com/SigmaHQ/pySigma/blob/main/sigma/conversion/base.py)
+
+### Backend Inspiration
+- **pySigma-backend-loki**: [Custom Attributes Implementation](https://github.com/grafana/pySigma-backend-loki/blob/main/sigma/backends/loki/loki.py#L343-L347)
 
 ### Related
 - **Elastic Common Schema**: [ECS Reference](https://www.elastic.co/guide/en/ecs/current/index.html)

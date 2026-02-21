@@ -34,6 +34,7 @@ This project provides a backend for the pySigma library that converts Sigma dete
 - **OpenSearch Optimized**: Generates PPL queries optimized for OpenSearch performance
 - **Comprehensive Testing**: Full test suite ensuring correct conversion
 - **Extensible Architecture**: Easy to extend with custom index mappings and output formats
+- **Custom Attributes**: Configure backend behavior directly in Sigma rule YAML (see [Custom Attributes Guide](./docs/CUSTOM_ATTRIBUTES.md))
 
 ## What is Sigma?
 
