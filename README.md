@@ -10,6 +10,13 @@ Backend for converting Sigma rules into PPL (Piped Processing Language) queries 
 - [What is PPL?](#what-is-ppl)
 - [Project Structure](#project-structure)
   - [Quick Links to Project Components](#quick-links-to-project-components)
+    - [CLI](#cli)
+    - [Backend](#sigma_backend)
+    - [ECS Mapping](#ecs_mapping)
+    - [ECS Fields Info](#ecs_fields_info)
+    - [Inside OpenSearch Testing](#inside_opensearch_testing)
+    - [Tables](#tables)
+    - [Tests](#tests)
 - [Installation](#installation)
   - [Dependencies](#dependencies)
 - [Usage](#usage)
@@ -21,6 +28,7 @@ Backend for converting Sigma rules into PPL (Piped Processing Language) queries 
   - [Manual Testing](#manual-testing)
   - [Automated Testing](#automated-testing)
   - [Correlation Testing](#correlation-testing)
+  - [Custom Attributes Testing](#custom-attributes-testing)
 
 ---
 
@@ -111,6 +119,10 @@ sigma-opensearch-ppl-backend/
 │   │   ├── sigma_rules/                  # Correlation test Sigma rules
 │   │   ├── ppl_refs/                     # Expected correlation PPL outputs
 │   │   └── README.md                     # Correlation testing documentation
+│   ├── custom_attribute_testing/
+│   │   ├── test_custom_attributes.py     # Custom attributes test suite
+│   │   ├── custom_attributes_example.yml # Example rule with custom attributes
+│   │   └── README.md                     # Custom attributes testing documentation
 │   └── README.md                         # Testing overview documentation
 ├── .gitignore                            # Files ignored by Git
 ├── requirements.txt                      # Python dependencies
@@ -210,6 +222,11 @@ Comprehensive test suite for the backend.
   - [`sigma_rules/`](./tests/correlation_testing/sigma_rules/) - Correlation test Sigma rules
   - [`ppl_refs/`](./tests/correlation_testing/ppl_refs/) - Expected correlation PPL outputs
   - [`README.md`](./tests/correlation_testing/README.md) - Correlation testing documentation
+
+- [`custom_attribute_testing/`](./tests/custom_attribute_testing/)
+  - [`test_custom_attributes.py`](./tests/custom_attribute_testing/test_custom_attributes.py) - Custom attributes test suite
+  - [`custom_attributes_example.yml`](./tests/custom_attribute_testing/custom_attributes_example.yml) - Example rule with custom attributes
+  - [`README.md`](./tests/custom_attribute_testing/README.md) - Custom attributes testing documentation
 
 - [`README.md`](./tests/README.md) - Testing overview documentation
 
@@ -436,3 +453,22 @@ python tests/automated_tests/test_checker.py
 ### Correlation Testing
 
 For correlation rule testing, see [tests/correlation_testing/README.md](tests/correlation_testing/README.md).
+
+```bash
+# Run correlation tests
+./tests/correlation_testing/test_correlations.py
+```
+
+### Custom Attributes Testing
+
+For custom attributes feature testing, see [tests/custom_attribute_testing/README.md](tests/custom_attribute_testing/README.md).
+
+```bash
+# Run custom attributes tests with pytest
+pytest tests/custom_attribute_testing/test_custom_attributes.py -v
+
+# Run manually with detailed output
+python tests/custom_attribute_testing/test_custom_attributes.py
+```
+
+Custom attributes allow configuring backend behavior directly in Sigma rule YAML. See the [backend documentation](sigma_backend/backends/opensearch_ppl/README.md#custom-attributes) for full details.
