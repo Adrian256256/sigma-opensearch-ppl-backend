@@ -1,6 +1,6 @@
 # Tests
 
-This directory contains comprehensive test suites for the Sigma to OpenSearch PPL backend converter. The tests validate rule conversion, field mapping, logical operations, modifiers and special features.
+This directory contains comprehensive test suites for the Sigma to OpenSearch PPL backend converter. The tests validate rule conversion, field mapping, logical operations, modifiers, special features, and custom attributes.
 
 ## Directory Structure
 
@@ -32,15 +32,51 @@ All features documented in the `tables/` directory are verified by these automat
 **Correlation rules testing** for advanced detection patterns.
 
 - **Purpose**: Test and demonstrate Sigma correlation capabilities
-- **Status**: Not yet implemented - correlation backend support
+- **Test Script**: `test_correlations.py` - Correlation rules test suite
 - **Structure**:
   - `sigma_rules/` - Sigma correlation rule files
-  - `ppl_refs/` - Expected PPL correlation queries (in development)
+  - `ppl_refs/` - Expected PPL correlation queries
 - **Correlation Types**:
   - `event_count` - Detect event frequency patterns
   - `value_count` - Count distinct field values
   - `temporal` - Detect events occurring close together
-  - `ordered_temporal` - Detect events in specific sequence
+  - `temporal_ordered` - Detect events in specific sequence
+
+**Running correlation tests**:
+```bash
+./tests/correlation_testing/test_correlations.py
+```
+
+**See [correlation_testing/README.md](correlation_testing/README.md) for detailed documentation.**
+
+### `custom_attribute_testing/`
+**Custom attributes testing** for per-rule backend configuration.
+
+- **Purpose**: Test custom attributes feature that allows configuring backend behavior directly in Sigma rule YAML
+- **Test Script**: `test_custom_attributes.py` - Custom attributes test suite
+- **Structure**:
+  - `custom_attributes_example.yml` - Example rule with all custom attributes
+- **Features Tested**:
+  - `opensearch_ppl_index` - Override index pattern per rule
+  - `opensearch_ppl_time_field` - Custom timestamp field per rule
+  - `opensearch_ppl_min_time` - Minimum time filter per rule
+  - `opensearch_ppl_max_time` - Maximum time filter per rule
+- **Test Coverage**:
+  - Individual attribute validation
+  - Priority system (YAML > Backend options > Defaults)
+  - Integration of multiple attributes
+  - Backward compatibility
+
+**Running custom attribute tests**:
+```bash
+# Using pytest
+pytest tests/custom_attribute_testing/test_custom_attributes.py -v
+
+# Manual run with detailed output
+python tests/custom_attribute_testing/test_custom_attributes.py
+```
+
+**See [custom_attribute_testing/README.md](custom_attribute_testing/README.md) for detailed documentation.**
 
 ### `manual_test/`
 **Manual testing utilities** for interactive development and debugging.
@@ -92,6 +128,16 @@ pytest tests/automated_tests/test_checker.py
 ### Run with verbose output:
 ```bash
 pytest tests/automated_tests/ -v
+```
+
+### Run correlation tests:
+```bash
+./tests/correlation_testing/test_correlations.py
+```
+
+### Run custom attribute tests:
+```bash
+pytest tests/custom_attribute_testing/test_custom_attributes.py -v
 ```
 
 ### Run manual tests:
