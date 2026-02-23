@@ -62,8 +62,7 @@ sigma-opensearch-ppl-backend/
 │       ├── __init__.py
 │       └── opensearch_ppl/
 │           ├── __init__.py
-│           ├── opensearch_ppl.py                 # Unified backend (supports regular & correlation rules)
-│           ├── modifiers.py                      # Custom field modifiers
+│           ├── opensearch_ppl.py                 # Unified backend (includes custom modifiers & custom attributes)
 │           └── README.md                         # Backend documentation
 ├── cli/
 │   ├── sigma-ppl                         # Command-line conversion tool
@@ -142,8 +141,7 @@ Command-line interface for converting Sigma rules.
 Core backend implementation for Sigma to PPL conversion.
 
 - [`backends/opensearch_ppl/`](./sigma_backend/backends/opensearch_ppl/)
-  - [`opensearch_ppl.py`](./sigma_backend/backends/opensearch_ppl/opensearch_ppl.py) - Unified backend supporting both regular and correlation rules
-  - [`modifiers.py`](./sigma_backend/backends/opensearch_ppl/modifiers.py) - Custom field modifiers
+  - [`opensearch_ppl.py`](./sigma_backend/backends/opensearch_ppl/opensearch_ppl.py) - Unified backend with custom modifiers and custom attributes support
   - [`README.md`](./sigma_backend/backends/opensearch_ppl/README.md) - Backend documentation
 
 #### [`ecs_mapping/`](./ecs_mapping/)

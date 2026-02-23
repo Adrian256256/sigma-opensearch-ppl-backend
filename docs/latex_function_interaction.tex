@@ -1,0 +1,122 @@
+\subsection{Functions Interaction}
+
+This section describes how the backend converts Sigma rules into OpenSearch PPL queries. The process involves parsing the rule, transforming fields, and building the final query.
+
+\subsubsection{Regular Detection Rules Flow}
+
+For standard detection rules, the conversion follows a simple linear path. The Sigma rule is parsed, fields are mapped to ECS schema, conditions are converted to PPL syntax, and finally the query is assembled with custom configurations.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance=0.8cm and 1.5cm,
+    box/.style={rectangle, draw, minimum width=2.5cm, minimum height=0.6cm, align=center, font=\small},
+    arrow/.style={->, >=stealth}
+]
+
+\node[box] (input) {Sigma Rule};
+\node[box, below=of input] (convert) {\texttt{convert\_rule()}};
+\node[box, below=of convert] (pipeline) {Apply Pipeline};
+\node[box, below=of pipeline] (condition) {\texttt{convert\_condition()}};
+\node[box, below=of condition] (finish) {\texttt{finish\_query()}};
+\node[box, below=of finish] (output) {PPL Query};
+
+\draw[arrow] (input) -- (convert);
+\draw[arrow] (convert) -- (pipeline);
+\draw[arrow] (pipeline) -- (condition);
+\draw[arrow] (condition) -- (finish);
+\draw[arrow] (finish) -- (output);
+
+\end{tikzpicture}
+\caption{Regular detection rule conversion flow}
+\label{fig:regular_rule_flow}
+\end{figure}
+
+The conversion process works as follows:
+\begin{enumerate}
+    \item \textbf{Sigma Rule}: The input YAML file containing detection logic
+    \item \textbf{convert\_rule()}: Parses the rule structure and extracts detection conditions
+    \item \textbf{Apply Pipeline}: Maps generic field names to ECS-compliant names (e.g., CommandLine → process.command\_line)
+    \item \textbf{convert\_condition()}: Transforms logical operators (AND, OR, NOT) into PPL syntax
+    \item \textbf{finish\_query()}: Adds index pattern, time filters, and custom attributes
+    \item \textbf{PPL Query}: The final query ready to run in OpenSearch
+\end{enumerate}
+
+\subsubsection{Correlation Rules Flow}
+
+Correlation rules are more complex because they combine multiple detection rules and aggregate events. The process splits into two parallel branches: one for searching events and one for aggregating them.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance=0.8cm and 1cm,
+    box/.style={rectangle, draw, minimum width=2.5cm, minimum height=0.6cm, align=center, font=\small},
+    arrow/.style={->, >=stealth}
+]
+
+\node[box] (input) {Correlation Rule};
+\node[box, below=of input] (convert) {\texttt{convert\_correlation\_rule()}};
+\node[box, below left=of convert] (search) {\texttt{convert\_search()}};
+\node[box, below right=of convert] (agg) {\texttt{convert\_aggregation()}};
+\node[box, below right=of search] (condition) {\texttt{convert\_condition()}};
+\node[box, below=of condition] (output) {PPL Correlation Query};
+
+\draw[arrow] (input) -- (convert);
+\draw[arrow] (convert) -- (search);
+\draw[arrow] (convert) -- (agg);
+\draw[arrow] (search) -- (condition);
+\draw[arrow] (agg) -- (condition);
+\draw[arrow] (condition) -- (output);
+
+\end{tikzpicture}
+\caption{Correlation rule conversion flow}
+\label{fig:correlation_rule_flow}
+\end{figure}
+
+The correlation process has these steps:
+\begin{enumerate}
+    \item \textbf{Correlation Rule}: Input rule defining relationships between events
+    \item \textbf{convert\_correlation\_rule()}: Orchestrates the conversion process
+    \item \textbf{convert\_search()}: Processes each referenced detection rule (left branch)
+    \item \textbf{convert\_aggregation()}: Builds the stats command for counting or grouping events (right branch)
+    \item \textbf{convert\_condition()}: Combines both branches and adds the correlation condition
+    \item \textbf{PPL Correlation Query}: Final query with search, stats, and where clauses
+\end{enumerate}
+
+\subsubsection{Custom Attributes Priority}
+
+The backend supports three levels of configuration. Custom attributes in the YAML file have the highest priority, followed by backend options, and finally default values. This allows flexible configuration per rule or globally.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance=0.7cm,
+    box/.style={rectangle, draw, minimum width=3cm, minimum height=0.6cm, align=center, font=\small},
+    arrow/.style={->, >=stealth}
+]
+
+\node[box] (check) {Need config value};
+\node[box, below=of check] (custom) {1. Check YAML custom attributes};
+\node[box, below=of custom] (backend) {2. Check backend options};
+\node[box, below=of backend] (default) {3. Use default value};
+\node[box, below=of default] (result) {Apply to query};
+
+\draw[arrow] (check) -- (custom);
+\draw[arrow] (custom) -- node[right, font=\tiny] {if not found} (backend);
+\draw[arrow] (backend) -- node[right, font=\tiny] {if not found} (default);
+\draw[arrow] (default) -- (result);
+
+\end{tikzpicture}
+\caption{Custom attributes priority system}
+\label{fig:custom_attrs_flow}
+\end{figure}
+
+The priority system works by checking each level in order:
+\begin{enumerate}
+    \item \textbf{YAML custom attributes}: If the rule contains custom attributes (like \texttt{opensearch\_ppl\_index}), use them
+    \item \textbf{Backend options}: If not found in YAML, check if the user provided options when initializing the backend
+    \item \textbf{Default values}: If neither exists, use hardcoded defaults (e.g., \texttt{@timestamp} for time field)
+    \item \textbf{Apply to query}: Use the selected value in the final PPL query
+\end{enumerate}
+
+This design allows maximum flexibility: individual rules can override global settings, and global settings can override defaults.

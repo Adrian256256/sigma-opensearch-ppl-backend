@@ -260,7 +260,7 @@ detection:
 
 ## Custom Modifiers
 
-The backend includes custom Sigma modifiers defined in `modifiers.py` for handling UTF-16 encoding variants commonly found in Windows event logs and obfuscated malware.
+The backend includes custom Sigma modifiers defined in `opensearch_ppl.py` for handling UTF-16 encoding variants commonly found in Windows event logs and obfuscated malware.
 
 ### UTF-16 Modifiers
 
@@ -1641,15 +1641,13 @@ for rule in sigma_rules.rules:
 ```
 sigma_backend/backends/opensearch_ppl/
 ├── __init__.py                        # Package initialization, exports, modifier registration
-├── opensearch_ppl.py                  # Unified backend (regular + correlation rules)
-├── modifiers.py                       # Custom UTF-16 modifiers
+├── opensearch_ppl.py                  # Unified backend (includes custom modifiers & custom attributes)
 └── README.md                          # This documentation file
 ```
 
 ### Files
 
-- **`opensearch_ppl.py`**: Unified backend class supporting both regular Sigma rules and correlation rules
-- **`modifiers.py`**: Custom Sigma modifiers for encoding (UTF-16 variants)
+- **`opensearch_ppl.py`**: Unified backend class with custom UTF-16 modifiers and custom attributes support
 - **`__init__.py`**: Exports the backend and registers custom modifiers
 
 ---
