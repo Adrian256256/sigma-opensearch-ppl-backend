@@ -1,0 +1,1 @@
+search earliest=-30d latest=now CommandLine="test.exe" source=windows-process_creation-*

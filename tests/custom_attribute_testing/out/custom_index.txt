@@ -1,0 +1,1 @@
+source=my-custom-index-* | where CommandLine="test.exe"

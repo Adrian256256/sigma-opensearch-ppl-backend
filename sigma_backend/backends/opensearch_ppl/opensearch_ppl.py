@@ -475,7 +475,7 @@ class OpenSearchPPLBackend(TextQueryBackend):
         Finish the query before finalization.
         
         This is called before finalize_query and is where we can add
-        the source command and other PPL-specific structure.
+        the search command and other PPL-specific structure.
         
         Args:
             rule: The Sigma rule being converted
@@ -483,7 +483,7 @@ class OpenSearchPPLBackend(TextQueryBackend):
             state: Conversion state
             
         Returns:
-            Query with PPL source command added
+            Query with PPL search command added
         """
         # Get index pattern from logsource
         index_pattern = self._get_index_pattern(rule)
@@ -501,24 +501,26 @@ class OpenSearchPPLBackend(TextQueryBackend):
         
         query = re.sub(r'(%?)"([^"]*)\"(%?)', fix_wildcards, query)
         
-        # Build time filter conditions using custom attributes or backend options
-        time_field = self._get_time_field(rule)
+        # Build time modifiers using custom attributes or backend options
         min_time = self._get_min_time(rule)
         max_time = self._get_max_time(rule)
         
-        time_conditions = []
-        if min_time:
-            time_conditions.append(f"{time_field} >= {self._format_time_value(min_time)}")
-        if max_time:
-            time_conditions.append(f"{time_field} <= {self._format_time_value(max_time)}")
-        
-        # Combine detection logic with time filters
-        if time_conditions:
-            time_filter = " AND ".join(time_conditions)
-            query = f"({query}) AND ({time_filter})"
-        
-        # Build complete PPL query with source command
-        ppl_query = f"source={index_pattern} | where {query}"
+        # If we have time modifiers, use 'search' command syntax
+        # Otherwise, use 'source=... | where ...' syntax for backward compatibility
+        if min_time or max_time:
+            # Build time modifiers for search command
+            time_modifiers = []
+            if min_time:
+                time_modifiers.append(f"earliest={self._format_time_modifier(min_time)}")
+            if max_time:
+                time_modifiers.append(f"latest={self._format_time_modifier(max_time)}")
+            
+            # Construct search command: search [time_modifiers] <query> source=<index>
+            time_str = " ".join(time_modifiers)
+            ppl_query = f"search {time_str} {query} source={index_pattern}"
+        else:
+            # Use traditional source | where syntax when no time filters
+            ppl_query = f"source={index_pattern} | where {query}"
         
         return ppl_query
     
@@ -579,33 +581,33 @@ class OpenSearchPPLBackend(TextQueryBackend):
             return rule.custom_attributes['custom'][OpenSearchPPLCustomAttributes.MAX_TIME.value]
         return self._max_time
     
-    def _format_time_value(self, time_str: str) -> str:
+    def _format_time_modifier(self, time_str: str) -> str:
         """
-        Format time value for PPL queries.
+        Format time modifier for PPL search command.
         
         Args:
-            time_str: Time string like "-30d", "now", "2024-01-01T00:00:00"
+            time_str: Time string like "-30d", "now", "2024-01-01T00:00:00", "-1month@month"
             
         Returns:
-            Formatted time expression for PPL
+            Formatted time modifier for PPL search command
         """
         # Handle "now"
         if time_str.lower() == "now":
-            return "now()"
+            return "now"
         
-        # Handle relative time like "-30d", "-7d", "-1h"
-        if time_str.startswith("-"):
-            # Extract number and unit
-            import re
-            match = re.match(r'-(\d+)([dhms])', time_str)
-            if match:
-                value = match.group(1)
-                unit = match.group(2)
-                # Map Splunk-style units to PPL
-                return f"now() - {value}{unit}"
+        # Handle relative time with rounding like "-1month@month", "+1d@d"
+        if "@" in time_str:
+            # Wrap in quotes for time rounding expressions
+            return f"'{time_str}'"
+        
+        # Handle simple relative time like "-30d", "-7d", "-1h"
+        if time_str.startswith("-") or time_str.startswith("+"):
+            # Remove the dash/plus and keep the time unit as-is
+            return time_str
         
         # Handle absolute timestamps - wrap in quotes
-        return f'"{time_str}"'
+        # Support both formats: "2024-01-01T00:00:00" and "2024-01-01 00:00:00"
+        return f"'{time_str}'"
     
     ### Correlation rule conversion methods ###
     

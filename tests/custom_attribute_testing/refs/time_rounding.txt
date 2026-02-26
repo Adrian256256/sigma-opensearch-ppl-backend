@@ -1,0 +1,1 @@
+search earliest='-1month@month' latest='+1d@d' CommandLine="test.exe" source=windows-process_creation-*

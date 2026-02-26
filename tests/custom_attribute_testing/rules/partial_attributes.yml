@@ -1,0 +1,13 @@
+title: Test Partial Custom Attributes
+id: 10000006-0000-0000-0000-000000000006
+status: test
+description: Test with only some custom attributes
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine: test.exe
+  condition: selection
+custom:
+  opensearch_ppl_index: "partial-test-*"

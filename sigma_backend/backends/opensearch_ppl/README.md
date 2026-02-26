@@ -10,17 +10,11 @@ A production-ready pySigma backend for converting Sigma detection rules into PPL
    - [OpenSearchPPLBackend Class](#opensearchpplbackend-class)
    - [Configuration via Class Variables](#configuration-via-class-variables)
    - [Core Methods](#core-methods)
-4. [Sigma Modifiers Reference](#sigma-modifiers-reference)
-   - [Built-in Encoding Modifiers](#built-in-encoding-modifiers-pysigma)
-   - [Custom Modifiers](#custom-modifiers)
-   - [UTF-16 Modifiers](#utf-16-modifiers)
-   - [How UTF-16 Encoding Works](#how-utf-16-encoding-works)
-   - [Why `.encode()` and `.decode()`?](#why-encode-and-decode)
-5. [Sigma - PPL Conversion](#sigma--ppl-conversion)
+4. [Sigma - PPL Conversion](#sigma--ppl-conversion)
    - [Syntax Mapping](#syntax-mapping)
    - [Conversion Examples](#conversion-examples)
-6. [PPL Functions Used](#ppl-functions-used)
-7. [Correlation Rules Support](#correlation-rules-support)
+5. [PPL Functions Used](#ppl-functions-used)
+6. [Correlation Rules Support](#correlation-rules-support)
    - [Overview](#overview-1)
    - [Supported Correlation Types](#supported-correlation-types)
    - [Transformation Process: Sigma - OpenSearch PPL](#transformation-process-sigma--opensearch-ppl)
@@ -34,7 +28,10 @@ A production-ready pySigma backend for converting Sigma detection rules into PPL
    - [Implementation Architecture](#implementation-architecture)
    - [Technical Implementation Details](#technical-implementation-details)
    - [Usage Examples](#usage-examples)
-8. [Usage](#usage)
+7. [Usage](#usage)
+8. [Custom Attributes](#custom-attributes)
+   - [Supported Attributes](#supported-attributes)
+   - [Example](#example)
 9. [Project Structure](#project-structure)
 10. [References](#references)
 
@@ -194,177 +191,6 @@ field_in_list_expression: ClassVar[str] = "{field} in ({list})"
 convert_or_as_in: ClassVar[bool] = True  # Convert OR chains to IN
 list_separator: ClassVar[str] = ", "
 ```
-
----
-
-## Sigma Modifiers Reference
-
-### Built-in Encoding Modifiers (pySigma)
-
-Before discussing custom modifiers, it's important to understand the built-in encoding modifiers from pySigma:
-
-#### `base64` Modifier
-**Purpose**: Encode string as Base64  
-**Source**: pySigma built-in ([line ~213](https://github.com/SigmaHQ/pySigma/blob/main/sigma/modifiers.py#L213-L222))
-
-```python
-class SigmaBase64Modifier(SigmaValueModifier[SigmaString, SigmaString]):
-    """Encode string as Base64 value."""
-    def modify(self, val: SigmaString) -> SigmaString:
-        return SigmaString(b64encode(bytes(val)).decode())
-```
-
-**Example**:
-```yaml
-detection:
-  selection:
-    CommandLine|base64: 'powershell'  # Matches: cG93ZXJzaGVsbA==
-```
-
-**Use Case**: Detect Base64-encoded commands in logs (Linux bash history, web requests).
-
-#### `base64offset` Modifier
-**Purpose**: Encode string as Base64 with **3 different offsets** to match it anywhere in encoded data  
-**Source**: pySigma built-in ([line ~225](https://github.com/SigmaHQ/pySigma/blob/main/sigma/modifiers.py#L225-L332))
-
-```python
-class SigmaBase64OffsetModifier(SigmaValueModifier[SigmaString, SigmaExpansion]):
-    """Encode string with different offsets (0, 2, 3 bytes) to match at any position."""
-    start_offsets = (0, 2, 3)
-    end_offsets = (None, -3, -2)
-```
-
-**Why offsets?** Base64 encodes 3 bytes - 4 characters. A substring might start at different positions within these 3-byte blocks:
-
-```
-Original: "XYZtest123"
-         ---^^^---- "test" starts at offset 0 in this 3-byte block
-         
-Base64 offset 0: b64encode("test")       - "dGVzdA=="
-Base64 offset 1: b64encode(" test")      - "IHRlc3Q="  (padded with 1 space)
-Base64 offset 2: b64encode("  test")     - "ICB0ZXN0"  (padded with 2 spaces)
-```
-
-**Example**:
-```yaml
-detection:
-  selection:
-    CommandLine|base64offset: 'invoke'  # Matches invoke at ANY position in base64 string
-```
-
-**Result**: Generates 3 variations to catch the string regardless of where it appears in the encoded data.
-
-**Use Case**: Essential for detecting substrings within Base64-encoded data (malicious code fragments in encoded payloads).
-
----
-
-## Custom Modifiers
-
-The backend includes custom Sigma modifiers defined in `opensearch_ppl.py` for handling UTF-16 encoding variants commonly found in Windows event logs and obfuscated malware.
-
-### UTF-16 Modifiers
-
-Custom modifiers implemented following the pySigma pattern from [`SigmaWideModifier`](https://github.com/SigmaHQ/pySigma/blob/main/sigma/modifiers.py#L252-L273):
-
-```python
-# Available modifiers:
-# - wide: UTF-16 Little Endian (pySigma built-in)
-# - utf16: UTF-16 Little Endian (alias for 'wide')
-# - utf16le: UTF-16 Little Endian (explicit)
-# - utf16be: UTF-16 Big Endian (custom)
-```
-
-**Differences Between Modifiers**:
-
-| Modifier | Encoding | Source | Functionally |
-|----------|----------|--------|--------------|
-| `wide` | UTF-16LE | pySigma built-in | **Identical** to `utf16` and `utf16le` |
-| `utf16` | UTF-16LE | Custom (this backend) | Alias for `wide` - same implementation |
-| `utf16le` | UTF-16LE | Custom (this backend) | Explicit name - same implementation |
-| `utf16be` | UTF-16BE | Custom (this backend) | **Different** - Big Endian byte order |
-
-**Why provide multiple LE modifiers?**
-- `wide`: Original pySigma modifier name
-- `utf16`: More descriptive, clearer intent
-- `utf16le`: Explicit about Little Endian (pairs with `utf16be`)
-
-**Usage in Sigma Rules**:
-```yaml
-detection:
-  selection:
-    # All three LE modifiers produce the same result:
-    CommandLine|wide|base64: 'powershell'      # Original pySigma
-    CommandLine|utf16|base64: 'powershell'     # Descriptive alias
-    CommandLine|utf16le|base64: 'powershell'   # Explicit endianness
-    
-    # Big Endian is different:
-    ScriptBlock|utf16be|contains: 'malicious'  # Null before char (not after)
-```
-
-**Implementation Details**:
-- **Pattern**: Based on pySigma's `SigmaWideModifier` (line 305-330 in `modifiers.py`)
-- **Base Class**: `SigmaValueModifier[SigmaString, SigmaString]`
-- **Method**: Implements `modify()` to encode each string part
-- **UTF-16LE**: `item.encode("utf-16le").decode("utf-8")` - null byte after each char
-- **UTF-16BE**: `item.encode("utf-16be").decode("latin-1")` - null byte before each char
-- **Registration**: Modifiers registered in `modifier_mapping` via `__init__.py`
-
-### How UTF-16 Encoding Works
-
-**UTF-16LE (Little Endian)** - Null byte **after** each character:
-```
-"test" - 't\x00e\x00s\x00t\x00'
-ASCII: 74 65 73 74 - UTF-16LE: 74 00 65 00 73 00 74 00
-```
-
-**UTF-16BE (Big Endian)** - Null byte **before** each character:
-```
-"test" - '\x00t\x00e\x00s\x00t'
-ASCII: 74 65 73 74 - UTF-16BE: 00 74 00 65 00 73 00 74
-```
-
-**Encoding Process**:
-1. **Input**: `SigmaString` object containing the detection value
-2. **Iteration**: Loop through each character in the string
-3. **Encode**: Apply UTF-16LE or UTF-16BE encoding via Python's `.encode()`
-4. **Decode**: Convert bytes back to string representation (UTF-8 for LE, latin-1 for BE)
-5. **Output**: New `SigmaString` with encoded content ready for pattern matching
-
-### Why `.encode()` and `.decode()`?
-
-**`.encode(encoding)`** - Converts Python string - bytes:
-```python
-"test".encode("utf-16le")  # Returns: b't\x00e\x00s\x00t\x00' (bytes object)
-```
-- Transforms characters into their byte representation
-- Required because UTF-16 represents characters as 2-byte sequences
-- Creates a **bytes object** (not directly usable as string)
-
-**`.decode(encoding)`** - Converts bytes - Python string:
-```python
-b't\x00e\x00s\x00t\x00'.decode("utf-8")  # Returns: 't\x00e\x00s\x00t\x00' (string)
-```
-- Reinterprets the byte sequence as a string
-- Uses UTF-8 (for LE) or latin-1 (for BE) to preserve null bytes as characters
-- Creates a **string object** that Sigma can process
-
-**Why this two-step process?**
-- **Step 1 (encode)**: Get the actual UTF-16 byte representation with null bytes
-- **Step 2 (decode)**: Convert back to string so pySigma can use it for pattern matching
-- **Result**: A string containing null bytes that will match UTF-16 encoded data in logs
-
-**Example**:
-```python
-# PowerShell command: "iex"
-original = "iex"
-utf16_bytes = original.encode("utf-16le")      # b'i\x00e\x00x\x00'
-utf16_string = utf16_bytes.decode("utf-8")     # 'i\x00e\x00x\x00'
-# Now Sigma can match this pattern in base64-encoded PowerShell commands!
-```
-
-**Use Case**: Detect obfuscated commands in logs where strings are encoded (PowerShell `-EncodedCommand` uses UTF-16LE + Base64).
-
-These modifiers extend pySigma's built-in encoding capabilities and are automatically available when using the backend.
 
 ---
 
@@ -1636,39 +1462,22 @@ for rule in sigma_rules.rules:
 
 ---
 
-## Project Structure
-
-```
-sigma_backend/backends/opensearch_ppl/
-├── __init__.py                        # Package initialization, exports, modifier registration
-├── opensearch_ppl.py                  # Unified backend (includes custom modifiers & custom attributes)
-└── README.md                          # This documentation file
-```
-
-### Files
-
-- **`opensearch_ppl.py`**: Unified backend class with custom UTF-16 modifiers and custom attributes support
-- **`__init__.py`**: Exports the backend and registers custom modifiers
-
----
-
 ## Custom Attributes
 
-The backend supports **custom attributes** in Sigma rule YAML files to configure backend behavior on a per-rule basis. This allows you to override default settings directly in the rule without CLI options.
+The backend supports **custom attributes** that can be defined directly in Sigma rule YAML files to override backend behavior on a per-rule basis.
 
-### Supported Custom Attributes
+### Supported Attributes
 
-| Attribute | Description | Example Values |
-|-----------|-------------|----------------|
-| `opensearch_ppl_index` | Override index pattern | `"custom-logs-*"`, `"security-events-*"` |
-| `opensearch_ppl_time_field` | Specify timestamp field | `"event.created"`, `"@timestamp"` |
-| `opensearch_ppl_min_time` | Minimum time filter | `"-7d"`, `"-30d"`, `"2024-01-01T00:00:00"` |
-| `opensearch_ppl_max_time` | Maximum time filter | `"now"`, `"2024-12-31T23:59:59"` |
+| Attribute | Description | Example |
+|-----------|-------------|---------|
+| `opensearch_ppl_index` | Override index pattern | `"security-logs-*"` |
+| `opensearch_ppl_min_time` | Minimum time filter (earliest) | `"-7d"`, `"-1month@month"` |
+| `opensearch_ppl_max_time` | Maximum time filter (latest) | `"now"`, `"2024-12-31 23:59:59"` |
 
-### Usage Example
+### Example
 
 ```yaml
-title: Suspicious PowerShell Activity
+title: Suspicious PowerShell with Time Filter
 logsource:
   product: windows
   category: process_creation
@@ -1677,28 +1486,34 @@ detection:
     Image|endswith: '\powershell.exe'
     CommandLine|contains: '-enc'
   condition: selection
-level: high
-
-# Custom backend configuration
 custom:
   opensearch_ppl_index: "windows-security-*"
-  opensearch_ppl_time_field: "event.created"
   opensearch_ppl_min_time: "-7d"
   opensearch_ppl_max_time: "now"
 ```
 
-**Generated Query:**
+**Generated PPL Query:**
+```ppl
+search earliest=-7d latest=now LIKE(Image, "%\powershell.exe") AND LIKE(CommandLine, "%-enc%") source=windows-security-*
 ```
-source=windows-security-* | where (LIKE(Image, %\powershell.exe) AND LIKE(CommandLine, %-enc%)) AND (event.created >= now() - 7d AND event.created <= now())
+
+**Note**: When no time filters are specified, the backend uses standard `source=... | where ...` syntax. Time filters trigger the use of `search earliest=... latest=... source=...` syntax as per OpenSearch PPL documentation.
+
+---
+
+## Project Structure
+
+```
+sigma_backend/backends/opensearch_ppl/
+├── __init__.py                        # Package initialization, exports
+├── opensearch_ppl.py                  # Backend implementation
+└── README.md                          # This documentation file
 ```
 
-### Priority System
+### Files
 
-Settings are resolved in this order (highest to lowest priority):
-
-1. **Custom attributes** in rule YAML (`custom:` section)
-2. **Backend options** (CLI parameters or API options)
-3. **Default values** (logsource-based for index, `@timestamp` for time field)
+- **`opensearch_ppl.py`**: Backend class implementation
+- **`__init__.py`**: Exports the backend
 
 ---
 
@@ -1720,9 +1535,6 @@ Settings are resolved in this order (highest to lowest priority):
 - **pySigma Documentation**: [pySigma Docs](https://sigmahq-pysigma.readthedocs.io/)
 - **TextQueryBackend Guide**: [pySigma TextQueryBackend](https://sigmahq-pysigma.readthedocs.io/en/latest/Backends.html)
 - **TextQueryBackend Source Code**: [base.py](https://github.com/SigmaHQ/pySigma/blob/main/sigma/conversion/base.py)
-
-### Backend Inspiration
-- **pySigma-backend-loki**: [Custom Attributes Implementation](https://github.com/grafana/pySigma-backend-loki/blob/main/sigma/backends/loki/loki.py#L343-L347)
 
 ### Related
 - **Elastic Common Schema**: [ECS Reference](https://www.elastic.co/guide/en/ecs/current/index.html)

@@ -1,0 +1,1 @@
+search earliest=-7d CommandLine="test.exe" source=windows-process_creation-*

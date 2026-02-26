@@ -1,0 +1,13 @@
+title: Test Custom Index Attribute
+id: 10000001-0000-0000-0000-000000000001
+status: test
+description: Test that opensearch_ppl_index custom attribute overrides default index pattern
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine: test.exe
+  condition: selection
+custom:
+  opensearch_ppl_index: "my-custom-index-*"

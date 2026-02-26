@@ -1,0 +1,14 @@
+title: Test Custom Min and Max Time
+id: 10000003-0000-0000-0000-000000000003
+status: test
+description: Test that opensearch_ppl_min_time and opensearch_ppl_max_time work
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine: test.exe
+  condition: selection
+custom:
+  opensearch_ppl_min_time: "-30d"
+  opensearch_ppl_max_time: "now"

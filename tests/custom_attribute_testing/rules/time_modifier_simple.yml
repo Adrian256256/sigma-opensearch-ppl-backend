@@ -1,0 +1,13 @@
+title: Test Time Modifier Syntax
+id: 10000002-0000-0000-0000-000000000002
+status: test
+description: Test that time modifiers use PPL earliest/latest syntax
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine: test.exe
+  condition: selection
+custom:
+  opensearch_ppl_min_time: "-7d"

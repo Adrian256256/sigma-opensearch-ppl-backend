@@ -1,0 +1,11 @@
+title: Test No Custom Attributes
+id: 10000005-0000-0000-0000-000000000005
+status: test
+description: Test that without custom attributes, backend uses defaults
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine: test.exe
+  condition: selection

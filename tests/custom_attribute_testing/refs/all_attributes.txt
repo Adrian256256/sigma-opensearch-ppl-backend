@@ -1,0 +1,1 @@
+search earliest=-14d latest=now CommandLine="test.exe" source=complete-test-*
