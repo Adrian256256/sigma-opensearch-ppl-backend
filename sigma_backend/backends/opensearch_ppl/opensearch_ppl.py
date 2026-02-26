@@ -8,7 +8,6 @@ Supports:
 - Regular Sigma detection rules
 - Correlation rules (event_count, value_count, temporal, temporal_ordered)
 - All standard Sigma modifiers and features
-- Custom UTF-16 encoding modifiers
 """
 from typing import ClassVar, Optional, Pattern, Dict, Union, Any, List
 import re
@@ -26,120 +25,6 @@ from sigma.processing.pipeline import ProcessingPipeline
 from sigma.rule import SigmaRule
 from sigma.types import SigmaCompareExpression
 from sigma.conditions import ConditionItem, ConditionAND, ConditionOR, ConditionNOT
-from sigma.modifiers import (
-    SigmaValueModifier,
-    SigmaString,
-    SigmaStringPartType,
-    SigmaValueError,
-    modifier_mapping,
-)
-
-
-# ============================================================================
-# Custom Sigma Modifiers
-# ============================================================================
-
-class SigmaUTF16Modifier(SigmaValueModifier[SigmaString, SigmaString]):
-    """
-    Encode string as UTF-16LE (same as 'wide' modifier).
-    
-    This modifier provides an alias for the 'wide' modifier using the more
-    descriptive name 'utf16'. It encodes strings using UTF-16 Little Endian.
-    """
-
-    def modify(self, val: SigmaString) -> SigmaString:
-        r: List[SigmaStringPartType] = list()
-        for item in val.s:
-            if isinstance(
-                item, str
-            ):  # encode to utf-16le and decode as utf-8 to get null bytes between chars
-                try:
-                    r.append(item.encode("utf-16le").decode("utf-8"))
-                except UnicodeDecodeError:  # this method only works for ascii characters
-                    raise SigmaValueError(
-                        f"UTF-16 modifier only allowed for ascii strings, input string '{str(val)}' isn't one",
-                        source=self.source,
-                    )
-            else:  # just append special characters without further handling
-                r.append(item)
-
-        s = SigmaString()
-        s.s = r
-        return s
-
-
-class SigmaUTF16LEModifier(SigmaValueModifier[SigmaString, SigmaString]):
-    """
-    Encode string as UTF-16LE (UTF-16 Little Endian).
-    
-    This is identical to the 'wide' and 'utf16' modifiers but provides
-    an explicit name for Little Endian encoding.
-    """
-
-    def modify(self, val: SigmaString) -> SigmaString:
-        r: List[SigmaStringPartType] = list()
-        for item in val.s:
-            if isinstance(
-                item, str
-            ):  # encode to utf-16le and decode as utf-8 to get null bytes between chars
-                try:
-                    r.append(item.encode("utf-16le").decode("utf-8"))
-                except UnicodeDecodeError:  # this method only works for ascii characters
-                    raise SigmaValueError(
-                        f"UTF-16LE modifier only allowed for ascii strings, input string '{str(val)}' isn't one",
-                        source=self.source,
-                    )
-            else:  # just append special characters without further handling
-                r.append(item)
-
-        s = SigmaString()
-        s.s = r
-        return s
-
-
-class SigmaUTF16BEModifier(SigmaValueModifier[SigmaString, SigmaString]):
-    """
-    Encode string as UTF-16BE (UTF-16 Big Endian).
-    
-    This modifier encodes strings using UTF-16 Big Endian, placing the null
-    byte before each character instead of after (as in UTF-16LE).
-    """
-
-    def modify(self, val: SigmaString) -> SigmaString:
-        r: List[SigmaStringPartType] = list()
-        for item in val.s:
-            if isinstance(
-                item, str
-            ):  # encode to utf-16be - we need to handle this differently than LE
-                try:
-                    # Encode to UTF-16BE and decode as latin-1 to preserve byte values
-                    # UTF-16BE puts the null byte before each character
-                    encoded = item.encode("utf-16be")
-                    # Decode as latin-1 (which is byte-to-byte compatible with the first 256 unicode chars)
-                    r.append(encoded.decode("latin-1"))
-                except (UnicodeDecodeError, UnicodeEncodeError):
-                    raise SigmaValueError(
-                        f"UTF-16BE modifier only allowed for ascii strings, input string '{str(val)}' isn't one",
-                        source=self.source,
-                    )
-            else:  # just append special characters without further handling
-                r.append(item)
-
-        s = SigmaString()
-        s.s = r
-        return s
-
-
-def register_custom_modifiers():
-    """
-    Register custom modifiers in the global modifier_mapping.
-    
-    This function should be called before parsing Sigma rules that use
-    these custom modifiers.
-    """
-    modifier_mapping["utf16"] = SigmaUTF16Modifier
-    modifier_mapping["utf16le"] = SigmaUTF16LEModifier
-    modifier_mapping["utf16be"] = SigmaUTF16BEModifier
 
 
 # ============================================================================
@@ -692,6 +577,9 @@ class OpenSearchPPLBackend(TextQueryBackend):
             condition=condition,
         )
         
+        # Note: Time filters are now applied individually per detection rule in convert_correlation_search()
+        # This allows both correlation-level and detection-level time filters
+        
         return [query]
     
     def convert_correlation_search(self, rule: SigmaCorrelationRule, **kwargs) -> str:
@@ -701,6 +589,10 @@ class OpenSearchPPLBackend(TextQueryBackend):
         Uses OpenSearch 3.4+ multisearch command for correlation rules with multiple
         subsearches, or a single search command if only one rule is referenced.
         
+        Time filters logic:
+        - If detection rule has custom time attributes → use them for that specific rule
+        - If correlation rule has custom time attributes → apply to all detection rules without their own
+        
         Args:
             rule: The correlation rule
             **kwargs: Additional arguments
@@ -709,12 +601,42 @@ class OpenSearchPPLBackend(TextQueryBackend):
             Multisearch expression combining all referred detection rules, or a
             single search query if only one rule is referenced
         """
+        # Get correlation-level time filters (fallback for detection rules without their own)
+        corr_min_time = self._get_min_time(rule)
+        corr_max_time = self._get_max_time(rule)
+        
         # Collect complete queries from all referred rules
         subsearches = []
         
         for rule_reference in rule.rules:
             referred_rule = rule_reference.rule
             for query in referred_rule.get_conversion_result():
+                # Check if this detection rule has its own time attributes
+                detection_min_time = self._get_min_time(referred_rule)
+                detection_max_time = self._get_max_time(referred_rule)
+                
+                # Use detection rule's time filters if present, otherwise use correlation's
+                min_time = detection_min_time if detection_min_time else corr_min_time
+                max_time = detection_max_time if detection_max_time else corr_max_time
+                
+                # Apply time filters to this specific subsearch if needed
+                # Only apply if the query doesn't already have time filters (from detection rule)
+                needs_time_filters = (min_time or max_time) and not query.startswith("search ")
+                
+                if needs_time_filters:
+                    time_modifiers = []
+                    if min_time:
+                        time_modifiers.append(f"earliest={self._format_time_modifier(min_time)}")
+                    if max_time:
+                        time_modifiers.append(f"latest={self._format_time_modifier(max_time)}")
+                    
+                    time_str = " ".join(time_modifiers)
+                    
+                    # Add time modifiers to the query
+                    if query.startswith("source="):
+                        # Convert "source=... | where ..." to "search earliest=... source=... | where ..."
+                        query = f"search {time_str} {query}"
+                
                 # Store complete query for multisearch
                 subsearches.append(query)
         

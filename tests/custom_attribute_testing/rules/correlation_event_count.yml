@@ -1,0 +1,28 @@
+title: Detection Rule - Failed Login
+id: 10000100-0000-0000-0000-000000000001
+status: test
+description: Detect failed login attempts
+logsource:
+  product: windows
+  category: security
+detection:
+  selection:
+    EventID: 4625
+  condition: selection
+---
+title: Correlation - Brute Force Detection with Time Filter
+id: 10000101-0000-0000-0000-000000000001
+status: test
+description: Test event_count correlation with custom time attributes
+correlation:
+  type: event_count
+  rules:
+    - 10000100-0000-0000-0000-000000000001
+  group-by:
+    - SourceIP
+  timespan: 5m
+  condition:
+    gte: 5
+custom:
+  opensearch_ppl_min_time: "-24h"
+  opensearch_ppl_max_time: "now"

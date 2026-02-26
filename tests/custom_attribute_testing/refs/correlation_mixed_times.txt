@@ -1,0 +1,1 @@
+| multisearch [search earliest=-7d latest=now LIKE(CommandLine, "%malware%") source=windows-process_creation-*] [search earliest=-30d latest=now source=windows-network_connection-* | where DestinationPort=443] | stats dc(EventID) as unique_rules by span(@timestamp, 5m), Computer | where unique_rules >= 2

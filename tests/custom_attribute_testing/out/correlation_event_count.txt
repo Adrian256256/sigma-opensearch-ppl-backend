@@ -1,0 +1,1 @@
+| search earliest=-24h latest=now source=windows-security-* | where EventID=4625 | stats count() as event_count by SourceIP | where event_count >= 5
