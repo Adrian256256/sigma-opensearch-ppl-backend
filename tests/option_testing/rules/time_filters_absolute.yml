@@ -1,0 +1,15 @@
+title: Test Absolute Time Filters
+id: 12345678-1234-1234-1234-123456789004
+status: test
+description: Test rule with absolute time filters
+author: Adrian
+date: 2026/02/28
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '\powershell.exe'
+    CommandLine|contains: 'Invoke-'
+  condition: selection
+level: medium

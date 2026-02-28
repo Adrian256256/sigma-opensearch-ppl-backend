@@ -1,0 +1,1 @@
+source=windows-process_creation-* | where @timestamp >= now() - interval 7 day AND LIKE(Image, "%powershell.exe") AND LIKE(CommandLine, "%Invoke-%")

@@ -1,1 +1,1 @@
-search earliest=-30d latest=now CommandLine="test.exe" source=windows-process_creation-*
+source=windows-process_creation-* | where @timestamp >= now() - interval 30 day AND @timestamp <= now() AND CommandLine="test.exe"

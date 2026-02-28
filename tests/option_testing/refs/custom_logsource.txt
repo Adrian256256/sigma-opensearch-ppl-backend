@@ -1,0 +1,1 @@
+source=my-custom-logs-* | where LIKE(Image, "%powershell.exe") AND LIKE(CommandLine, "%Invoke-%")

@@ -390,22 +390,22 @@ class OpenSearchPPLBackend(TextQueryBackend):
         min_time = self._get_min_time(rule)
         max_time = self._get_max_time(rule)
         
-        # If we have time modifiers, use 'search' command syntax
-        # Otherwise, use 'source=... | where ...' syntax for backward compatibility
-        if min_time or max_time:
-            # Build time modifiers for search command
-            time_modifiers = []
-            if min_time:
-                time_modifiers.append(f"earliest={self._format_time_modifier(min_time)}")
-            if max_time:
-                time_modifiers.append(f"latest={self._format_time_modifier(max_time)}")
-            
-            # Construct search command: search [time_modifiers] <query> source=<index>
-            time_str = " ".join(time_modifiers)
-            ppl_query = f"search {time_str} {query} source={index_pattern}"
+        # Build the base query with source and where clause
+        ppl_query = f"source={index_pattern} | where "
+        
+        # Add time filters if present
+        time_filters = []
+        if min_time:
+            time_filters.append(self._build_time_filter(min_time, ">="))
+        if max_time:
+            time_filters.append(self._build_time_filter(max_time, "<="))
+        
+        # Combine time filters with the main query
+        if time_filters:
+            time_condition = " AND ".join(time_filters)
+            ppl_query += f"{time_condition} AND {query}"
         else:
-            # Use traditional source | where syntax when no time filters
-            ppl_query = f"source={index_pattern} | where {query}"
+            ppl_query += query
         
         return ppl_query
     
@@ -493,6 +493,59 @@ class OpenSearchPPLBackend(TextQueryBackend):
         # Handle absolute timestamps - wrap in quotes
         # Support both formats: "2024-01-01T00:00:00" and "2024-01-01 00:00:00"
         return f"'{time_str}'"
+    
+    def _build_time_filter(self, time_str: str, operator: str) -> str:
+        """
+        Build a time filter condition for OpenSearch PPL where clause.
+        
+        Converts time expressions to proper PPL syntax:
+        - Relative time: "-30d" -> "@timestamp >= now() - interval 30 day"
+        - Absolute time: "2024-01-01T00:00:00" -> "@timestamp >= '2024-01-01T00:00:00'"
+        - Now: "now" -> "@timestamp >= now()"
+        
+        Args:
+            time_str: Time string like "-30d", "now", "2024-01-01T00:00:00"
+            operator: Comparison operator (">=" or "<=")
+            
+        Returns:
+            PPL time filter condition
+        """
+        time_field = self._time_field
+        
+        # Handle "now"
+        if time_str.lower() == "now":
+            return f"{time_field} {operator} now()"
+        
+        # Handle relative time like "-30d", "-7d", "-24h"
+        if time_str.startswith("-"):
+            # Parse the time value and unit
+            time_str_stripped = time_str[1:]  # Remove the '-'
+            
+            # Extract number and unit (e.g., "30d" -> "30", "d")
+            import re
+            match = re.match(r'(\d+)([a-zA-Z]+)', time_str_stripped)
+            if match:
+                value, unit = match.groups()
+                
+                # Map common time units to PPL interval units
+                unit_map = {
+                    'd': 'day',
+                    'h': 'hour',
+                    'm': 'minute',
+                    's': 'second',
+                    'w': 'week',
+                    'mon': 'month',
+                    'month': 'month',
+                    'y': 'year',
+                    'year': 'year'
+                }
+                
+                ppl_unit = unit_map.get(unit.lower(), unit)
+                return f"{time_field} {operator} now() - interval {value} {ppl_unit}"
+        
+        # Handle absolute timestamps - wrap in quotes
+        # Support both formats: "2024-01-01T00:00:00" and "2024-01-01 00:00:00"
+        return f"{time_field} {operator} '{time_str}'"
     
     ### Correlation rule conversion methods ###
     

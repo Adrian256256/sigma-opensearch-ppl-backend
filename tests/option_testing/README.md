@@ -6,6 +6,17 @@ This directory contains tests for backend-specific options functionality in the 
 
 Backend options allow you to customize query generation behavior without modifying the Sigma rules themselves. This is similar to how Splunk backend handles options via `-O` or `--backend-option` parameters.
 
+## Directory Structure
+
+```
+option_testing/
+├── rules/              # Test Sigma rules (one per test case)
+├── refs/               # Expected reference outputs
+├── out/                # Actual outputs from test runs
+├── test_checker.py     # Automated test runner
+└── README.md           # This file
+```
+
 ## Available Backend Options
 
 ### `custom_logsource`

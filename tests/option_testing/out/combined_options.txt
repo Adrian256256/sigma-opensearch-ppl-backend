@@ -1,0 +1,1 @@
+source=security-logs-* | where @timestamp >= now() - interval 24 hour AND @timestamp <= now() AND LIKE(Image, "%powershell.exe") AND LIKE(CommandLine, "%Invoke-%")

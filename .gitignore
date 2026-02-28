@@ -153,3 +153,8 @@ inside_opensearch_testing/http_dataset_testing/apache_http_logs_bulk.ndjson
 
 # Log generator output
 inside_opensearch_testing/log_generator/bulk_ready.ndjson
+
+# Documentation drafts and PR descriptions
+GHID_PR_SIMPLU.md
+PR_DESCRIPTION.md
+README-NEW.md
