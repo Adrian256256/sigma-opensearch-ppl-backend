@@ -1,1 +1,1 @@
-source=windows-process_creation-* | where @timestamp >= now() - interval 30 day AND @timestamp <= now() AND LIKE(Image, "%powershell.exe") AND LIKE(CommandLine, "%Invoke-%")
+search earliest=-30d latest=now LIKE(Image, "%powershell.exe") AND LIKE(CommandLine, "%Invoke-%") source=windows-process_creation-*

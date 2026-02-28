@@ -1,1 +1,1 @@
-source=windows-process_creation-* | where @timestamp <= now() AND LIKE(Image, "%powershell.exe") AND LIKE(CommandLine, "%Invoke-%")
+search latest=now LIKE(Image, "%powershell.exe") AND LIKE(CommandLine, "%Invoke-%") source=windows-process_creation-*

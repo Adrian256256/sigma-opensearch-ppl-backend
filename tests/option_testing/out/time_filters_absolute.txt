@@ -1,1 +1,1 @@
-source=windows-process_creation-* | where @timestamp >= '2024-01-01T00:00:00' AND @timestamp <= '2024-01-31T23:59:59' AND LIKE(Image, "%powershell.exe") AND LIKE(CommandLine, "%Invoke-%")
+search earliest='2024-01-01T00:00:00' latest='2024-01-31T23:59:59' LIKE(Image, "%powershell.exe") AND LIKE(CommandLine, "%Invoke-%") source=windows-process_creation-*

@@ -1,1 +1,1 @@
-source=complete-test-* | where @timestamp >= now() - interval 14 day AND @timestamp <= now() AND CommandLine="test.exe"
+search earliest=-14d latest=now CommandLine="test.exe" source=complete-test-*
