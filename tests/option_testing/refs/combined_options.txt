@@ -1,1 +1,1 @@
-search earliest=-24h latest=now LIKE(Image, "%powershell.exe") AND LIKE(CommandLine, "%Invoke-%") source=security-logs-*
+search earliest=-24h latest=now source=security-logs-* | where LIKE(Image, "%powershell.exe") AND LIKE(CommandLine, "%Invoke-%")

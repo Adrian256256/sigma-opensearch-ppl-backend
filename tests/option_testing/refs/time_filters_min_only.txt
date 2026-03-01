@@ -1,1 +1,1 @@
-search earliest=-7d LIKE(Image, "%powershell.exe") AND LIKE(CommandLine, "%Invoke-%") source=windows-process_creation-*
+search earliest=-7d source=windows-process_creation-* | where LIKE(Image, "%powershell.exe") AND LIKE(CommandLine, "%Invoke-%")

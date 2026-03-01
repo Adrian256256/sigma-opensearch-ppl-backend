@@ -1,0 +1,32 @@
+title: Detection Rule - PowerShell Execution
+id: 20000200-0000-0000-0000-000000000002
+status: test
+description: Detect PowerShell execution
+author: Adrian
+date: 2026/03/01
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '\powershell.exe'
+  condition: selection
+level: medium
+---
+title: Correlation - Distinct PowerShell Commands
+id: 20000201-0000-0000-0000-000000000002
+status: test
+description: Test value_count correlation with backend options
+author: Adrian
+date: 2026/03/01
+correlation:
+  type: value_count
+  rules:
+    - 20000200-0000-0000-0000-000000000002
+  group-by:
+    - User
+  timespan: 10m
+  condition:
+    field: CommandLine
+    gte: 3
+level: high

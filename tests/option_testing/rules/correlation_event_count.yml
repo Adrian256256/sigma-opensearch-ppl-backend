@@ -1,0 +1,31 @@
+title: Detection Rule - Failed Login
+id: 20000100-0000-0000-0000-000000000001
+status: test
+description: Detect failed login attempts
+author: Adrian
+date: 2026/03/01
+logsource:
+  product: windows
+  category: security
+detection:
+  selection:
+    EventID: 4625
+  condition: selection
+level: high
+---
+title: Correlation - Brute Force Detection
+id: 20000101-0000-0000-0000-000000000001
+status: test
+description: Test event_count correlation with backend options
+author: Adrian
+date: 2026/03/01
+correlation:
+  type: event_count
+  rules:
+    - 20000100-0000-0000-0000-000000000001
+  group-by:
+    - SourceIP
+  timespan: 5m
+  condition:
+    gte: 5
+level: critical

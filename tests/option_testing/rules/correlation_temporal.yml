@@ -1,0 +1,45 @@
+title: Detection Rule 1 - Suspicious Process
+id: 20000300-0000-0000-0000-000000000003
+status: test
+description: Detect suspicious process execution
+author: Adrian
+date: 2026/03/01
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains: 'suspicious'
+  condition: selection
+level: medium
+---
+title: Detection Rule 2 - Network Connection
+id: 20000301-0000-0000-0000-000000000003
+status: test
+description: Detect network connection initiated
+author: Adrian
+date: 2026/03/01
+logsource:
+  product: windows
+  category: network_connection
+detection:
+  selection:
+    Initiated: 'true'
+  condition: selection
+level: low
+---
+title: Correlation - Temporal Correlation
+id: 20000302-0000-0000-0000-000000000003
+status: test
+description: Test temporal correlation with backend options
+author: Adrian
+date: 2026/03/01
+correlation:
+  type: temporal
+  rules:
+    - 20000300-0000-0000-0000-000000000003
+    - 20000301-0000-0000-0000-000000000003
+  group-by:
+    - Computer
+  timespan: 2m
+level: high

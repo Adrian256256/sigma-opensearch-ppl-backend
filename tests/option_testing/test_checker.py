@@ -59,6 +59,24 @@ TEST_CONFIGS = {
         "custom_logsource": "security-logs-*",
         "min_time": "-24h",
         "max_time": "now"
+    },
+    # Correlation rule tests
+    "correlation_event_count": {
+        "min_time": "-24h",
+        "max_time": "now"
+    },
+    "correlation_value_count": {
+        "min_time": "-7d",
+        "max_time": "now"
+    },
+    "correlation_temporal": {
+        "min_time": "2026-02-01T00:00:00",
+        "max_time": "2026-02-28T23:59:59"
+    },
+    "correlation_with_custom_index": {
+        "custom_logsource": "threat-intel-*",
+        "min_time": "-48h",
+        "max_time": "now"
     }
 }
 

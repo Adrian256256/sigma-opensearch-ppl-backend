@@ -1,0 +1,1 @@
+| search earliest=-7d latest=now source=windows-process_creation-* | where LIKE(Image, "%powershell.exe") | stats dc(CommandLine) as value_count by User | where value_count >= 3

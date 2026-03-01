@@ -1,0 +1,1 @@
+| search earliest=-48h latest=now source=threat-intel-* | where LIKE(CommandLine, "%malware%") | stats count() as event_count by Computer | where event_count >= 3

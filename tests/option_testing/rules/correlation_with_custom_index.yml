@@ -1,0 +1,31 @@
+title: Detection Rule - Malware Execution
+id: 20000400-0000-0000-0000-000000000004
+status: test
+description: Detect malware execution
+author: Adrian
+date: 2026/03/01
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains: 'malware'
+  condition: selection
+level: critical
+---
+title: Correlation - Malware Activity Pattern
+id: 20000401-0000-0000-0000-000000000004
+status: test
+description: Test event_count correlation with custom index from backend option
+author: Adrian
+date: 2026/03/01
+correlation:
+  type: event_count
+  rules:
+    - 20000400-0000-0000-0000-000000000004
+  group-by:
+    - Computer
+  timespan: 15m
+  condition:
+    gte: 3
+level: critical
