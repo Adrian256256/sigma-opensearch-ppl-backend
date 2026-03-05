@@ -25,10 +25,10 @@ Backend for converting Sigma rules into PPL (Piped Processing Language) queries 
 - [ECS Field Mapping](#ecs-field-mapping)
   - [Quick Example](#quick-example)
 - [Testing](#testing)
-  - [Manual Testing](#manual-testing)
   - [Automated Testing](#automated-testing)
   - [Correlation Testing](#correlation-testing)
   - [Custom Attributes Testing](#custom-attributes-testing)
+  - [Option Testing](#option-testing)
 
 ---
 
@@ -72,6 +72,7 @@ sigma-opensearch-ppl-backend/
 │   ├── __init__.py
 │   ├── yaml_loader.py                    # YAML pipeline loader
 │   ├── ecs_mapping.yml                   # ECS field mappings (YAML)
+│   ├── categories/                       # Per-category ECS mapping YAMLs
 │   └── README.md                         # ECS mapping documentation
 ├── ecs_fields_info/
 │   ├── checker.py                        # ECS field verification tool
@@ -85,7 +86,7 @@ sigma-opensearch-ppl-backend/
 │   └── README.md                         # ECS checker documentation
 ├── inside_opensearch_testing/
 │   ├── windows_dataset_testing/
-│   │   ├── correlation_rules             # correlation rules used for testing
+│   │   ├── correlation_rules/            # Correlation rules used for testing
 │   │   ├── evtx_to_opensearch.py         # EVTX to OpenSearch converter
 │   │   ├── evtx_attack_samples_bulk.ndjson # Converted EVTX dataset
 │   │   ├── EVTX-ATTACK-SAMPLES/          # Windows event logs dataset
@@ -105,23 +106,33 @@ sigma-opensearch-ppl-backend/
 ├── tests/
 │   ├── automated_tests/
 │   │   ├── test_checker.py               # Automated test checker
+│   │   ├── validate_ppl_syntax.py        # PPL syntax validation script
+│   │   ├── validate_refs_in_opensearch.py # Validate refs against OpenSearch
 │   │   ├── rules/                        # Test Sigma rules
 │   │   ├── refs/                         # Expected PPL outputs
+│   │   ├── out/                          # Conversion output files
 │   │   └── README.md                     # Automated testing documentation
-│   ├── manual_test/
-│   │   ├── test_textquery_backend.py     # TextQueryBackend test script
-│   │   ├── test_ecs_pipeline.py          # ECS pipeline test script
-│   │   ├── example_rules/                # Additional example rules
-│   │   └── README.md                     # Manual testing documentation
 │   ├── correlation_testing/
 │   │   ├── test_correlations.py          # Correlation rules test script
+│   │   ├── validate_refs_in_opensearch.py # Validate refs against OpenSearch
 │   │   ├── sigma_rules/                  # Correlation test Sigma rules
 │   │   ├── ppl_refs/                     # Expected correlation PPL outputs
+│   │   ├── out/                          # Conversion output files
 │   │   └── README.md                     # Correlation testing documentation
 │   ├── custom_attribute_testing/
-│   │   ├── test_custom_attributes.py     # Custom attributes test suite
-│   │   ├── custom_attributes_example.yml # Example rule with custom attributes
+│   │   ├── test_checker.py               # Custom attributes test suite
+│   │   ├── validate_refs_in_opensearch.py # Validate refs against OpenSearch
+│   │   ├── rules/                        # Test Sigma rules with custom attributes
+│   │   ├── refs/                         # Expected PPL outputs
+│   │   ├── out/                          # Conversion output files
 │   │   └── README.md                     # Custom attributes testing documentation
+│   ├── option_testing/
+│   │   ├── test_checker.py               # Option testing checker
+│   │   ├── validate_refs_in_opensearch.py # Validate refs against OpenSearch
+│   │   ├── rules/                        # Test Sigma rules for options
+│   │   ├── refs/                         # Expected PPL outputs
+│   │   ├── out/                          # Conversion output files
+│   │   └── README.md                     # Option testing documentation
 │   └── README.md                         # Testing overview documentation
 ├── .gitignore                            # Files ignored by Git
 ├── requirements.txt                      # Python dependencies
@@ -134,7 +145,7 @@ sigma-opensearch-ppl-backend/
 Command-line interface for converting Sigma rules.
 
 - [`sigma-ppl`](./cli/sigma-ppl) - CLI conversion tool
-- [`examples.sh`](./cli/examples.sh) - Usage examples
+- [`rule.yaml`](./cli/rule.yaml) - Example Sigma rule
 - [`README.md`](./cli/README.md) - CLI documentation
 
 #### [`sigma_backend/`](./sigma_backend/)
@@ -149,6 +160,7 @@ Elastic Common Schema (ECS) field mapping for Sigma rules.
 
 - [`yaml_loader.py`](./ecs_mapping/yaml_loader.py) - YAML pipeline loader
 - [`ecs_mapping.yml`](./ecs_mapping/ecs_mapping.yml) - ECS field mappings (YAML)
+- [`categories/`](./ecs_mapping/categories/) - Per-category ECS mapping YAMLs
 - [`README.md`](./ecs_mapping/README.md) - ECS mapping documentation
 
 #### [`ecs_fields_info/`](./ecs_fields_info/)
@@ -174,14 +186,6 @@ Windows event logs testing with EVTX-ATTACK-SAMPLES dataset (~31,911 Windows eve
 - [`EVTX-ATTACK-SAMPLES/`](./inside_opensearch_testing/windows_dataset_testing/EVTX-ATTACK-SAMPLES/) - Windows event logs dataset
 - [`README.md`](./inside_opensearch_testing/windows_dataset_testing/README.md) - Windows dataset testing documentation with validated Sigma rules
 
-##### [`http_dataset_testing/`](./inside_opensearch_testing/http_dataset_testing/)
-HTTP/web server logs testing with apache-http-logs dataset (XSS, SQL injection, vulnerability scans).
-
-- [`apache_to_opensearch.py`](./inside_opensearch_testing/http_dataset_testing/apache_to_opensearch.py) - Apache logs to OpenSearch converter
-- [`apache_http_logs_bulk.ndjson`](./inside_opensearch_testing/http_dataset_testing/apache_http_logs_bulk.ndjson) - Converted Apache logs
-- [`apache-http-logs/`](./inside_opensearch_testing/http_dataset_testing/apache-http-logs/) - Apache HTTP logs dataset
-- [`README.md`](./inside_opensearch_testing/http_dataset_testing/README.md) - HTTP dataset testing documentation with example Sigma web rules
-
 ##### [`log_generator/`](./inside_opensearch_testing/log_generator/)
 Synthetic log generation for testing detection rules.
 
@@ -205,26 +209,36 @@ Comprehensive test suite for the backend.
 
 - [`automated_tests/`](./tests/automated_tests/)
   - [`test_checker.py`](./tests/automated_tests/test_checker.py) - Automated test checker
+  - [`validate_ppl_syntax.py`](./tests/automated_tests/validate_ppl_syntax.py) - PPL syntax validation script
+  - [`validate_refs_in_opensearch.py`](./tests/automated_tests/validate_refs_in_opensearch.py) - Validate refs against OpenSearch
   - [`rules/`](./tests/automated_tests/rules/) - Test Sigma rules
   - [`refs/`](./tests/automated_tests/refs/) - Expected PPL outputs
+  - [`out/`](./tests/automated_tests/out/) - Conversion output files
   - [`README.md`](./tests/automated_tests/README.md) - Automated testing documentation
-
-- [`manual_test/`](./tests/manual_test/)
-  - [`test_textquery_backend.py`](./tests/manual_test/test_textquery_backend.py) - TextQueryBackend test script
-  - [`test_ecs_pipeline.py`](./tests/manual_test/test_ecs_pipeline.py) - ECS pipeline test script
-  - [`example_rules/`](./tests/manual_test/example_rules/) - Additional example rules
-  - [`README.md`](./tests/manual_test/README.md) - Manual testing documentation
 
 - [`correlation_testing/`](./tests/correlation_testing/)
   - [`test_correlations.py`](./tests/correlation_testing/test_correlations.py) - Correlation rules test script
+  - [`validate_refs_in_opensearch.py`](./tests/correlation_testing/validate_refs_in_opensearch.py) - Validate refs against OpenSearch
   - [`sigma_rules/`](./tests/correlation_testing/sigma_rules/) - Correlation test Sigma rules
   - [`ppl_refs/`](./tests/correlation_testing/ppl_refs/) - Expected correlation PPL outputs
+  - [`out/`](./tests/correlation_testing/out/) - Conversion output files
   - [`README.md`](./tests/correlation_testing/README.md) - Correlation testing documentation
 
 - [`custom_attribute_testing/`](./tests/custom_attribute_testing/)
-  - [`test_custom_attributes.py`](./tests/custom_attribute_testing/test_custom_attributes.py) - Custom attributes test suite
-  - [`custom_attributes_example.yml`](./tests/custom_attribute_testing/custom_attributes_example.yml) - Example rule with custom attributes
+  - [`test_checker.py`](./tests/custom_attribute_testing/test_checker.py) - Custom attributes test suite
+  - [`validate_refs_in_opensearch.py`](./tests/custom_attribute_testing/validate_refs_in_opensearch.py) - Validate refs against OpenSearch
+  - [`rules/`](./tests/custom_attribute_testing/rules/) - Test Sigma rules with custom attributes
+  - [`refs/`](./tests/custom_attribute_testing/refs/) - Expected PPL outputs
+  - [`out/`](./tests/custom_attribute_testing/out/) - Conversion output files
   - [`README.md`](./tests/custom_attribute_testing/README.md) - Custom attributes testing documentation
+
+- [`option_testing/`](./tests/option_testing/)
+  - [`test_checker.py`](./tests/option_testing/test_checker.py) - Option testing checker
+  - [`validate_refs_in_opensearch.py`](./tests/option_testing/validate_refs_in_opensearch.py) - Validate refs against OpenSearch
+  - [`rules/`](./tests/option_testing/rules/) - Test Sigma rules for options
+  - [`refs/`](./tests/option_testing/refs/) - Expected PPL outputs
+  - [`out/`](./tests/option_testing/out/) - Conversion output files
+  - [`README.md`](./tests/option_testing/README.md) - Option testing documentation
 
 - [`README.md`](./tests/README.md) - Testing overview documentation
 
@@ -427,18 +441,6 @@ ppl_query = backend.convert(collection)
 
 ## Testing
 
-### Manual Testing
-
-For quick testing and experimentation with example Sigma rules, see [tests/manual_test/README.md](tests/manual_test/README.md).
-
-```bash
-# Test example rules with TextQuery backend
-python tests/manual_test/test_textquery_backend.py
-
-# Test ECS field mapping pipeline
-python tests/manual_test/test_ecs_pipeline.py
-```
-
 ### Automated Testing
 
 For automated testing with the test checker, see [tests/automated_tests/README.md](tests/automated_tests/README.md).
@@ -462,11 +464,17 @@ For correlation rule testing, see [tests/correlation_testing/README.md](tests/co
 For custom attributes feature testing, see [tests/custom_attribute_testing/README.md](tests/custom_attribute_testing/README.md).
 
 ```bash
-# Run custom attributes tests with pytest
-pytest tests/custom_attribute_testing/test_custom_attributes.py -v
-
-# Run manually with detailed output
-python tests/custom_attribute_testing/test_custom_attributes.py
+# Run custom attributes tests
+python tests/custom_attribute_testing/test_checker.py
 ```
 
 Custom attributes allow configuring backend behavior directly in Sigma rule YAML. See the [backend documentation](sigma_backend/backends/opensearch_ppl/README.md#custom-attributes) for full details.
+
+### Option Testing
+
+For backend options testing, see [tests/option_testing/README.md](tests/option_testing/README.md).
+
+```bash
+# Run option tests
+python tests/option_testing/test_checker.py
+```
